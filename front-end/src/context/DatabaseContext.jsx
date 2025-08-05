@@ -3,7 +3,7 @@ import React, { createContext, useContext } from "react";
 export const DatabaseContext = createContext({});
 
 export function DatabaseContextProvider({ children }) {
-  const databaseUrl = "https://simple-jet-eta.vercel.app";
+  const databaseUrl = "https://simple-quotes-alter-s3od.vercel.app";
   // const databaseUrl = "http://localhost:9000";
 
   return (
