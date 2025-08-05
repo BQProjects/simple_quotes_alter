@@ -24,6 +24,7 @@ app.use(
       "https://simplefront-iota.vercel.app",
       "http://localhost:9000",
       "https://simple-jet-eta.vercel.app",
+      "https://simple-quotes-alter.vercel.app",
     ],
   })
 );
