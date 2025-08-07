@@ -180,7 +180,7 @@ const JsonToWord = async (jsonData) => {
     return defaultColor.replace("#", "");
   };
 
-  // Web-matching typography function with tighter spacing
+  // Web-matching typography function with ultra-tight spacing
   const createParagraph = (text, options = {}) => {
     const {
       bold = false,
@@ -190,10 +190,10 @@ const JsonToWord = async (jsonData) => {
       color = defaultColor.replace("#", ""),
       alignment = AlignmentType.LEFT,
       heading = null,
-      spacing = { before: 60, after: 60 }, // Much tighter default spacing
+      spacing = { before: 30, after: 30 }, // Ultra-tight default spacing to match web
       indent = null,
       font = defaultFont,
-      lineSpacing = 1.2, // Tighter line spacing
+      lineSpacing = 1.15, // Web-like line spacing
     } = options;
 
     return new Paragraph({
@@ -223,7 +223,7 @@ const JsonToWord = async (jsonData) => {
       alignment = AlignmentType.CENTER,
       width = 400,
       height = 300,
-      spacing = { before: 120, after: 120 }, // Tighter spacing
+      spacing = { before: 60, after: 60 }, // Web-like tight spacing
       maxWidth = 600,
       maxHeight = 400,
       context = "normal",
@@ -264,7 +264,7 @@ const JsonToWord = async (jsonData) => {
         new TextRun({
           text: `[Image: ${imageUrl.split("/").pop() || "unavailable"}]`,
           italic: true,
-          size: 18,
+          size: 16,
           color: "6C757D",
           font: defaultFont,
         }),
@@ -282,15 +282,15 @@ const JsonToWord = async (jsonData) => {
         type: ShadingType.SOLID,
       },
       indent: {
-        left: 150,
-        right: 150,
+        left: 100,
+        right: 100,
       },
     });
   };
 
-  // Improved code block formatting
+  // Improved code block formatting to match web view exactly
   const createCodeBlock = (codeContent, options = {}) => {
-    const { spacing = { before: 120, after: 120 } } = options;
+    const { spacing = { before: 80, after: 80 } } = options;
 
     const codeLines = codeContent.split("\n");
     const codeParagraphs = codeLines.map(
@@ -299,27 +299,31 @@ const JsonToWord = async (jsonData) => {
           children: [
             new TextRun({
               text: line || " ", // Ensure empty lines are preserved
-              size: 18,
+              size: 16, // Smaller font size to match web
               font: codeFont,
             }),
           ],
-          spacing: { before: 0, after: 40 }, // Tight line spacing within code block
-          indent: { left: 400 }, // Indentation for code block
+          spacing: { before: 0, after: 20 }, // Tighter line spacing within code block
+          indent: { left: 200 }, // Reduced indentation for code block
           borders: {
-            left: { style: BorderStyle.SINGLE, size: 6, color: "007ACC" }, // Blue left border
+            left: { style: BorderStyle.SINGLE, size: 4, color: "007ACC" }, // Thinner blue left border
+            top: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+            bottom: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+            right: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
           },
         })
     );
 
-    // Add title and wrapper
+    // Add title and wrapper with web-like styling
     return [
       createParagraph("Code:", {
         bold: true,
-        size: 20,
-        spacing: { before: spacing.before, after: 40 },
+        size: 18,
+        spacing: { before: spacing.before, after: 20 },
+        color: "333333",
       }),
       ...codeParagraphs,
-      createParagraph("", { spacing: { before: 40, after: spacing.after } }),
+      createParagraph("", { spacing: { before: 20, after: spacing.after } }),
     ];
   };
 
@@ -336,6 +340,7 @@ const JsonToWord = async (jsonData) => {
     const rows = tableData.map((row, rowIndex) => {
       const cells = Array.isArray(row) ? row : [];
       const isHeaderRow = rowIndex === 0;
+      const isEvenRow = rowIndex % 2 === 0;
 
       return new TableRow({
         children: cells.map((cellText, cellIndex) => {
@@ -350,16 +355,18 @@ const JsonToWord = async (jsonData) => {
                 children: [
                   new TextRun({
                     text: cellText?.toString() || "",
-                    size: 20,
+                    size: isHeaderRow ? 18 : 16,
                     font: defaultFont,
                     bold: textBold,
                     underline: textUnderline,
                     italics: textItalic,
-                    color: textColor,
+                    color: "000000", // Black text
                   }),
                 ],
-                alignment: AlignmentType.LEFT,
-                spacing: { before: 60, after: 60 }, // Tighter cell spacing
+                alignment: isHeaderRow
+                  ? AlignmentType.CENTER
+                  : AlignmentType.LEFT,
+                spacing: { before: 30, after: 30 }, // Web-like tight cell spacing
               }),
             ],
             width: {
@@ -367,16 +374,16 @@ const JsonToWord = async (jsonData) => {
               type: WidthType.PERCENTAGE,
             },
             borders: {
-              top: { style: BorderStyle.SINGLE, size: 4, color: "DEE2E6" },
-              bottom: { style: BorderStyle.SINGLE, size: 4, color: "DEE2E6" },
-              left: { style: BorderStyle.SINGLE, size: 4, color: "DEE2E6" },
-              right: { style: BorderStyle.SINGLE, size: 4, color: "DEE2E6" },
+              top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
             },
             margins: {
-              top: 100,
-              bottom: 100,
-              left: 120,
-              right: 120,
+              top: 60,
+              bottom: 60,
+              left: 80,
+              right: 80,
             },
             verticalAlign: VerticalAlign.CENTER,
           });
@@ -392,8 +399,8 @@ const JsonToWord = async (jsonData) => {
       },
       layout: TableLayoutType.AUTOFIT,
       margins: {
-        top: 120,
-        bottom: 120,
+        top: 80,
+        bottom: 80,
       },
     });
   };
@@ -434,6 +441,7 @@ const JsonToWord = async (jsonData) => {
                     bold: true,
                     size: 20,
                     font: defaultFont,
+                    color: "000000", // Black text
                   }),
                 ],
                 alignment: AlignmentType.CENTER,
@@ -493,7 +501,7 @@ const JsonToWord = async (jsonData) => {
                       text: cellData.toString(),
                       size: 18,
                       font: defaultFont,
-                      color: convertToHex(defaultColor),
+                      color: "000000", // Black text
                       bold: cellIndex === rowData.length - 1, // Bold amount column
                     }),
                   ],
@@ -981,14 +989,14 @@ const JsonToWord = async (jsonData) => {
                     : true;
                 const textColor = item.textColor || defaultColor;
 
-                // Web-matching heading sizes with tighter spacing
+                // Web-matching heading sizes - exact match to CSS
                 const sizeMap = {
-                  "heading-one": 48,
-                  "heading-two": 36,
-                  "heading-three": 30,
-                  "heading-four": 26,
-                  "heading-five": 22,
-                  "heading-six": 20,
+                  "heading-one": 40, // 2.5em exact
+                  "heading-two": 32, // 2em exact
+                  "heading-three": 28, // 1.75em exact
+                  "heading-four": 24, // 1.5em exact
+                  "heading-five": 20, // 1.25em exact
+                  "heading-six": 16, // 1em exact
                 };
 
                 const alignmentMap = {
@@ -1006,26 +1014,42 @@ const JsonToWord = async (jsonData) => {
                   "heading-six": HeadingLevel.HEADING_6,
                 };
 
-                // Much tighter heading spacing
+                // Check if next item is also a heading for ultra-tight spacing
+                const nextItem = data[index + 1];
+                const isNextHeading = nextItem && nextItem.type === "heading";
+
+                // Ultra-tight spacing to match web view exactly
                 const spacingMap = {
-                  "heading-one": { before: 240, after: 120 },
-                  "heading-two": { before: 180, after: 100 },
-                  "heading-three": { before: 160, after: 80 },
-                  "heading-four": { before: 140, after: 70 },
-                  "heading-five": { before: 120, after: 60 },
-                  "heading-six": { before: 100, after: 50 },
+                  "heading-one": isNextHeading
+                    ? { before: 160, after: 20 }
+                    : { before: 160, after: 80 },
+                  "heading-two": isNextHeading
+                    ? { before: 120, after: 15 }
+                    : { before: 120, after: 60 },
+                  "heading-three": isNextHeading
+                    ? { before: 100, after: 10 }
+                    : { before: 100, after: 50 },
+                  "heading-four": isNextHeading
+                    ? { before: 80, after: 8 }
+                    : { before: 80, after: 40 },
+                  "heading-five": isNextHeading
+                    ? { before: 60, after: 6 }
+                    : { before: 60, after: 30 },
+                  "heading-six": isNextHeading
+                    ? { before: 40, after: 4 }
+                    : { before: 40, after: 20 },
                 };
 
                 allContent.push(
                   createParagraph(text, {
                     bold: isBold,
-                    size: sizeMap[size] || 36,
+                    size: sizeMap[size] || 32,
                     alignment: alignmentMap[alignment] || AlignmentType.LEFT,
                     heading: headingMap[size] || HeadingLevel.HEADING_2,
                     color: textColor,
-                    spacing: spacingMap[size] || { before: 180, after: 100 },
+                    spacing: spacingMap[size] || { before: 40, after: 20 },
                     font: headingFont,
-                    lineSpacing: 1.1,
+                    lineSpacing: 1.05, // Even tighter line spacing
                   })
                 );
               } catch (err) {
@@ -1062,28 +1086,48 @@ const JsonToWord = async (jsonData) => {
 
                 let size = 22;
                 let heading = null;
-                let spacing = { before: 60, after: 60 }; // Much tighter spacing
+                let spacing = { before: 30, after: 30 }; // Ultra-tight spacing
 
                 if (type && type.includes("heading")) {
                   const sizeMap = {
-                    "heading-one": 44,
+                    "heading-one": 40,
                     "heading-two": 32,
                     "heading-three": 28,
                     "heading-four": 24,
-                    "heading-five": 22,
-                    "heading-six": 20,
+                    "heading-five": 20,
+                    "heading-six": 16,
                   };
                   size = sizeMap[type] || 22;
 
+                  // Check if next content block is also a heading
+                  const nextBlock =
+                    item.content[item.content.indexOf(block) + 1];
+                  const isNextHeading =
+                    nextBlock &&
+                    nextBlock.type &&
+                    nextBlock.type.includes("heading");
+
                   const spacingMap = {
-                    "heading-one": { before: 240, after: 120 },
-                    "heading-two": { before: 180, after: 100 },
-                    "heading-three": { before: 160, after: 80 },
-                    "heading-four": { before: 140, after: 70 },
-                    "heading-five": { before: 120, after: 60 },
-                    "heading-six": { before: 100, after: 50 },
+                    "heading-one": isNextHeading
+                      ? { before: 160, after: 20 }
+                      : { before: 160, after: 80 },
+                    "heading-two": isNextHeading
+                      ? { before: 120, after: 15 }
+                      : { before: 120, after: 60 },
+                    "heading-three": isNextHeading
+                      ? { before: 100, after: 10 }
+                      : { before: 100, after: 50 },
+                    "heading-four": isNextHeading
+                      ? { before: 80, after: 8 }
+                      : { before: 80, after: 40 },
+                    "heading-five": isNextHeading
+                      ? { before: 60, after: 6 }
+                      : { before: 60, after: 30 },
+                    "heading-six": isNextHeading
+                      ? { before: 40, after: 4 }
+                      : { before: 40, after: 20 },
                   };
-                  spacing = spacingMap[type] || { before: 180, after: 100 };
+                  spacing = spacingMap[type] || { before: 120, after: 60 };
 
                   const headingMap = {
                     "heading-one": HeadingLevel.HEADING_1,
@@ -1148,7 +1192,7 @@ const JsonToWord = async (jsonData) => {
                           createParagraph(text, {
                             size: 22,
                             alignment: leftAlignment,
-                            spacing: { before: 60, after: 60 },
+                            spacing: { before: 20, after: 20 }, // Ultra-tight for web match
                           })
                         ),
                         width: { size: 50, type: WidthType.PERCENTAGE },
@@ -1158,7 +1202,7 @@ const JsonToWord = async (jsonData) => {
                           left: { style: BorderStyle.NONE },
                           right: { style: BorderStyle.NONE },
                         },
-                        margins: { top: 0, bottom: 0, left: 0, right: 150 },
+                        margins: { top: 0, bottom: 0, left: 0, right: 100 }, // Reduced margins
                         verticalAlign: VerticalAlign.TOP,
                       }),
                       new TableCell({
@@ -1166,7 +1210,7 @@ const JsonToWord = async (jsonData) => {
                           createParagraph(text, {
                             size: 22,
                             alignment: rightAlignment,
-                            spacing: { before: 60, after: 60 },
+                            spacing: { before: 20, after: 20 }, // Ultra-tight for web match
                           })
                         ),
                         width: { size: 50, type: WidthType.PERCENTAGE },
@@ -1176,7 +1220,7 @@ const JsonToWord = async (jsonData) => {
                           left: { style: BorderStyle.NONE },
                           right: { style: BorderStyle.NONE },
                         },
-                        margins: { top: 0, bottom: 0, left: 150, right: 0 },
+                        margins: { top: 0, bottom: 0, left: 100, right: 0 }, // Reduced margins
                         verticalAlign: VerticalAlign.TOP,
                       }),
                     ],
@@ -1187,9 +1231,9 @@ const JsonToWord = async (jsonData) => {
               });
 
               allContent.push(
-                createParagraph("", { spacing: { before: 120, after: 60 } }),
+                createParagraph("", { spacing: { before: 60, after: 30 } }), // Reduced spacing
                 doubleParaTable,
-                createParagraph("", { spacing: { before: 60, after: 120 } })
+                createParagraph("", { spacing: { before: 30, after: 60 } }) // Reduced spacing
               );
             }
           }
@@ -1197,16 +1241,16 @@ const JsonToWord = async (jsonData) => {
 
         case "table":
           const table = createTable(item.content, {
-            design: item.design,
+            design: item.design || "striped", // Default to striped for web-like appearance
             boldAll: item.boldAll,
             underlineAll: item.underlineAll,
             italicAll: item.italicAll,
           });
           if (table) {
             allContent.push(
-              createParagraph("", { spacing: { before: 180, after: 80 } }),
+              createParagraph("", { spacing: { before: 100, after: 40 } }), // Reduced spacing
               table,
-              createParagraph("", { spacing: { before: 80, after: 180 } })
+              createParagraph("", { spacing: { before: 40, after: 100 } }) // Reduced spacing
             );
           }
           break;
@@ -1269,7 +1313,7 @@ const JsonToWord = async (jsonData) => {
                   : item.aliegn === "right"
                   ? AlignmentType.RIGHT
                   : AlignmentType.CENTER,
-              spacing: { before: 160, after: 80 },
+              spacing: { before: 80, after: 40 }, // Web-like tight spacing
             });
             allContent.push(imagePara);
 
@@ -1277,9 +1321,9 @@ const JsonToWord = async (jsonData) => {
               allContent.push(
                 createParagraph(item.caption, {
                   italic: true,
-                  size: 18,
+                  size: 16,
                   alignment: AlignmentType.CENTER,
-                  spacing: { before: 40, after: 160 },
+                  spacing: { before: 20, after: 80 },
                   color: "6C757D",
                 })
               );
@@ -1371,9 +1415,9 @@ const JsonToWord = async (jsonData) => {
             });
 
             allContent.push(
-              createParagraph("", { spacing: { before: 200, after: 80 } }),
+              createParagraph("", { spacing: { before: 100, after: 40 } }), // Web-like spacing
               imageParaTable,
-              createParagraph("", { spacing: { before: 80, after: 200 } })
+              createParagraph("", { spacing: { before: 40, after: 100 } }) // Web-like spacing
             );
           }
           break;
@@ -1431,9 +1475,9 @@ const JsonToWord = async (jsonData) => {
             });
 
             allContent.push(
-              createParagraph("", { spacing: { before: 240, after: 120 } }),
+              createParagraph("", { spacing: { before: 120, after: 60 } }), // Web-like spacing
               doubleImageTable,
-              createParagraph("", { spacing: { before: 120, after: 240 } })
+              createParagraph("", { spacing: { before: 60, after: 120 } }) // Web-like spacing
             );
           }
           break;
@@ -1441,7 +1485,7 @@ const JsonToWord = async (jsonData) => {
         case "code":
           if (item.content) {
             const codeBlocks = createCodeBlock(item.content, {
-              spacing: { before: 200, after: 200 },
+              spacing: { before: 120, after: 120 }, // Web-like spacing
             });
             allContent.push(...codeBlocks);
           }
@@ -1622,7 +1666,7 @@ const JsonToWord = async (jsonData) => {
     }
   }
 
-  // Create the final document with web-matching styles
+  // Create the final document with ultra-web-matching styles
   const doc = new Document({
     creator: "Professional Proposal Generator",
     title: jsonData.proposalName || "Business Proposal",
@@ -1641,9 +1685,9 @@ const JsonToWord = async (jsonData) => {
           },
           paragraph: {
             spacing: {
-              before: 60,
-              after: 60,
-              line: Math.round(22 * 20 * 1.2),
+              before: 30,
+              after: 30,
+              line: Math.round(22 * 20 * 1.15), // Web-like line spacing
             },
           },
         },
@@ -1654,15 +1698,15 @@ const JsonToWord = async (jsonData) => {
           next: "Normal",
           run: {
             font: headingFont,
-            size: 44,
+            size: 40, // Exact match to 2.5em
             bold: true,
             color: "1976D2",
           },
           paragraph: {
             spacing: {
-              before: 240,
-              after: 120,
-              line: Math.round(44 * 20 * 1.1),
+              before: 160,
+              after: 80,
+              line: Math.round(40 * 20 * 1.05),
             },
           },
         },
@@ -1673,15 +1717,15 @@ const JsonToWord = async (jsonData) => {
           next: "Normal",
           run: {
             font: headingFont,
-            size: 32,
+            size: 32, // Exact match to 2em
             bold: true,
             color: "1976D2",
           },
           paragraph: {
             spacing: {
-              before: 180,
-              after: 100,
-              line: Math.round(32 * 20 * 1.1),
+              before: 120,
+              after: 60,
+              line: Math.round(32 * 20 * 1.05),
             },
           },
         },
@@ -1692,24 +1736,27 @@ const JsonToWord = async (jsonData) => {
           next: "Normal",
           run: {
             font: codeFont,
-            size: 18,
+            size: 16, // Smaller, web-like
             color: "333333",
           },
           paragraph: {
             spacing: {
               before: 0,
-              after: 40,
-              line: Math.round(18 * 20 * 1.2),
+              after: 20,
+              line: Math.round(16 * 20 * 1.2),
             },
             indent: {
-              left: 400,
+              left: 200,
             },
             shading: {
               fill: "F8F9FA",
               type: ShadingType.SOLID,
             },
             borders: {
-              left: { style: BorderStyle.SINGLE, size: 6, color: "007ACC" },
+              left: { style: BorderStyle.SINGLE, size: 4, color: "007ACC" },
+              top: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+              bottom: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+              right: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
             },
           },
         },
@@ -1737,10 +1784,10 @@ const JsonToWord = async (jsonData) => {
                   createParagraph(
                     jsonData.proposalName || "Business Proposal",
                     {
-                      size: 18,
+                      size: 16,
                       color: "6C757D",
                       alignment: AlignmentType.CENTER,
-                      spacing: { before: 60, after: 60 },
+                      spacing: { before: 30, after: 30 },
                     }
                   ),
                 ],
@@ -1752,10 +1799,10 @@ const JsonToWord = async (jsonData) => {
               default: new Footer({
                 children: [
                   createParagraph("Page", {
-                    size: 16,
+                    size: 14,
                     color: "6C757D",
                     alignment: AlignmentType.CENTER,
-                    spacing: { before: 60, after: 60 },
+                    spacing: { before: 30, after: 30 },
                   }),
                 ],
               }),
