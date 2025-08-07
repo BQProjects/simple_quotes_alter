@@ -2,6 +2,21 @@ export const exportLiveHTML = (dropCanvasRef, proposalName) => {
   if (dropCanvasRef.current) {
     // Function to clean and optimize elements for Word compatibility
     const optimizeForWord = (element) => {
+      // Replace 'Page Break' text/divs with Word-compatible page break divs
+      const insertPageBreaks = (el) => {
+        // Replace any <div> or <p> with text 'Page Break' (case-insensitive)
+        const allDivs = el.querySelectorAll("div, p");
+        allDivs.forEach((node) => {
+          if (
+            node.textContent &&
+            node.textContent.trim().toLowerCase() === "page break"
+          ) {
+            const pb = document.createElement("div");
+            pb.className = "page-break";
+            node.parentNode.replaceChild(pb, node);
+          }
+        });
+      };
       const clone = element.cloneNode(true);
 
       const removeAttributes = (el) => {
@@ -119,40 +134,30 @@ export const exportLiveHTML = (dropCanvasRef, proposalName) => {
       };
 
       // Detect and preserve side-by-side layouts
+      // Convert side-by-side divs to tables for Word compatibility
       const preserveSideBySideLayout = (el) => {
-        // Look for containers with multiple divs (likely side-by-side content)
         const allDivs = el.querySelectorAll("div");
         allDivs.forEach((div) => {
           const directChildDivs = Array.from(div.children).filter(
             (child) => child.tagName === "DIV"
           );
-
-          // If a div has exactly 2 child divs with meaningful content, make it flexbox
           if (directChildDivs.length === 2) {
-            const hasContent = directChildDivs.every((child) => {
-              const text = child.textContent?.trim();
-              const hasImg = child.querySelector("img");
-              const hasTable = child.querySelector("table");
-              const hasEditor =
-                child.querySelector("[data-slate-editor]") ||
-                child.querySelector("[aria-multiline]");
-              return text || hasImg || hasTable || hasEditor;
+            // Create a table with two columns
+            const table = document.createElement("table");
+            table.style.width = "100%";
+            table.style.borderCollapse = "collapse";
+            const tr = document.createElement("tr");
+            directChildDivs.forEach((child) => {
+              const td = document.createElement("td");
+              td.style.verticalAlign = "top";
+              td.style.border = "1px solid #ccc";
+              td.style.padding = "8px";
+              td.appendChild(child.cloneNode(true));
+              tr.appendChild(td);
             });
-
-            // Only apply flex if not already styled and content is meaningful
-            if (hasContent && !div.style.display) {
-              div.style.display = "flex";
-              div.style.gap = "20px";
-              div.style.alignItems = "flex-start";
-              div.style.marginBottom = "16px";
-
-              // Set flex properties for children
-              directChildDivs.forEach((child) => {
-                child.style.flex = "1";
-                child.style.minWidth = "0";
-                child.style.maxWidth = "48%";
-              });
-            }
+            table.appendChild(tr);
+            // Replace the div with the table
+            div.parentNode.replaceChild(table, div);
           }
         });
       };
@@ -269,6 +274,57 @@ export const exportLiveHTML = (dropCanvasRef, proposalName) => {
         });
       };
 
+      // Convert code blocks to <pre><code>...</code></pre>
+      const convertCodeBlocks = (el) => {
+        // Only convert divs or paragraphs with data-code-block="true" or class="code-block"
+        const codeCandidates = el.querySelectorAll(
+          'div[data-code-block="true"], p[data-code-block="true"], div.code-block, p.code-block'
+        );
+        codeCandidates.forEach((node) => {
+          const text = node.textContent || "";
+          const pre = document.createElement("pre");
+          const code = document.createElement("code");
+          code.textContent = text;
+          pre.appendChild(code);
+          node.parentNode.replaceChild(pre, node);
+        });
+        // Fallback: convert any div or p containing only a single <code> child
+        const fallbackCandidates = el.querySelectorAll("div, p");
+        fallbackCandidates.forEach((node) => {
+          if (
+            node.children.length === 1 &&
+            node.firstElementChild.tagName === "CODE"
+          ) {
+            const pre = document.createElement("pre");
+            pre.appendChild(node.firstElementChild.cloneNode(true));
+            node.parentNode.replaceChild(pre, node);
+          }
+        });
+        // Detect code blocks by content in leaf nodes only
+        const contentCandidates = el.querySelectorAll("div, span, p");
+        contentCandidates.forEach((node) => {
+          const text = node.textContent?.trim();
+          // Only convert if node has no children and text looks like code
+          if (
+            !node.children.length &&
+            text &&
+            (text.startsWith("const ") ||
+              text.startsWith("let ") ||
+              text.startsWith("function ") ||
+              text.startsWith("class ") ||
+              text.includes("new Document(") ||
+              text.includes("new Paragraph(") ||
+              text.includes("new TextRun("))
+          ) {
+            const pre = document.createElement("pre");
+            const code = document.createElement("code");
+            code.textContent = text;
+            pre.appendChild(code);
+            node.parentNode.replaceChild(pre, node);
+          }
+        });
+      };
+
       const processElement = (el) => {
         removeAttributes(el);
         applyWordStyles(el);
@@ -300,7 +356,8 @@ export const exportLiveHTML = (dropCanvasRef, proposalName) => {
       preserveSideBySideLayout(clone);
       cleanUpTables(clone);
       simplifySpans(clone);
-
+      insertPageBreaks(clone);
+      convertCodeBlocks(clone);
       return clone;
     };
 
@@ -331,14 +388,37 @@ export const exportLiveHTML = (dropCanvasRef, proposalName) => {
 
     table {
       border-collapse: collapse !important;
+      border-spacing: 0 !important;
       width: 100% !important;
-      margin: 16px 0 !important;
+      margin: 24px 0 32px 0 !important;
+      margin-bottom: 32px !important;
     }
 
     td, th {
       border: 1px solid #ccc !important;
       padding: 8px !important;
       vertical-align: top !important;
+    }
+
+    pre, code {
+      display: block;
+      margin-bottom: 24px !important;
+      font-family: 'Consolas', 'Courier New', monospace !important;
+      background: #f8f8f8 !important;
+      border-radius: 4px !important;
+      padding: 12px !important;
+      font-size: 15px !important;
+    }
+
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+      height: 0;
+      margin-bottom: 32px !important;
+    }
+
+    h1, h2, h3, h4, h5, h6, p, img, table, pre {
+      margin-bottom: 24px !important;
     }
 
     h1, h2, h3, h4, h5, h6 {
@@ -357,20 +437,7 @@ export const exportLiveHTML = (dropCanvasRef, proposalName) => {
       margin: 16px 0;
     }
 
-    /* Preserve side-by-side layouts */
-    div[style*="display: flex"], 
-    div[style*="display:flex"] {
-      display: flex !important;
-      gap: 20px !important;
-      align-items: flex-start !important;
-      margin-bottom: 16px !important;
-    }
-
-    div[style*="flex: 1"] {
-      flex: 1 !important;
-      min-width: 0 !important;
-      max-width: 48% !important;
-    }
+    /* Remove flexbox for Word compatibility */
 
     /* Clean up empty elements and excessive wrappers */
     div:empty:not([style*="flex"]),
@@ -403,6 +470,11 @@ export const exportLiveHTML = (dropCanvasRef, proposalName) => {
       min-height: 20px;
     }
 
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+      height: 0;
+    }
     * {
       box-sizing: border-box;
     }
