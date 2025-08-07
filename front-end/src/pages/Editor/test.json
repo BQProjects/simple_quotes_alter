@@ -485,6 +485,10 @@
             "bookmark": false
         },
         {
+            "id": "58a32c70-9ef3-418f-b72f-7091ac910375",
+            "type": "line"
+        },
+        {
             "id": "b0346eb2-3db5-4c62-b30d-9fc7672dff75",
             "type": "table",
             "design": "alternativerow",
@@ -594,6 +598,10 @@
             ],
             "textFormat": "left",
             "bookmark": false
+        },
+        {
+            "id": "4ec204d3-83c3-4443-8e43-74899c869ddd",
+            "type": "line"
         },
         {
             "id": "baf5cfb0-1e45-483a-a2bb-fcb23f6deaa3",
@@ -707,6 +715,10 @@
             "bookmark": false
         },
         {
+            "id": "199c5ea4-3462-4350-8ee8-0e2cb892ec42",
+            "type": "line"
+        },
+        {
             "id": "2497a26f-d79f-4e0b-9779-87121186dedb",
             "type": "table",
             "design": "leftcol",
@@ -818,6 +830,10 @@
             "bookmark": false
         },
         {
+            "id": "64b722ba-a6be-4343-b8e1-2db0aa394a19",
+            "type": "line"
+        },
+        {
             "id": "8b023ea6-f663-4a36-bd9b-e858c10e1978",
             "type": "brake",
             "content": "",
@@ -833,6 +849,10 @@
             "caption": "",
             "discription": "",
             "bookmark": false
+        },
+        {
+            "id": "2a84ad0e-9360-4b8d-acc1-0fbc5ee5c14a",
+            "type": "line"
         },
         {
             "id": "1d5a999d-a6b8-4a68-9187-56333912f4c8",
@@ -878,7 +898,7 @@
         {
             "id": "5e6b6cb1-39eb-4dd8-9d97-8dfa3dc73fd5",
             "type": "code",
-            "content": "const doc = new Document({\n    creator: \"Simple Quotes\",\n    description: \"Generated Proposal Document\",\n    sections: sections.length > 0 ? sections : [\n      {\n        properties: {},\n        children: [\n          new Paragraph({\n            children: [\n              new TextRun(\"No content available\"),\n            ],\n          }),\n        ],\n      },\n    ],\n  });",
+            "content": "const doc = new Document({\n    creator: \"Simple Quotes\",\n\n    description: \"Generated Proposal Document\",\n    sections: sections.length > 0 ? sections : [\n      {\n        properties: {},\n        children: [\n          new Paragraph({\n            children: [\n              new TextRun(\"No content available\"),\n            ],\n          }),\n        ],\n      },\n    ],\n  });",
             "bookmark": false
         },
         {
@@ -905,23 +925,23 @@
             "content": [
                 {
                     "deliverable": "UI/UX Design",
-                    "price": null,
+                    "price": 200,
                     "discount": null,
-                    "quantity": null,
+                    "quantity": 2,
                     "paymentDuration": "Monthly",
-                    "amount": 100
+                    "amount": 400
                 }
             ],
             "options": {
-                "discount": false,
-                "quantity": false,
-                "currency": "₹",
-                "tax": false
+                "discount": true,
+                "quantity": true,
+                "currency": true,
+                "tax": true
             },
             "bookmark": false,
             "values": {
-                "discount": null,
-                "tax": null
+                "discount": "10",
+                "tax": "15"
             },
             "heading": "Cost Module"
         },
@@ -951,6 +971,11 @@
                     "deliverable": "Milestone 1",
                     "percentage": 10,
                     "value": 900
+                },
+                {
+                    "deliverable": "Advance",
+                    "percentage": 22,
+                    "value": 70
                 }
             ],
             "options": {
@@ -969,7 +994,7 @@
                     "signed": true
                 },
                 {
-                    "acceptedName": "",
+                    "acceptedName": "Josh",
                     "signed": true
                 }
             ],
@@ -981,7 +1006,29 @@
     ],
     "readOnlyUsers": [],
     "Users": [
-        "6892f29b7bff2777e3329554"
+        {
+            "_id": "6892f29b7bff2777e3329554",
+            "fullName": "Jashkumar",
+            "email": "jash@gmail.com",
+            "password": "$2b$10$Lyy7OTCHSHe3uuiHu/sDze7dfJ/cqfLZM/zImTap617Jaxv9mvDRy",
+            "companyName": "Jash",
+            "companySize": "1",
+            "teamName": "",
+            "teamSize": "1",
+            "subscription": "yearly",
+            "subscriptionDate": "2025-08-06T10:40:15.291Z",
+            "sharedSubscription": [],
+            "pendingWorkspaces": [],
+            "approvedWorkspaces": [],
+            "goals": [],
+            "collab": [],
+            "__v": 0,
+            "avatar": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754476361/fausxfcmi6dalogtfhp5.webp",
+            "subscriptionEnd": "2026-08-06T10:40:15.291Z",
+            "Curency": "INR",
+            "country": "IST",
+            "phoneNo": "9484467898"
+        }
     ],
     "AcceptedUsers": [],
     "PendingUsers": [],
@@ -997,7 +1044,7 @@
         "theme": 0
     },
     "views": 1,
-    "lastUpdate": "2025-08-07T06:39:55.655Z",
+    "lastUpdate": "2025-08-07T12:32:15.441Z",
     "analytics": [
         "68943897f3204dceae1fc5aa",
         "68943898f3204dceae1fc5af",
@@ -5832,12 +5879,2015 @@
             ],
             "createdAt": "2025-08-07T05:18:23.828Z",
             "updatedAt": "2025-08-07T05:43:18.154Z"
+        },
+        {
+            "data": [
+                {
+                    "id": "030bb67e-f6bb-416d-b9c4-6deea5e7755bsdcwdsc",
+                    "type": "cover",
+                    "template": 6,
+                    "dark": 0,
+                    "bright": 0,
+                    "content": "https://res.cloudinary.com/dojwaepbj/image/upload/v1751983875/usctxnou2svleh3qqwm9.png",
+                    "bookmark": false,
+                    "height": 690
+                },
+                {
+                    "id": "37570ee6-afa5-4115-955a-7a825b4f8242sdcsdc",
+                    "type": "heading",
+                    "size": "heading-one",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "bold": true,
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-one",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "bold": true,
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-one",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "bold": true,
+                                    "text": "BUSINESS PROPOSAL"
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "8654bfb7-5db2-4891-8ac4-2b54dd68b78asdcdssv",
+                    "type": "heading",
+                    "size": "heading-five",
+                    "content": [
+                        {
+                            "type": "heading-five",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": "Smart Solar Street Lighting System"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-five",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": "with IoT Integration"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-five",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false,
+                    "textColor": "text-black"
+                },
+                {
+                    "id": "3e48383c-148e-4f3a-a951-ed04c7e0738fsdvfs",
+                    "type": "input",
+                    "content": [
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": "June 13, 2025"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-three",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "c5ca97f4-a7c6-4534-bf04-51af660b98f5svsvsv",
+                    "type": "double-para",
+                    "firstContent": [
+                        {
+                            "type": "paragraph",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": "Prepared By"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "Project Development Team"
+                                }
+                            ],
+                            "align": "center"
+                        }
+                    ],
+                    "secondContent": [
+                        {
+                            "type": "paragraph",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": "Prepared For:"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "GreenEdge Innovations Pvt. Ltd."
+                                }
+                            ],
+                            "align": "center"
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "0f7fddbb-057d-41e0-9cbd-ffcbc21e167c",
+                    "type": "brake",
+                    "content": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "daa3b15f-30fb-47f5-a1ef-30cac3e692f3",
+                    "type": "line"
+                },
+                {
+                    "id": "064f6360-a993-43b5-9cdc-3a8e5ec4cc51",
+                    "type": "input",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "test Para 1"
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "11af05f7-232d-4145-8b4a-e76d49228c08",
+                    "type": "double-para",
+                    "firstContent": [
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "test Para 2"
+                                }
+                            ]
+                        }
+                    ],
+                    "secondContent": [
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "test Para 3"
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "e9476b19-89d7-497e-a3f5-65d5d9f5e0f1",
+                    "type": "heading",
+                    "size": "heading-one",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": true
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "94cfc175-550d-4e6a-a1a7-10cdb2084ca4",
+                    "type": "heading",
+                    "size": "heading-two",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "d2f87da7-6d19-4501-abc9-5a5c47bddc5e",
+                    "type": "heading",
+                    "size": "heading-three",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "caf46292-55aa-47c0-9f13-6c8597def0d0",
+                    "type": "heading",
+                    "size": "heading-four",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "cc0b9998-8242-4c2e-9fcb-8631c1dd4f46",
+                    "type": "heading",
+                    "size": "heading-five",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "f33291f5-49e5-46b6-a385-111e20117df3",
+                    "type": "heading",
+                    "size": "heading-six",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "9bc22f7b-b590-4365-9178-e8e90a60619f",
+                    "type": "brake",
+                    "content": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "836df5b2-7df8-4713-a20e-24a09ab937f0",
+                    "type": "table",
+                    "design": "normal",
+                    "content": [
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "",
+                            "Tabel",
+                            "",
+                            ""
+                        ],
+                        [
+                            "",
+                            "",
+                            "Tabel",
+                            ""
+                        ],
+                        [
+                            "",
+                            "",
+                            "",
+                            "Tabel"
+                        ]
+                    ],
+                    "boldAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "underlineAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "italicAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "textFormat": "left",
+                    "bookmark": false
+                },
+                {
+                    "id": "58a32c70-9ef3-418f-b72f-7091ac910375",
+                    "type": "line"
+                },
+                {
+                    "id": "b0346eb2-3db5-4c62-b30d-9fc7672dff75",
+                    "type": "table",
+                    "design": "alternativerow",
+                    "content": [
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ],
+                        [
+                            "",
+                            "Tabel",
+                            "Tabel",
+                            ""
+                        ],
+                        [
+                            "",
+                            "Tabel",
+                            "Tabel",
+                            ""
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ]
+                    ],
+                    "boldAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "underlineAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "italicAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "textFormat": "left",
+                    "bookmark": false
+                },
+                {
+                    "id": "4ec204d3-83c3-4443-8e43-74899c869ddd",
+                    "type": "line"
+                },
+                {
+                    "id": "baf5cfb0-1e45-483a-a2bb-fcb23f6deaa3",
+                    "type": "table",
+                    "design": "toprow",
+                    "content": [
+                        [
+                            "Tabel",
+                            "Tabel",
+                            "Tabel",
+                            "Tabel"
+                        ],
+                        [
+                            "",
+                            "Tabel",
+                            "",
+                            ""
+                        ],
+                        [
+                            "",
+                            "",
+                            "Tabel",
+                            ""
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ]
+                    ],
+                    "boldAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "underlineAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "italicAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "textFormat": "left",
+                    "bookmark": false
+                },
+                {
+                    "id": "199c5ea4-3462-4350-8ee8-0e2cb892ec42",
+                    "type": "line"
+                },
+                {
+                    "id": "2497a26f-d79f-4e0b-9779-87121186dedb",
+                    "type": "table",
+                    "design": "leftcol",
+                    "content": [
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "Tabel",
+                            "Tabel"
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "Tabel",
+                            "Tabel"
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ]
+                    ],
+                    "boldAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "underlineAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "italicAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "textFormat": "left",
+                    "bookmark": false
+                },
+                {
+                    "id": "64b722ba-a6be-4343-b8e1-2db0aa394a19",
+                    "type": "line"
+                },
+                {
+                    "id": "8b023ea6-f663-4a36-bd9b-e858c10e1978",
+                    "type": "brake",
+                    "content": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "42664032-2799-407e-836a-6e0e04c34f69",
+                    "type": "image",
+                    "content": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754460989/i55mlnizbahddhoj3eyd.png",
+                    "height": "200",
+                    "width": "50",
+                    "aliegn": "center",
+                    "caption": "",
+                    "discription": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "2a84ad0e-9360-4b8d-acc1-0fbc5ee5c14a",
+                    "type": "line"
+                },
+                {
+                    "id": "1d5a999d-a6b8-4a68-9187-56333912f4c8",
+                    "type": "image-para",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "Tabel"
+                                }
+                            ]
+                        }
+                    ],
+                    "ImageLink": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754460999/cr1i6cc7uqtgqf3fz3bv.png",
+                    "height": "",
+                    "width": "",
+                    "align": "left",
+                    "aliegn": "center",
+                    "bookmark": false
+                },
+                {
+                    "id": "abfec25b-b365-443c-955f-48a9995203fd",
+                    "type": "double-image",
+                    "ImageLink1": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754461009/cze9wjpk0bylwxy74irn.png",
+                    "height1": "",
+                    "width1": "",
+                    "align1": "left",
+                    "aliegn1": "center",
+                    "ImageLink2": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754461014/l677t76ipvbkftiqenkr.png",
+                    "height2": "",
+                    "width2": "",
+                    "align2": "left",
+                    "aliegn2": "center",
+                    "bookmark": false
+                },
+                {
+                    "id": "c08b3d77-0e76-49c9-a377-5f39b5b35ccc",
+                    "type": "brake",
+                    "content": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "5e6b6cb1-39eb-4dd8-9d97-8dfa3dc73fd5",
+                    "type": "code",
+                    "content": "const doc = new Document({\n    creator: \"Simple Quotes\",\n\n    description: \"Generated Proposal Document\",\n    sections: sections.length > 0 ? sections : [\n      {\n        properties: {},\n        children: [\n          new Paragraph({\n            children: [\n              new TextRun(\"No content available\"),\n            ],\n          }),\n        ],\n      },\n    ],\n  });",
+                    "bookmark": false
+                },
+                {
+                    "id": "b66c7cdd-9b53-4eb5-a0e3-de7531e4c9cfesfewrf",
+                    "type": "heading",
+                    "size": "heading-two",
+                    "content": [
+                        {
+                            "type": "heading-two",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Cost Module",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "8fa7336d-9e67-4888-a060-adb242239df9",
+                    "type": "cost",
+                    "content": [
+                        {
+                            "deliverable": "UI/UX Design",
+                            "price": null,
+                            "discount": null,
+                            "quantity": null,
+                            "paymentDuration": "Monthly",
+                            "amount": 100
+                        }
+                    ],
+                    "options": {
+                        "discount": false,
+                        "quantity": false,
+                        "currency": "₹",
+                        "tax": false
+                    },
+                    "bookmark": false,
+                    "values": {
+                        "discount": null,
+                        "tax": null
+                    },
+                    "heading": "Cost Module"
+                },
+                {
+                    "id": "b66c7cdd-9b53-4eb5-a0e3-de7531e4c9cfwekjfhuw",
+                    "type": "heading",
+                    "size": "heading-two",
+                    "content": [
+                        {
+                            "type": "heading-two",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Price Terms",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "37f25e6c-377a-46fe-b05f-6abd5e43b073",
+                    "type": "price",
+                    "content": [
+                        {
+                            "deliverable": "Milestone 1",
+                            "percentage": 10,
+                            "value": 900
+                        }
+                    ],
+                    "options": {
+                        "percentage": true,
+                        "value": true,
+                        "currency": "$"
+                    },
+                    "bookmark": false
+                },
+                {
+                    "id": "67d20064-f742-4a18-8369-e9a963cc8a6b",
+                    "type": "sign",
+                    "content": [
+                        {
+                            "proposedName": "Jashkumar",
+                            "signed": true
+                        },
+                        {
+                            "acceptedName": "",
+                            "signed": true
+                        }
+                    ],
+                    "bookmark": false
+                }
+            ],
+            "createdAt": "2025-08-07T09:09:25.962Z",
+            "updatedAt": "2025-08-07T09:14:43.159Z"
+        },
+        {
+            "data": [
+                {
+                    "id": "030bb67e-f6bb-416d-b9c4-6deea5e7755bsdcwdsc",
+                    "type": "cover",
+                    "template": 6,
+                    "dark": 0,
+                    "bright": 0,
+                    "content": "https://res.cloudinary.com/dojwaepbj/image/upload/v1751983875/usctxnou2svleh3qqwm9.png",
+                    "bookmark": false,
+                    "height": 690
+                },
+                {
+                    "id": "37570ee6-afa5-4115-955a-7a825b4f8242sdcsdc",
+                    "type": "heading",
+                    "size": "heading-one",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "bold": true,
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-one",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "bold": true,
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-one",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "bold": true,
+                                    "text": "BUSINESS PROPOSAL"
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "8654bfb7-5db2-4891-8ac4-2b54dd68b78asdcdssv",
+                    "type": "heading",
+                    "size": "heading-five",
+                    "content": [
+                        {
+                            "type": "heading-five",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": "Smart Solar Street Lighting System"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-five",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": "with IoT Integration"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-five",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false,
+                    "textColor": "text-black"
+                },
+                {
+                    "id": "3e48383c-148e-4f3a-a951-ed04c7e0738fsdvfs",
+                    "type": "input",
+                    "content": [
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": "June 13, 2025"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "right",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragrapgh",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "heading-three",
+                            "children": [
+                                {
+                                    "text": ""
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "c5ca97f4-a7c6-4534-bf04-51af660b98f5svsvsv",
+                    "type": "double-para",
+                    "firstContent": [
+                        {
+                            "type": "paragraph",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": "Prepared By"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "Project Development Team"
+                                }
+                            ],
+                            "align": "center"
+                        }
+                    ],
+                    "secondContent": [
+                        {
+                            "type": "paragraph",
+                            "align": "center",
+                            "children": [
+                                {
+                                    "text": "Prepared For:"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "GreenEdge Innovations Pvt. Ltd."
+                                }
+                            ],
+                            "align": "center"
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "0f7fddbb-057d-41e0-9cbd-ffcbc21e167c",
+                    "type": "brake",
+                    "content": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "daa3b15f-30fb-47f5-a1ef-30cac3e692f3",
+                    "type": "line"
+                },
+                {
+                    "id": "064f6360-a993-43b5-9cdc-3a8e5ec4cc51",
+                    "type": "input",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "test Para 1"
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "11af05f7-232d-4145-8b4a-e76d49228c08",
+                    "type": "double-para",
+                    "firstContent": [
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "test Para 2"
+                                }
+                            ]
+                        }
+                    ],
+                    "secondContent": [
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "test Para 3"
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "e9476b19-89d7-497e-a3f5-65d5d9f5e0f1",
+                    "type": "heading",
+                    "size": "heading-one",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": true
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "94cfc175-550d-4e6a-a1a7-10cdb2084ca4",
+                    "type": "heading",
+                    "size": "heading-two",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "d2f87da7-6d19-4501-abc9-5a5c47bddc5e",
+                    "type": "heading",
+                    "size": "heading-three",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "caf46292-55aa-47c0-9f13-6c8597def0d0",
+                    "type": "heading",
+                    "size": "heading-four",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "cc0b9998-8242-4c2e-9fcb-8631c1dd4f46",
+                    "type": "heading",
+                    "size": "heading-five",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "f33291f5-49e5-46b6-a385-111e20117df3",
+                    "type": "heading",
+                    "size": "heading-six",
+                    "content": [
+                        {
+                            "type": "heading-one",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Heading",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "9bc22f7b-b590-4365-9178-e8e90a60619f",
+                    "type": "brake",
+                    "content": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "836df5b2-7df8-4713-a20e-24a09ab937f0",
+                    "type": "table",
+                    "design": "normal",
+                    "content": [
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "",
+                            "Tabel",
+                            "",
+                            ""
+                        ],
+                        [
+                            "",
+                            "",
+                            "Tabel",
+                            ""
+                        ],
+                        [
+                            "",
+                            "",
+                            "",
+                            "Tabel"
+                        ]
+                    ],
+                    "boldAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "underlineAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "italicAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "textFormat": "left",
+                    "bookmark": false
+                },
+                {
+                    "id": "58a32c70-9ef3-418f-b72f-7091ac910375",
+                    "type": "line"
+                },
+                {
+                    "id": "b0346eb2-3db5-4c62-b30d-9fc7672dff75",
+                    "type": "table",
+                    "design": "alternativerow",
+                    "content": [
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ],
+                        [
+                            "",
+                            "Tabel",
+                            "Tabel",
+                            ""
+                        ],
+                        [
+                            "",
+                            "Tabel",
+                            "Tabel",
+                            ""
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ]
+                    ],
+                    "boldAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "underlineAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "italicAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "textFormat": "left",
+                    "bookmark": false
+                },
+                {
+                    "id": "4ec204d3-83c3-4443-8e43-74899c869ddd",
+                    "type": "line"
+                },
+                {
+                    "id": "baf5cfb0-1e45-483a-a2bb-fcb23f6deaa3",
+                    "type": "table",
+                    "design": "toprow",
+                    "content": [
+                        [
+                            "Tabel",
+                            "Tabel",
+                            "Tabel",
+                            "Tabel"
+                        ],
+                        [
+                            "",
+                            "Tabel",
+                            "",
+                            ""
+                        ],
+                        [
+                            "",
+                            "",
+                            "Tabel",
+                            ""
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ]
+                    ],
+                    "boldAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "underlineAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "italicAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "textFormat": "left",
+                    "bookmark": false
+                },
+                {
+                    "id": "199c5ea4-3462-4350-8ee8-0e2cb892ec42",
+                    "type": "line"
+                },
+                {
+                    "id": "2497a26f-d79f-4e0b-9779-87121186dedb",
+                    "type": "table",
+                    "design": "leftcol",
+                    "content": [
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "Tabel",
+                            "Tabel"
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "Tabel",
+                            "Tabel"
+                        ],
+                        [
+                            "Tabel",
+                            "",
+                            "",
+                            "Tabel"
+                        ]
+                    ],
+                    "boldAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "underlineAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "italicAll": [
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ],
+                        [
+                            false,
+                            false,
+                            false,
+                            false
+                        ]
+                    ],
+                    "textFormat": "left",
+                    "bookmark": false
+                },
+                {
+                    "id": "64b722ba-a6be-4343-b8e1-2db0aa394a19",
+                    "type": "line"
+                },
+                {
+                    "id": "8b023ea6-f663-4a36-bd9b-e858c10e1978",
+                    "type": "brake",
+                    "content": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "42664032-2799-407e-836a-6e0e04c34f69",
+                    "type": "image",
+                    "content": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754460989/i55mlnizbahddhoj3eyd.png",
+                    "height": "200",
+                    "width": "50",
+                    "aliegn": "center",
+                    "caption": "",
+                    "discription": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "2a84ad0e-9360-4b8d-acc1-0fbc5ee5c14a",
+                    "type": "line"
+                },
+                {
+                    "id": "1d5a999d-a6b8-4a68-9187-56333912f4c8",
+                    "type": "image-para",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "children": [
+                                {
+                                    "text": "Tabel"
+                                }
+                            ]
+                        }
+                    ],
+                    "ImageLink": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754460999/cr1i6cc7uqtgqf3fz3bv.png",
+                    "height": "",
+                    "width": "",
+                    "align": "left",
+                    "aliegn": "center",
+                    "bookmark": false
+                },
+                {
+                    "id": "abfec25b-b365-443c-955f-48a9995203fd",
+                    "type": "double-image",
+                    "ImageLink1": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754461009/cze9wjpk0bylwxy74irn.png",
+                    "height1": "",
+                    "width1": "",
+                    "align1": "left",
+                    "aliegn1": "center",
+                    "ImageLink2": "https://res.cloudinary.com/dojwaepbj/image/upload/v1754461014/l677t76ipvbkftiqenkr.png",
+                    "height2": "",
+                    "width2": "",
+                    "align2": "left",
+                    "aliegn2": "center",
+                    "bookmark": false
+                },
+                {
+                    "id": "c08b3d77-0e76-49c9-a377-5f39b5b35ccc",
+                    "type": "brake",
+                    "content": "",
+                    "bookmark": false
+                },
+                {
+                    "id": "5e6b6cb1-39eb-4dd8-9d97-8dfa3dc73fd5",
+                    "type": "code",
+                    "content": "const doc = new Document({\n    creator: \"Simple Quotes\",\n\n    description: \"Generated Proposal Document\",\n    sections: sections.length > 0 ? sections : [\n      {\n        properties: {},\n        children: [\n          new Paragraph({\n            children: [\n              new TextRun(\"No content available\"),\n            ],\n          }),\n        ],\n      },\n    ],\n  });",
+                    "bookmark": false
+                },
+                {
+                    "id": "b66c7cdd-9b53-4eb5-a0e3-de7531e4c9cfesfewrf",
+                    "type": "heading",
+                    "size": "heading-two",
+                    "content": [
+                        {
+                            "type": "heading-two",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Cost Module",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "8fa7336d-9e67-4888-a060-adb242239df9",
+                    "type": "cost",
+                    "content": [
+                        {
+                            "deliverable": "UI/UX Design",
+                            "price": 200,
+                            "discount": null,
+                            "quantity": 2,
+                            "paymentDuration": "Monthly",
+                            "amount": 400
+                        }
+                    ],
+                    "options": {
+                        "discount": true,
+                        "quantity": true,
+                        "currency": true,
+                        "tax": true
+                    },
+                    "bookmark": false,
+                    "values": {
+                        "discount": "10",
+                        "tax": "15"
+                    },
+                    "heading": "Cost Module"
+                },
+                {
+                    "id": "b66c7cdd-9b53-4eb5-a0e3-de7531e4c9cfwekjfhuw",
+                    "type": "heading",
+                    "size": "heading-two",
+                    "content": [
+                        {
+                            "type": "heading-two",
+                            "align": "left",
+                            "children": [
+                                {
+                                    "text": "Price Terms",
+                                    "bold": false
+                                }
+                            ]
+                        }
+                    ],
+                    "bookmark": false
+                },
+                {
+                    "id": "37f25e6c-377a-46fe-b05f-6abd5e43b073",
+                    "type": "price",
+                    "content": [
+                        {
+                            "deliverable": "Milestone 1",
+                            "percentage": 10,
+                            "value": 900
+                        },
+                        {
+                            "deliverable": "Advance",
+                            "percentage": 22,
+                            "value": 70
+                        }
+                    ],
+                    "options": {
+                        "percentage": true,
+                        "value": true,
+                        "currency": "$"
+                    },
+                    "bookmark": false
+                },
+                {
+                    "id": "67d20064-f742-4a18-8369-e9a963cc8a6b",
+                    "type": "sign",
+                    "content": [
+                        {
+                            "proposedName": "Jashkumar",
+                            "signed": true
+                        },
+                        {
+                            "acceptedName": "Josh",
+                            "signed": true
+                        }
+                    ],
+                    "bookmark": false
+                }
+            ],
+            "createdAt": "2025-08-07T11:21:26.426Z",
+            "updatedAt": "2025-08-07T11:22:36.415Z"
         }
     ],
     "createdAt": "2025-08-06T06:14:09.313Z",
-    "updatedAt": "2025-08-07T06:39:55.655Z",
-    "__v": 35,
-    "lastSeen": "2025-08-07T06:39:55.655Z",
+    "updatedAt": "2025-08-07T12:32:15.441Z",
+    "__v": 44,
+    "lastSeen": "2025-08-07T12:32:15.441Z",
     "sectionWise": {
         "Price Terms": 1.292,
         "Cost Module": 11.040999999999999,

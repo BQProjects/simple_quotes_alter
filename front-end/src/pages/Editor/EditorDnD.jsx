@@ -500,7 +500,7 @@ const EditorDnD = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="w-full">
+      <div className="w-full  ">
         <EditorHeader
           share={share}
           setShare={setShare}
@@ -524,10 +524,154 @@ const EditorDnD = () => {
       </div>
 
       <div
-        className="bg-canvas_bg relative"
+        className="bg-canvas_bg relative  "
         style={{ display: "flex", height: "calc(100vh - 65px)" }}
       >
-        {/* ...existing code... */}
+        {move && (
+          <div className="fixed inset-0 bg-opacity-40 flex justify-center bg-black items-center z-50">
+            <div className="bg-white rounded-md border border-gray-300 w-[40%] relative flex flex-col ">
+              <div className="w-full h-16 flex items-center justify-center ">
+                <p className="font-bold">Move or Copy the Document</p>
+                <div
+                  onClick={() => setMove(false)}
+                  className="absolute top-5 right-4  cursor-pointer"
+                >
+                  <RxCross2 className="font-bold w-6 h-6" />
+                </div>
+              </div>
+              <div className="w-full flex items-center justify-center border-t  border-b border-gray-200 py-7 ">
+                <div className="w-[70%] relative flex flex-col  ">
+                  <p className="text-gray-500">Select Destination</p>
+                  <div className="w-full flex items-center justify-between p-2 border border-gray-300 rounded-md mt-1 ml-[-3px] relative">
+                    <img src={copyPop} alt="no" className="mx-2" />
+                    <p className="w-full">Select The Destination</p>
+                    <button
+                      onClick={() => setDropCopy(!dropCopy)}
+                      className=" p-1 rounded-[50%] bg-graidient_bottom text-white"
+                    >
+                      <FaAngleDown />
+                    </button>
+
+                    <div></div>
+                  </div>
+                  {dropCopy && (
+                    <div className="w-full ml-[-2px] rounded-b-md flex flex-col   h-20 border border-gray-30 overflow-auto  ">
+                      {[1, 2, 3, 4].map((item) => {
+                        return (
+                          <div className=" w-full px-3 py-2 border-b border-200 ">
+                            <h1 className="text-black">Something</h1>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="mt-3 flex flex-row items-center justify-center w-[35%] gap-2 ">
+                    <input type="checkbox" />
+                    <p>Create a Copy</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="mt-6 mb-5 mr-5 flex justify-end gap-4">
+                  <button
+                    onClick={() => setMove(false)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button className="px-4 py-2 bg-graidient_bottom text-white rounded-md hover:bg-shadow_Bottom">
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {costModule && (
+          <CostModule
+            addCostModule={addCostModule}
+            rows={rows}
+            setRows={setRows}
+          />
+        )}
+        {priceTerms && (
+          <PriceTerms
+            addPriceTerms={addPriceTerms}
+            setPriceTerms={setPriceTerms}
+            rows={rows}
+            setRows={setRows}
+          />
+        )}
+        {sign && (
+          <Signiture
+            addSign={addSign}
+            rows={rows}
+            setRows={setRows}
+            signEdit={signEdit}
+            setSignEdit={setSignEdit}
+          />
+        )}
+
+        {historyPreview !== null && (
+          <div className="fixed inset-0 bg-opacity-40 flex justify-center bg-black items-center z-[10000000]">
+            <div className="w-fit h-fit bg-white px-4 py-4 rounded-md transition-all duration-500 ease-out opacity-15 animate-fadeInforRow ">
+              <div className="px-3 py-2 text-non_active_text">
+                <p>History Preview</p>
+              </div>
+              <div
+                className="flex justify-center overflow-y-auto h-[68vh] bg-white"
+                style={{
+                  flex: 1,
+                  overflow: "auto",
+                }}
+                ref={dropCanvasRef}
+              >
+                <DropCanvas
+                  rows={historyPreview}
+                  settings={settings}
+                  setRows={setHistoryPreview}
+                  preview={true}
+                  setSignEdit={setSignEdit}
+                  dropCanvasRef={dropCanvasRef}
+                  addEmptyRow={addEmptyRow}
+                  addInputRow={addInputRow}
+                  addTextRow={addTextRow}
+                  addHeadingRow={addHeadingRow}
+                  addDoublePara={addDoublePara}
+                  addImageAndParagraph={addImageAndParagraph}
+                  addImageRow={addImageRow}
+                  addBreakPoint={addBreakPoint}
+                  addTableRow={addTableRow}
+                  addCodeBlock={addCodeBlock}
+                  addLineSpace={addLineSpace}
+                  addDoubleImage={addDoubleImage}
+                  height={true}
+                />
+              </div>
+
+              <div className="mt-4 mb-1 mr-2 flex justify-end gap-4">
+                <button
+                  onClick={() => setHistoryPreview(null)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setRows(historyPreview);
+                    setHistoryPreview(null);
+                  }}
+                  className="bg-footer_gradient_bot text-white px-4 rounded-md py-2 text-center text-sm flex gap-1 items-center justify-center hover:bg-hover_dark_btn active:bg-gradient_darker "
+                >
+                  Restore this version
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Sidebar with buttons */}
         <div
           style={{
             maxWidth: "400px",

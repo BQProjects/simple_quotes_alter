@@ -180,12 +180,61 @@ const JsonToWord = async (jsonData) => {
     return defaultColor.replace("#", "");
   };
 
+  // Convert Tailwind CSS text color classes to hex values
+  const convertTailwindTextColor = (textColor) => {
+    if (!textColor || typeof textColor !== "string") {
+      return convertToHex(defaultColor);
+    }
+
+    const colorMap = {
+      "text-black": "000000",
+      "text-white": "FFFFFF",
+      "text-gray-700": "374151",
+      "text-gray-600": "4B5563",
+      "text-gray-500": "6B7280",
+      "text-gray-400": "9CA3AF",
+      "text-gray-300": "D1D5DB",
+      "text-red-500": "EF4444",
+      "text-blue-500": "3B82F6",
+      "text-green-500": "10B981",
+      "text-yellow-500": "F59E0B",
+      "text-purple-500": "8B5CF6",
+      "text-indigo-500": "6366F1",
+    };
+
+    // Return mapped color or try to extract color from class
+    if (colorMap[textColor]) {
+      return colorMap[textColor];
+    }
+
+    // If it's already a hex color, process it
+    if (textColor.startsWith("#")) {
+      return convertToHex(textColor);
+    }
+
+    // Extract color from text-{color}-{shade} pattern
+    const match = textColor.match(/text-(\w+)-?(\d+)?/);
+    if (match) {
+      const [, color, shade] = match;
+      const key = shade ? `text-${color}-${shade}` : `text-${color}`;
+      if (colorMap[key]) {
+        return colorMap[key];
+      }
+    }
+
+    // Fallback to default
+    console.warn(`Unknown textColor: ${textColor}, using default`);
+    return convertToHex(defaultColor);
+  };
+
   // Web-matching typography function with ultra-tight spacing
   const createParagraph = (text, options = {}) => {
     const {
       bold = false,
       italic = false,
       underline = false,
+      strikethrough = false,
+      link = false,
       size = 22,
       color = defaultColor.replace("#", ""),
       alignment = AlignmentType.LEFT,
@@ -194,28 +243,220 @@ const JsonToWord = async (jsonData) => {
       indent = null,
       font = defaultFont,
       lineSpacing = 1.15, // Web-like line spacing
+      numbering = null,
     } = options;
 
+    let textRun;
+    if (link && text) {
+      // Create a hyperlink text run
+      textRun = new TextRun({
+        text: text || "",
+        bold: bold,
+        italics: italic,
+        underline: true, // Links are always underlined
+        strike: strikethrough,
+        size: size,
+        color: "0000FF", // Blue color for links
+        font: font,
+      });
+    } else {
+      textRun = new TextRun({
+        text: text || "",
+        bold: bold,
+        italics: italic,
+        underline: underline,
+        strike: strikethrough,
+        size: size,
+        color: convertToHex(color),
+        font: font,
+      });
+    }
+
     return new Paragraph({
-      children: [
-        new TextRun({
-          text: text || "",
-          bold: bold,
-          italics: italic,
-          underline: underline,
-          size: size,
-          color: convertToHex(color),
-          font: font,
-        }),
-      ],
+      children: [textRun],
       alignment: alignment,
       heading: heading,
-      spacing: {
-        ...spacing,
-        line: Math.round(size * 20 * lineSpacing),
-      },
+      spacing: spacing,
       indent: indent,
+      numbering: numbering,
+      style: lineSpacing !== 1.15 ? "CustomLineSpacing" : undefined,
     });
+  };
+
+  // Enhanced function to process Slate content with proper formatting
+  const processSlateContent = (content, options = {}) => {
+    if (!content || !Array.isArray(content)) return [];
+
+    const paragraphs = [];
+
+    content.forEach((block) => {
+      if (!block || !block.children) return;
+
+      // Extract alignment from block
+      const blockAlignment =
+        block.align === "center"
+          ? AlignmentType.CENTER
+          : block.align === "right"
+          ? AlignmentType.RIGHT
+          : AlignmentType.LEFT;
+
+      // Determine text size based on block type
+      let textSize = 22;
+      let headingLevel = null;
+      let isHeading = false;
+
+      if (block.type) {
+        const sizeMap = {
+          "heading-one": 48,
+          "heading-two": 36,
+          "heading-three": 30,
+          "heading-four": 26,
+          "heading-five": 22,
+          "heading-six": 20,
+          paragrapgh: 22,
+          "paragrapgh-two": 20,
+        };
+        textSize = sizeMap[block.type] || 22;
+
+        if (block.type.includes("heading")) {
+          isHeading = true;
+          const headingMap = {
+            "heading-one": HeadingLevel.HEADING_1,
+            "heading-two": HeadingLevel.HEADING_2,
+            "heading-three": HeadingLevel.HEADING_3,
+            "heading-four": HeadingLevel.HEADING_4,
+            "heading-five": HeadingLevel.HEADING_5,
+            "heading-six": HeadingLevel.HEADING_6,
+          };
+          headingLevel = headingMap[block.type];
+        }
+      }
+
+      // Handle list items
+      if (block.type === "bulleted-list") {
+        block.children.forEach((listItem, index) => {
+          if (listItem.type === "list-item" && listItem.children) {
+            const listText = listItem.children
+              .map((child) => child.text || "")
+              .join("");
+            if (listText.trim()) {
+              paragraphs.push(
+                createParagraph(listText, {
+                  ...options,
+                  size: textSize,
+                  alignment: blockAlignment,
+                  numbering: {
+                    reference: "bullet-numbering",
+                    level: 0,
+                  },
+                  spacing: { before: 60, after: 60 },
+                })
+              );
+            }
+          }
+        });
+        return;
+      }
+
+      if (block.type === "numbered-list") {
+        block.children.forEach((listItem, index) => {
+          if (listItem.type === "list-item" && listItem.children) {
+            const listText = listItem.children
+              .map((child) => child.text || "")
+              .join("");
+            if (listText.trim()) {
+              paragraphs.push(
+                createParagraph(listText, {
+                  ...options,
+                  size: textSize,
+                  alignment: blockAlignment,
+                  numbering: {
+                    reference: "numbered-numbering",
+                    level: 0,
+                  },
+                  spacing: { before: 60, after: 60 },
+                })
+              );
+            }
+          }
+        });
+        return;
+      }
+
+      // Process regular paragraph content with mixed formatting
+      const textRuns = [];
+
+      block.children.forEach((child) => {
+        if (!child) return;
+
+        const text = child.text || "";
+        if (!text && !child.children) return;
+
+        // Handle nested content
+        if (child.children && Array.isArray(child.children)) {
+          child.children.forEach((nestedChild) => {
+            const nestedText = nestedChild.text || "";
+            if (nestedText) {
+              textRuns.push(
+                new TextRun({
+                  text: nestedText,
+                  bold: nestedChild.bold || false,
+                  italics: nestedChild.italic || false,
+                  underline: nestedChild.underline || false,
+                  strike: nestedChild.strikethrough || false,
+                  size: textSize,
+                  color: nestedChild.link
+                    ? "0000FF"
+                    : options.color || convertToHex(defaultColor),
+                  font: defaultFont,
+                })
+              );
+            }
+          });
+        } else if (text) {
+          // Handle direct text content
+          textRuns.push(
+            new TextRun({
+              text: text,
+              bold: child.bold || false,
+              italics: child.italic || false,
+              underline: child.underline || child.link || false,
+              strike: child.strikethrough || false,
+              size: textSize,
+              color: child.link
+                ? "0000FF"
+                : options.color || convertToHex(defaultColor),
+              font: defaultFont,
+            })
+          );
+        }
+      });
+
+      // Create paragraph only if we have content
+      if (textRuns.length > 0) {
+        paragraphs.push(
+          new Paragraph({
+            children: textRuns,
+            alignment: blockAlignment,
+            heading: headingLevel,
+            spacing: isHeading
+              ? { before: 240, after: 120 }
+              : { before: 120, after: 120 },
+          })
+        );
+      } else {
+        // Empty paragraph for spacing
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: "", size: textSize })],
+            alignment: blockAlignment,
+            spacing: { before: 60, after: 60 },
+          })
+        );
+      }
+    });
+
+    return paragraphs;
   };
 
   const createImageParagraph = async (imageUrl, options = {}) => {
@@ -310,6 +551,9 @@ const JsonToWord = async (jsonData) => {
             top: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
             bottom: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
             right: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+          },
+          shading: {
+            fill: "F3F4F6",
           },
         })
     );
@@ -406,153 +650,138 @@ const JsonToWord = async (jsonData) => {
   };
 
   const createCostTable = (costContent, options = {}) => {
-    if (!Array.isArray(costContent) || costContent.length === 0) return null;
-
-    const hasDiscount = options?.discount;
-    const hasQuantity = options?.quantity;
-    const hasTax = options?.tax;
-    const currency = options?.currency || "$";
-    const taxValue = options?.values?.tax;
-    const discountValue = options?.values?.discount;
-
-    // Build headers dynamically
-    const headers = ["Deliverable"];
-    if (
-      costContent.some(
-        (item) => item.price !== null && item.price !== undefined
-      )
-    ) {
-      headers.push("Price");
-    }
-    if (hasDiscount) headers.push("Discount");
-    if (hasQuantity) headers.push("Quantity");
-    headers.push("Payment Duration", "Amount");
-
-    // Header row with professional styling
+    // Debug: log costContent to diagnose missing data
+    console.log("costContent:", JSON.stringify(costContent, null, 2));
+    // Map costContent to dataRows for table body, support array of objects
+    const dataRows = Array.isArray(costContent)
+      ? costContent
+          .filter((row) => typeof row === "object" && row !== null)
+          .map((rowObj) => {
+            // Map object to array in correct order
+            const rowArr = [
+              rowObj.deliverable ?? "",
+              rowObj.price ?? "",
+              rowObj.quantity ?? "",
+              rowObj.amount ?? "",
+            ];
+            return new TableRow({
+              children: rowArr.map(
+                (cell, i) =>
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        children: [
+                          new TextRun({
+                            text: cell?.toString() || "",
+                            size: 16,
+                            font: defaultFont,
+                          }),
+                        ],
+                        alignment:
+                          i === rowArr.length - 1
+                            ? AlignmentType.RIGHT
+                            : AlignmentType.LEFT,
+                        spacing: { before: 30, after: 30 },
+                      }),
+                    ],
+                    width: {
+                      size: 100 / rowArr.length,
+                      type: WidthType.PERCENTAGE,
+                    },
+                    borders: {
+                      top: {
+                        style: BorderStyle.SINGLE,
+                        size: 2,
+                        color: "DEE2E6",
+                      },
+                      bottom: {
+                        style: BorderStyle.SINGLE,
+                        size: 2,
+                        color: "DEE2E6",
+                      },
+                      left: {
+                        style: BorderStyle.SINGLE,
+                        size: 2,
+                        color: "DEE2E6",
+                      },
+                      right: {
+                        style: BorderStyle.SINGLE,
+                        size: 2,
+                        color: "DEE2E6",
+                      },
+                    },
+                    margins: { top: 60, bottom: 60, left: 80, right: 80 },
+                    verticalAlign: VerticalAlign.CENTER,
+                  })
+              ),
+            });
+          })
+      : [];
+    // Define fixed header row for cost table
+    const headerLabels = ["Description", "Unit Price", "Quantity", "Amount"];
     const headerRow = new TableRow({
-      children: headers.map(
-        (header) =>
+      children: headerLabels.map(
+        (label) =>
           new TableCell({
             children: [
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: header,
+                    text: label,
                     bold: true,
-                    size: 20,
+                    size: 18,
                     font: defaultFont,
-                    color: "000000", // Black text
                   }),
                 ],
                 alignment: AlignmentType.CENTER,
-                spacing: { before: 80, after: 80 },
+                spacing: { before: 30, after: 30 },
               }),
             ],
             width: {
-              size: 100 / headers.length,
+              size: 100 / headerLabels.length,
               type: WidthType.PERCENTAGE,
             },
             borders: {
-              top: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-              bottom: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-              left: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-              right: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+              top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
             },
-            margins: {
-              top: 120,
-              bottom: 120,
-              left: 100,
-              right: 100,
-            },
+            margins: { top: 60, bottom: 60, left: 80, right: 80 },
             verticalAlign: VerticalAlign.CENTER,
           })
       ),
     });
+    if (!Array.isArray(costContent) || costContent.length === 0) return null;
 
-    // Data rows with alternating background
-    const dataRows = costContent.map((item, index) => {
-      const rowData = [item.deliverable || ""];
+    const hasDiscount = options?.discount;
+    const hasQuantity = options?.quantity;
+    const hasTax = options?.tax;
+    const currency =
+      typeof options?.currency === "string" ? options.currency : "$";
+    const discountValue = Number(options?.values?.discount ?? 0);
+    const taxValue = Number(options?.values?.tax ?? 0);
 
-      if (headers.includes("Price")) {
-        rowData.push(item.price ? `${currency}${item.price}` : "-");
-      }
-      if (hasDiscount) {
-        rowData.push(item.discount ? `${item.discount}%` : "-");
-      }
-      if (hasQuantity) {
-        rowData.push(item.quantity?.toString() || "-");
-      }
-
-      rowData.push(
-        item.paymentDuration || "-",
-        `${currency}${item.amount || 0}`
-      );
-
-      const isEvenRow = index % 2 === 0;
-
-      return new TableRow({
-        children: rowData.map(
-          (cellData, cellIndex) =>
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: cellData.toString(),
-                      size: 18,
-                      font: defaultFont,
-                      color: "000000", // Black text
-                      bold: cellIndex === rowData.length - 1, // Bold amount column
-                    }),
-                  ],
-                  alignment:
-                    cellIndex === rowData.length - 1 || cellIndex === 1
-                      ? AlignmentType.RIGHT
-                      : AlignmentType.LEFT,
-                  spacing: { before: 60, after: 60 },
-                }),
-              ],
-              borders: {
-                top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              },
-              margins: {
-                top: 100,
-                bottom: 100,
-                left: 100,
-                right: 100,
-              },
-              verticalAlign: VerticalAlign.CENTER,
-            })
-        ),
-      });
-    });
-
-    // Calculate totals
-    let subtotal = costContent.reduce(
-      (sum, item) => sum + (Number(item.amount) || 0),
-      0
-    );
-    let discountAmount = 0;
-    let taxAmount = 0;
-
-    if (hasDiscount && discountValue) {
-      discountAmount = subtotal * (discountValue / 100);
-      subtotal -= discountAmount;
+    // Calculate subtotal
+    let subtotal = 0;
+    if (Array.isArray(costContent)) {
+      subtotal = costContent.reduce((sum, row) => {
+        let amount = 0;
+        if (typeof row === "object" && row !== null && "amount" in row) {
+          amount = Number(row.amount) || 0;
+        } else if (Array.isArray(row)) {
+          amount = Number(row[row.length - 1]) || 0;
+        }
+        return sum + amount;
+      }, 0);
     }
+    const discountAmount = hasDiscount ? subtotal * (discountValue / 100) : 0;
+    const taxAmount = hasTax ? subtotal * (taxValue / 100) : 0;
+    const total = subtotal - discountAmount + taxAmount;
 
-    if (hasTax && taxValue) {
-      taxAmount = subtotal * (taxValue / 100);
-    }
-
-    const total = subtotal + taxAmount;
-
-    // Summary rows
+    // Summary table (separate)
     const summaryRows = [];
-
-    if (hasDiscount && discountValue) {
+    if (hasDiscount) {
       summaryRows.push(
         new TableRow({
           children: [
@@ -561,57 +790,51 @@ const JsonToWord = async (jsonData) => {
                 new Paragraph({
                   children: [
                     new TextRun({
-                      text: "Discount",
+                      text: `Discount (${discountValue}%)`,
                       bold: true,
-                      size: 18,
+                      size: 16,
                       font: defaultFont,
                     }),
                   ],
-                  alignment: AlignmentType.RIGHT,
-                  spacing: { before: 60, after: 60 },
+                  alignment: AlignmentType.LEFT,
+                  spacing: { before: 20, after: 20 },
                 }),
               ],
-              columnSpan: headers.length - 1,
-              shading: { fill: "F8F9FA", type: ShadingType.SOLID },
               borders: {
-                top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
+                left: { style: BorderStyle.NONE },
                 right: { style: BorderStyle.NONE },
               },
-              margins: { top: 100, bottom: 100, left: 100, right: 100 },
             }),
             new TableCell({
               children: [
                 new Paragraph({
                   children: [
                     new TextRun({
-                      text: `-${currency}${discountAmount.toFixed(2)}`,
+                      text: `${currency}${discountAmount.toFixed(2)}`,
                       bold: true,
-                      size: 18,
-                      color: "DC3545",
+                      size: 16,
                       font: defaultFont,
                     }),
                   ],
                   alignment: AlignmentType.RIGHT,
-                  spacing: { before: 60, after: 60 },
+                  spacing: { before: 20, after: 20 },
                 }),
               ],
-              shading: { fill: "F8F9FA", type: ShadingType.SOLID },
               borders: {
-                top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
                 left: { style: BorderStyle.NONE },
-                right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                right: { style: BorderStyle.NONE },
               },
-              margins: { top: 100, bottom: 100, left: 100, right: 100 },
             }),
           ],
         })
       );
     }
 
-    if (hasTax && taxValue) {
+    if (hasTax) {
       summaryRows.push(
         new TableRow({
           children: [
@@ -622,23 +845,20 @@ const JsonToWord = async (jsonData) => {
                     new TextRun({
                       text: `Tax (${taxValue}%)`,
                       bold: true,
-                      size: 18,
+                      size: 16,
                       font: defaultFont,
                     }),
                   ],
-                  alignment: AlignmentType.RIGHT,
-                  spacing: { before: 60, after: 60 },
+                  alignment: AlignmentType.LEFT,
+                  spacing: { before: 20, after: 20 },
                 }),
               ],
-              columnSpan: headers.length - 1,
-              shading: { fill: "F1F3F4", type: ShadingType.SOLID },
               borders: {
-                top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
+                left: { style: BorderStyle.NONE },
                 right: { style: BorderStyle.NONE },
               },
-              margins: { top: 100, bottom: 100, left: 100, right: 100 },
             }),
             new TableCell({
               children: [
@@ -647,116 +867,111 @@ const JsonToWord = async (jsonData) => {
                     new TextRun({
                       text: `${currency}${taxAmount.toFixed(2)}`,
                       bold: true,
-                      size: 18,
-                      color: "6C757D",
+                      size: 16,
                       font: defaultFont,
                     }),
                   ],
                   alignment: AlignmentType.RIGHT,
-                  spacing: { before: 60, after: 60 },
+                  spacing: { before: 20, after: 20 },
                 }),
               ],
-              shading: { fill: "F1F3F4", type: ShadingType.SOLID },
               borders: {
-                top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-                bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
                 left: { style: BorderStyle.NONE },
-                right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                right: { style: BorderStyle.NONE },
               },
-              margins: { top: 100, bottom: 100, left: 100, right: 100 },
             }),
           ],
         })
       );
     }
+    summaryRows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "Final Amount",
+                    bold: true,
+                    size: 16,
+                    font: defaultFont,
+                  }),
+                ],
+                alignment: AlignmentType.LEFT,
+                spacing: { before: 20, after: 20 },
+              }),
+            ],
+            borders: {
+              top: { style: BorderStyle.NONE },
+              bottom: { style: BorderStyle.NONE },
+              left: { style: BorderStyle.NONE },
+              right: { style: BorderStyle.NONE },
+            },
+          }),
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `${currency}${total.toFixed(2)}`,
+                    bold: true,
+                    size: 16,
+                    font: defaultFont,
+                  }),
+                ],
+                alignment: AlignmentType.RIGHT,
+                spacing: { before: 20, after: 20 },
+              }),
+            ],
+            borders: {
+              top: { style: BorderStyle.NONE },
+              bottom: { style: BorderStyle.NONE },
+              left: { style: BorderStyle.NONE },
+              right: { style: BorderStyle.NONE },
+            },
+          }),
+        ],
+      })
+    );
 
-    // Total row with emphasis
-    const totalRow = new TableRow({
-      children: [
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Total",
-                  bold: true,
-                  size: 22,
-                  font: defaultFont,
-                }),
-              ],
-              alignment: AlignmentType.RIGHT,
-              spacing: { before: 80, after: 80 },
-            }),
-          ],
-          columnSpan: headers.length - 1,
-          // No background shading for cost table total row to match web UI
-          shading: undefined,
-          borders: {
-            top: { style: BorderStyle.DOUBLE, size: 6, color: "1976D2" },
-            bottom: { style: BorderStyle.DOUBLE, size: 6, color: "1976D2" },
-            left: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            right: { style: BorderStyle.NONE },
-          },
-          margins: { top: 120, bottom: 120, left: 100, right: 100 },
-        }),
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${currency}${total.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
-                  bold: true,
-                  size: 22,
-                  font: defaultFont,
-                }),
-              ],
-              alignment: AlignmentType.RIGHT,
-              spacing: { before: 80, after: 80 },
-            }),
-          ],
-          // No background shading for total amount cell to match web UI
-          shading: undefined,
-          borders: {
-            top: { style: BorderStyle.DOUBLE, size: 6, color: "1976D2" },
-            bottom: { style: BorderStyle.DOUBLE, size: 6, color: "1976D2" },
-            left: { style: BorderStyle.NONE },
-            right: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-          },
-          margins: { top: 120, bottom: 120, left: 100, right: 100 },
-        }),
-      ],
-    });
-
-    return new Table({
-      rows: [headerRow, ...dataRows, ...summaryRows, totalRow],
-      width: {
-        size: 100,
-        type: WidthType.PERCENTAGE,
-      },
-      layout: TableLayoutType.AUTOFIT,
-      margins: {
-        top: 120,
-        bottom: 120,
-      },
-    });
+    // Return both tables as array
+    return [
+      new Table({
+        rows: [headerRow, ...dataRows],
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        layout: TableLayoutType.AUTOFIT,
+        margins: { top: 120, bottom: 40 },
+      }),
+      new Table({
+        rows: summaryRows,
+        width: { size: 60, type: WidthType.PERCENTAGE },
+        layout: TableLayoutType.AUTOFIT,
+        margins: { top: 20, bottom: 120 },
+      }),
+    ];
   };
 
   // Improved price table formatting
   const createPriceTable = (priceContent, options = {}) => {
     if (!Array.isArray(priceContent) || priceContent.length === 0) return null;
 
-    const currency = options?.currency || "$";
+    const currency =
+      typeof options?.currency === "string" ? options.currency : "$";
     const showValue = options?.value;
 
-    const rows = priceContent.map((priceItem, index) => {
-      const isEvenRow = index % 2 === 0;
-      const value = priceItem.value ? `${currency}${priceItem.value}` : "";
-      const percentage = priceItem.percentage ? `${priceItem.percentage}%` : "";
-      const displayValue = showValue ? value : percentage;
+    let totalPercentage = 0;
+    let totalValue = 0;
 
+    const rows = priceContent.map((priceItem, index) => {
+      const percentage = priceItem.percentage
+        ? Number(priceItem.percentage)
+        : 0;
+      const value = priceItem.value ? Number(priceItem.value) : 0;
+      totalPercentage += percentage;
+      totalValue += value;
       return new TableRow({
         children: [
           new TableCell({
@@ -774,7 +989,7 @@ const JsonToWord = async (jsonData) => {
                 spacing: { before: 60, after: 60 },
               }),
             ],
-            width: { size: 70, type: WidthType.PERCENTAGE },
+            width: { size: 50, type: WidthType.PERCENTAGE },
             borders: {
               top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
               bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
@@ -789,7 +1004,33 @@ const JsonToWord = async (jsonData) => {
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: displayValue,
+                    text: percentage ? `${percentage}%` : "",
+                    size: 20,
+                    font: defaultFont,
+                    color: "1976D2",
+                    bold: true,
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 60, after: 60 },
+              }),
+            ],
+            width: { size: 25, type: WidthType.PERCENTAGE },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            },
+            margins: { top: 100, bottom: 100, left: 120, right: 120 },
+            verticalAlign: VerticalAlign.CENTER,
+          }),
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: value ? `${currency}${value}` : "",
                     size: 20,
                     font: defaultFont,
                     color: "1976D2",
@@ -800,7 +1041,7 @@ const JsonToWord = async (jsonData) => {
                 spacing: { before: 60, after: 60 },
               }),
             ],
-            width: { size: 30, type: WidthType.PERCENTAGE },
+            width: { size: 25, type: WidthType.PERCENTAGE },
             borders: {
               top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
               bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
@@ -812,6 +1053,89 @@ const JsonToWord = async (jsonData) => {
           }),
         ],
       });
+    });
+
+    // Add Total row
+    const totalRow = new TableRow({
+      children: [
+        new TableCell({
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Total",
+                  bold: true,
+                  size: 20,
+                  font: defaultFont,
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 60, after: 60 },
+            }),
+          ],
+          width: { size: 50, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+          },
+          margins: { top: 100, bottom: 100, left: 120, right: 120 },
+          verticalAlign: VerticalAlign.CENTER,
+        }),
+        new TableCell({
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `${totalPercentage}%`,
+                  bold: true,
+                  size: 20,
+                  font: defaultFont,
+                  color: "1976D2",
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 60, after: 60 },
+            }),
+          ],
+          width: { size: 25, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+          },
+          margins: { top: 100, bottom: 100, left: 120, right: 120 },
+          verticalAlign: VerticalAlign.CENTER,
+        }),
+        new TableCell({
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `${currency}${totalValue}`,
+                  bold: true,
+                  size: 20,
+                  font: defaultFont,
+                  color: "1976D2",
+                }),
+              ],
+              alignment: AlignmentType.RIGHT,
+              spacing: { before: 60, after: 60 },
+            }),
+          ],
+          width: { size: 25, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+          },
+          margins: { top: 100, bottom: 100, left: 120, right: 120 },
+          verticalAlign: VerticalAlign.CENTER,
+        }),
+      ],
     });
 
     // Header row
@@ -832,7 +1156,57 @@ const JsonToWord = async (jsonData) => {
               spacing: { before: 80, after: 80 },
             }),
           ],
-          width: { size: 70, type: WidthType.PERCENTAGE },
+          width: { size: 50, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+            bottom: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+            left: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+            right: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+          },
+          margins: { top: 120, bottom: 120, left: 120, right: 120 },
+          verticalAlign: VerticalAlign.CENTER,
+        }),
+        new TableCell({
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Percentage",
+                  bold: true,
+                  size: 20,
+                  font: defaultFont,
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 80, after: 80 },
+            }),
+          ],
+          width: { size: 25, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+            bottom: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+            left: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+            right: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+          },
+          margins: { top: 120, bottom: 120, left: 120, right: 120 },
+          verticalAlign: VerticalAlign.CENTER,
+        }),
+        new TableCell({
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Value",
+                  bold: true,
+                  size: 20,
+                  font: defaultFont,
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 80, after: 80 },
+            }),
+          ],
+          width: { size: 25, type: WidthType.PERCENTAGE },
           borders: {
             top: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
             bottom: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
@@ -846,7 +1220,7 @@ const JsonToWord = async (jsonData) => {
     });
 
     return new Table({
-      rows: [headerRow, ...rows],
+      rows: [headerRow, ...rows, totalRow],
       width: {
         size: 100,
         type: WidthType.PERCENTAGE,
@@ -987,7 +1361,7 @@ const JsonToWord = async (jsonData) => {
                   typeof children[0].bold === "boolean"
                     ? children[0].bold
                     : true;
-                const textColor = item.textColor || defaultColor;
+                const textColor = convertTailwindTextColor(item.textColor);
 
                 // Web-matching heading sizes - exact match to CSS
                 const sizeMap = {
@@ -1068,95 +1442,20 @@ const JsonToWord = async (jsonData) => {
 
         case "input":
           if (Array.isArray(item.content)) {
-            for (const block of item.content) {
-              const text = block?.children?.[0]?.text || "";
-              if (text.trim()) {
-                const alignment = block?.align?.toLowerCase() || "left";
-                const type =
-                  block?.type === "paragrapgh" ? "paragraph" : block?.type;
-                const isBold = block?.children?.[0]?.bold || false;
-                const isItalic = block?.children?.[0]?.italic || false;
-                const isUnderline = block?.children?.[0]?.underline || false;
+            const processedParagraphs = processSlateContent(item.content, {
+              color: convertTailwindTextColor(item.textColor),
+            });
+            allContent.push(...processedParagraphs);
+          }
+          break;
 
-                const alignmentMap = {
-                  left: AlignmentType.LEFT,
-                  center: AlignmentType.CENTER,
-                  right: AlignmentType.RIGHT,
-                };
-
-                let size = 22;
-                let heading = null;
-                let spacing = { before: 30, after: 30 }; // Ultra-tight spacing
-
-                if (type && type.includes("heading")) {
-                  const sizeMap = {
-                    "heading-one": 40,
-                    "heading-two": 32,
-                    "heading-three": 28,
-                    "heading-four": 24,
-                    "heading-five": 20,
-                    "heading-six": 16,
-                  };
-                  size = sizeMap[type] || 22;
-
-                  // Check if next content block is also a heading
-                  const nextBlock =
-                    item.content[item.content.indexOf(block) + 1];
-                  const isNextHeading =
-                    nextBlock &&
-                    nextBlock.type &&
-                    nextBlock.type.includes("heading");
-
-                  const spacingMap = {
-                    "heading-one": isNextHeading
-                      ? { before: 160, after: 20 }
-                      : { before: 160, after: 80 },
-                    "heading-two": isNextHeading
-                      ? { before: 120, after: 15 }
-                      : { before: 120, after: 60 },
-                    "heading-three": isNextHeading
-                      ? { before: 100, after: 10 }
-                      : { before: 100, after: 50 },
-                    "heading-four": isNextHeading
-                      ? { before: 80, after: 8 }
-                      : { before: 80, after: 40 },
-                    "heading-five": isNextHeading
-                      ? { before: 60, after: 6 }
-                      : { before: 60, after: 30 },
-                    "heading-six": isNextHeading
-                      ? { before: 40, after: 4 }
-                      : { before: 40, after: 20 },
-                  };
-                  spacing = spacingMap[type] || { before: 120, after: 60 };
-
-                  const headingMap = {
-                    "heading-one": HeadingLevel.HEADING_1,
-                    "heading-two": HeadingLevel.HEADING_2,
-                    "heading-three": HeadingLevel.HEADING_3,
-                    "heading-four": HeadingLevel.HEADING_4,
-                    "heading-five": HeadingLevel.HEADING_5,
-                    "heading-six": HeadingLevel.HEADING_6,
-                  };
-                  heading = headingMap[type];
-                }
-
-                allContent.push(
-                  createParagraph(text, {
-                    bold: isBold || (type && type.includes("heading")),
-                    italic: isItalic,
-                    underline: isUnderline,
-                    size: size,
-                    alignment: alignmentMap[alignment] || AlignmentType.LEFT,
-                    heading: heading,
-                    spacing: spacing,
-                    font:
-                      type && type.includes("heading")
-                        ? headingFont
-                        : defaultFont,
-                  })
-                );
-              }
-            }
+        // Handle misspelled "paragrapgh" type (common in test data)
+        case "paragrapgh":
+          if (Array.isArray(item.content)) {
+            const processedParagraphs = processSlateContent(item.content, {
+              color: convertTailwindTextColor(item.textColor),
+            });
+            allContent.push(...processedParagraphs);
           }
           break;
 
@@ -1170,6 +1469,7 @@ const JsonToWord = async (jsonData) => {
               .filter((t) => t.trim());
 
             if (leftTexts.length > 0 || rightTexts.length > 0) {
+              const textColor = convertTailwindTextColor(item.textColor);
               const leftAlignment =
                 item.firstContent[0]?.align === "center"
                   ? AlignmentType.CENTER
@@ -1191,6 +1491,7 @@ const JsonToWord = async (jsonData) => {
                         children: leftTexts.map((text) =>
                           createParagraph(text, {
                             size: 22,
+                            color: textColor,
                             alignment: leftAlignment,
                             spacing: { before: 20, after: 20 }, // Ultra-tight for web match
                           })
@@ -1209,6 +1510,7 @@ const JsonToWord = async (jsonData) => {
                         children: rightTexts.map((text) =>
                           createParagraph(text, {
                             size: 22,
+                            color: textColor,
                             alignment: rightAlignment,
                             spacing: { before: 20, after: 20 }, // Ultra-tight for web match
                           })
@@ -1256,12 +1558,17 @@ const JsonToWord = async (jsonData) => {
           break;
 
         case "cost":
-          const costTable = createCostTable(item.content, item.options);
+          // Merge options and values so discount/tax are read correctly
+          const mergedOptions = {
+            ...(item.options || {}),
+            values: item.values || {},
+          };
+          const costTable = createCostTable(item.content, mergedOptions);
           if (costTable) {
             // Add heading if provided
             if (item.heading) {
               allContent.push(
-                createParagraph(item.heading, {
+                createParagraph({
                   bold: true,
                   size: 32,
                   heading: HeadingLevel.HEADING_2,
@@ -1272,7 +1579,7 @@ const JsonToWord = async (jsonData) => {
               );
             }
             allContent.push(
-              costTable,
+              ...costTable,
               createParagraph("", { spacing: { before: 120, after: 200 } })
             );
           }
@@ -1281,7 +1588,7 @@ const JsonToWord = async (jsonData) => {
         case "price":
           if (Array.isArray(item.content)) {
             allContent.push(
-              createParagraph("Price Terms", {
+              createParagraph({
                 bold: true,
                 size: 32,
                 heading: HeadingLevel.HEADING_2,
@@ -1521,127 +1828,104 @@ const JsonToWord = async (jsonData) => {
               })
             );
 
-            // Create signature table with better web-matching layout
-            const signatureRows = [];
+            // Create separate signature tables to match HTML structure exactly
+            for (let i = 0; i < item.content.length; i++) {
+              const signature = item.content[i];
 
-            for (let i = 0; i < item.content.length; i += 2) {
-              const signature1 = item.content[i];
-              const signature2 = item.content[i + 1];
-
-              const cells = [];
-
-              // First signature
-              if (signature1) {
-                const role = i === 0 ? "Proposed by" : "Accepted by";
+              if (signature) {
                 const name =
-                  signature1.proposedName ||
-                  signature1.acceptedName ||
+                  signature.proposedName ||
+                  signature.acceptedName ||
+                  signature.name ||
                   "Not specified";
-                const status = signature1.signed ? "✓ Signed" : "Pending";
-                const statusColor = signature1.signed ? "28A745" : "DC3545";
 
-                cells.push(
-                  new TableCell({
-                    children: [
-                      createParagraph(`${role}:`, {
-                        bold: true,
-                        size: 20,
-                        spacing: { before: 0, after: 60 },
-                      }),
-                      createParagraph(name, {
-                        size: 22,
-                        spacing: { before: 0, after: 120 },
-                      }),
-                      createParagraph("_".repeat(25), {
-                        color: "6C757D",
-                        size: 16,
-                        spacing: { before: 0, after: 60 },
-                      }),
-                      createParagraph(status, {
-                        size: 18,
-                        color: statusColor,
-                        bold: true,
-                        spacing: { before: 0, after: 0 },
-                      }),
-                    ],
-                    width: {
-                      size: signature2 ? 50 : 100,
-                      type: WidthType.PERCENTAGE,
-                    },
-                    borders: {
-                      top: { style: BorderStyle.NONE },
-                      bottom: { style: BorderStyle.NONE },
-                      left: { style: BorderStyle.NONE },
-                      right: { style: BorderStyle.NONE },
-                    },
-                    margins: {
-                      top: 0,
-                      bottom: 0,
-                      left: 0,
-                      right: signature2 ? 150 : 0,
-                    },
-                    verticalAlign: VerticalAlign.TOP,
-                  })
-                );
+                const signatureTable = new Table({
+                  rows: [
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          children: [
+                            new Paragraph({
+                              children: [
+                                new TextRun({
+                                  text: name,
+                                  size: 22,
+                                  font: defaultFont,
+                                }),
+                              ],
+                              spacing: { before: 40, after: 40 },
+                            }),
+                          ],
+                          width: { size: 50, type: WidthType.PERCENTAGE },
+                          borders: {
+                            top: {
+                              style: BorderStyle.SINGLE,
+                              size: 1,
+                              color: "CCCCCC",
+                            },
+                            bottom: {
+                              style: BorderStyle.SINGLE,
+                              size: 1,
+                              color: "CCCCCC",
+                            },
+                            left: {
+                              style: BorderStyle.SINGLE,
+                              size: 1,
+                              color: "CCCCCC",
+                            },
+                            right: {
+                              style: BorderStyle.SINGLE,
+                              size: 1,
+                              color: "CCCCCC",
+                            },
+                          },
+                          margins: { top: 40, bottom: 40, left: 40, right: 40 },
+                          verticalAlign: VerticalAlign.TOP,
+                        }),
+                        new TableCell({
+                          children: [
+                            new Paragraph({
+                              children: [new TextRun({ text: "", size: 22 })],
+                              spacing: { before: 40, after: 40 },
+                            }),
+                          ],
+                          width: { size: 50, type: WidthType.PERCENTAGE },
+                          borders: {
+                            top: {
+                              style: BorderStyle.SINGLE,
+                              size: 1,
+                              color: "CCCCCC",
+                            },
+                            bottom: {
+                              style: BorderStyle.SINGLE,
+                              size: 1,
+                              color: "CCCCCC",
+                            },
+                            left: {
+                              style: BorderStyle.SINGLE,
+                              size: 1,
+                              color: "CCCCCC",
+                            },
+                            right: {
+                              style: BorderStyle.SINGLE,
+                              size: 1,
+                              color: "CCCCCC",
+                            },
+                          },
+                          margins: { top: 40, bottom: 40, left: 40, right: 40 },
+                          verticalAlign: VerticalAlign.TOP,
+                        }),
+                      ],
+                    }),
+                  ],
+                  width: { size: 100, type: WidthType.PERCENTAGE },
+                  layout: TableLayoutType.AUTOFIT,
+                  margins: { top: 0, bottom: 0 },
+                });
+
+                allContent.push(signatureTable);
               }
-
-              // Second signature (if exists)
-              if (signature2) {
-                const role = "Accepted by";
-                const name =
-                  signature2.proposedName ||
-                  signature2.acceptedName ||
-                  "Not specified";
-                const status = signature2.signed ? "✓ Signed" : "Pending";
-                const statusColor = signature2.signed ? "28A745" : "DC3545";
-
-                cells.push(
-                  new TableCell({
-                    children: [
-                      createParagraph(`${role}:`, {
-                        bold: true,
-                        size: 20,
-                        spacing: { before: 0, after: 60 },
-                      }),
-                      createParagraph(name, {
-                        size: 22,
-                        spacing: { before: 0, after: 120 },
-                      }),
-                      createParagraph("_".repeat(25), {
-                        color: "6C757D",
-                        size: 16,
-                        spacing: { before: 0, after: 60 },
-                      }),
-                      createParagraph(status, {
-                        size: 18,
-                        color: statusColor,
-                        bold: true,
-                        spacing: { before: 0, after: 0 },
-                      }),
-                    ],
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    borders: {
-                      top: { style: BorderStyle.NONE },
-                      bottom: { style: BorderStyle.NONE },
-                      left: { style: BorderStyle.NONE },
-                      right: { style: BorderStyle.NONE },
-                    },
-                    margins: { top: 0, bottom: 0, left: 150, right: 0 },
-                    verticalAlign: VerticalAlign.TOP,
-                  })
-                );
-              }
-
-              signatureRows.push(new TableRow({ children: cells }));
             }
-
-            const signatureTable = new Table({
-              rows: signatureRows,
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              layout: TableLayoutType.AUTOFIT,
-            });
-
-            allContent.push(signatureTable);
           }
           break;
 
@@ -1650,7 +1934,59 @@ const JsonToWord = async (jsonData) => {
           break;
 
         default:
+          // Improved fallback handling for unknown types
           console.warn(`Unhandled content type '${item.type}':`, item);
+
+          // Try to handle as text content if it has content array
+          if (Array.isArray(item.content)) {
+            try {
+              const processedParagraphs = processSlateContent(item.content, {
+                color: convertTailwindTextColor(item.textColor),
+              });
+              if (processedParagraphs.length > 0) {
+                allContent.push(...processedParagraphs);
+                console.log(
+                  `Successfully processed unknown type '${item.type}' as text content`
+                );
+              } else {
+                // Add a placeholder paragraph for empty unknown types
+                allContent.push(
+                  createParagraph(`[Unknown content type: ${item.type}]`, {
+                    italic: true,
+                    color: "6C757D",
+                    size: 16,
+                    spacing: { before: 60, after: 60 },
+                  })
+                );
+              }
+            } catch (err) {
+              console.error(
+                `Failed to process unknown type '${item.type}' as text:`,
+                err
+              );
+              allContent.push(
+                createParagraph(`[Error: Could not process ${item.type}]`, {
+                  italic: true,
+                  color: "DC3545",
+                  size: 16,
+                  spacing: { before: 60, after: 60 },
+                })
+              );
+            }
+          } else {
+            // Non-content types get a debug note
+            allContent.push(
+              createParagraph(
+                `[Debug: Skipped ${item.type} - no content array]`,
+                {
+                  italic: true,
+                  color: "6C757D",
+                  size: 14,
+                  spacing: { before: 30, after: 30 },
+                }
+              )
+            );
+          }
           break;
       }
     } catch (error) {
