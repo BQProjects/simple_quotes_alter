@@ -652,18 +652,28 @@ const JsonToWord = async (jsonData) => {
   const createCostTable = (costContent, options = {}) => {
     // Debug: log costContent to diagnose missing data
     console.log("costContent:", JSON.stringify(costContent, null, 2));
+    // Dynamically build columns based on quantity option
+    const showQuantity = !!options?.quantity;
+    // If quantity is enabled, show both 'Unit Price' and 'Quantity'.
+    // If quantity is not enabled, show only 'Description' and 'Amount'.
+    const headerLabels = showQuantity
+      ? ["Description", "Unit Price", "Quantity", "Amount"]
+      : ["Description", "Amount"];
+
     // Map costContent to dataRows for table body, support array of objects
     const dataRows = Array.isArray(costContent)
       ? costContent
           .filter((row) => typeof row === "object" && row !== null)
           .map((rowObj) => {
             // Map object to array in correct order
-            const rowArr = [
-              rowObj.deliverable ?? "",
-              rowObj.price ?? "",
-              rowObj.quantity ?? "",
-              rowObj.amount ?? "",
-            ];
+            const rowArr = showQuantity
+              ? [
+                  rowObj.deliverable ?? "",
+                  rowObj.price ?? "",
+                  rowObj.quantity ?? "",
+                  rowObj.amount ?? "",
+                ]
+              : [rowObj.deliverable ?? "", rowObj.amount ?? ""];
             return new TableRow({
               children: rowArr.map(
                 (cell, i) =>
@@ -717,8 +727,7 @@ const JsonToWord = async (jsonData) => {
             });
           })
       : [];
-    // Define fixed header row for cost table
-    const headerLabels = ["Description", "Unit Price", "Quantity", "Amount"];
+
     const headerRow = new TableRow({
       children: headerLabels.map(
         (label) =>
@@ -781,160 +790,114 @@ const JsonToWord = async (jsonData) => {
 
     // Summary table (separate)
     const summaryRows = [];
+    // Each summary row matches the main table's column count and width
+    const makeFullWidthSummaryRow = (label, value) => {
+      // Match main table's column count and width: label in first, value in last, others empty
+      const cells = [];
+      for (let i = 0; i < headerLabels.length; i++) {
+        if (i === 0) {
+          cells.push(
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: label,
+                      bold: true,
+                      size: 16,
+                      font: defaultFont,
+                    }),
+                  ],
+                  alignment: AlignmentType.LEFT,
+                  spacing: { before: 20, after: 20 },
+                }),
+              ],
+              width: { size: 100 / headerLabels.length, type: WidthType.PERCENTAGE },
+              borders: {
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
+                left: { style: BorderStyle.NONE },
+                right: { style: BorderStyle.NONE },
+              },
+              verticalAlign: VerticalAlign.CENTER,
+            })
+          );
+        } else if (i === headerLabels.length - 1) {
+          cells.push(
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: value,
+                      bold: true,
+                      size: 16,
+                      font: defaultFont,
+                    }),
+                  ],
+                  alignment: AlignmentType.RIGHT,
+                  spacing: { before: 20, after: 20 },
+                }),
+              ],
+              width: { size: 100 / headerLabels.length, type: WidthType.PERCENTAGE },
+              borders: {
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
+                left: { style: BorderStyle.NONE },
+                right: { style: BorderStyle.NONE },
+              },
+              verticalAlign: VerticalAlign.CENTER,
+            })
+          );
+        } else {
+          cells.push(
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "" })],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { before: 20, after: 20 },
+                }),
+              ],
+              width: { size: 100 / headerLabels.length, type: WidthType.PERCENTAGE },
+              borders: {
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
+                left: { style: BorderStyle.NONE },
+                right: { style: BorderStyle.NONE },
+              },
+              verticalAlign: VerticalAlign.CENTER,
+            })
+          );
+        }
+      }
+      return new TableRow({ children: cells });
+    };
+
+    summaryRows.push(
+      makeFullWidthSummaryRow("Total", `${currency}${subtotal}`)
+    );
     if (hasDiscount) {
       summaryRows.push(
-        new TableRow({
-          children: [
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `Discount (${discountValue}%)`,
-                      bold: true,
-                      size: 16,
-                      font: defaultFont,
-                    }),
-                  ],
-                  alignment: AlignmentType.LEFT,
-                  spacing: { before: 20, after: 20 },
-                }),
-              ],
-              borders: {
-                top: { style: BorderStyle.NONE },
-                bottom: { style: BorderStyle.NONE },
-                left: { style: BorderStyle.NONE },
-                right: { style: BorderStyle.NONE },
-              },
-            }),
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `${currency}${discountAmount.toFixed(2)}`,
-                      bold: true,
-                      size: 16,
-                      font: defaultFont,
-                    }),
-                  ],
-                  alignment: AlignmentType.RIGHT,
-                  spacing: { before: 20, after: 20 },
-                }),
-              ],
-              borders: {
-                top: { style: BorderStyle.NONE },
-                bottom: { style: BorderStyle.NONE },
-                left: { style: BorderStyle.NONE },
-                right: { style: BorderStyle.NONE },
-              },
-            }),
-          ],
-        })
+        makeFullWidthSummaryRow(
+          `Discount (${discountValue}%)`,
+          `${currency}${discountAmount.toFixed(2)}`
+        )
       );
     }
-
     if (hasTax) {
       summaryRows.push(
-        new TableRow({
-          children: [
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `Tax (${taxValue}%)`,
-                      bold: true,
-                      size: 16,
-                      font: defaultFont,
-                    }),
-                  ],
-                  alignment: AlignmentType.LEFT,
-                  spacing: { before: 20, after: 20 },
-                }),
-              ],
-              borders: {
-                top: { style: BorderStyle.NONE },
-                bottom: { style: BorderStyle.NONE },
-                left: { style: BorderStyle.NONE },
-                right: { style: BorderStyle.NONE },
-              },
-            }),
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `${currency}${taxAmount.toFixed(2)}`,
-                      bold: true,
-                      size: 16,
-                      font: defaultFont,
-                    }),
-                  ],
-                  alignment: AlignmentType.RIGHT,
-                  spacing: { before: 20, after: 20 },
-                }),
-              ],
-              borders: {
-                top: { style: BorderStyle.NONE },
-                bottom: { style: BorderStyle.NONE },
-                left: { style: BorderStyle.NONE },
-                right: { style: BorderStyle.NONE },
-              },
-            }),
-          ],
-        })
+        makeFullWidthSummaryRow(
+          `Tax (${taxValue}%)`,
+          `${currency}${taxAmount.toFixed(2)}`
+        )
       );
     }
     summaryRows.push(
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: "Final Amount",
-                    bold: true,
-                    size: 16,
-                    font: defaultFont,
-                  }),
-                ],
-                alignment: AlignmentType.LEFT,
-                spacing: { before: 20, after: 20 },
-              }),
-            ],
-            borders: {
-              top: { style: BorderStyle.NONE },
-              bottom: { style: BorderStyle.NONE },
-              left: { style: BorderStyle.NONE },
-              right: { style: BorderStyle.NONE },
-            },
-          }),
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: `${currency}${total.toFixed(2)}`,
-                    bold: true,
-                    size: 16,
-                    font: defaultFont,
-                  }),
-                ],
-                alignment: AlignmentType.RIGHT,
-                spacing: { before: 20, after: 20 },
-              }),
-            ],
-            borders: {
-              top: { style: BorderStyle.NONE },
-              bottom: { style: BorderStyle.NONE },
-              left: { style: BorderStyle.NONE },
-              right: { style: BorderStyle.NONE },
-            },
-          }),
-        ],
-      })
+      makeFullWidthSummaryRow(
+        "Total Payable Amount",
+        `${currency}${total.toFixed(2)}`
+      )
     );
 
     // Return both tables as array
@@ -960,267 +923,153 @@ const JsonToWord = async (jsonData) => {
 
     const currency =
       typeof options?.currency === "string" ? options.currency : "$";
-    const showValue = options?.value;
+    const showPercentage = !!options?.percentage;
+    const showValue = !!options?.value;
 
+    // Dynamically build columns
+    const headerLabels = ["Deliverable"];
+    if (showPercentage) headerLabels.push("Percentage");
+    if (showValue) headerLabels.push("Value");
+
+    // Prepare rows
     let totalPercentage = 0;
     let totalValue = 0;
 
-    const rows = priceContent.map((priceItem, index) => {
-      const percentage = priceItem.percentage
-        ? Number(priceItem.percentage)
-        : 0;
-      const value = priceItem.value ? Number(priceItem.value) : 0;
-      totalPercentage += percentage;
-      totalValue += value;
+    const tableRows = priceContent.map((priceItem, index) => {
+      const rowArr = [priceItem.deliverable || ""];
+      if (showPercentage) {
+        const percentage = priceItem.percentage
+          ? Number(priceItem.percentage)
+          : 0;
+        rowArr.push(percentage ? `${percentage}%` : "");
+        totalPercentage += percentage;
+      }
+      if (showValue) {
+        const value = priceItem.value ? Number(priceItem.value) : 0;
+        rowArr.push(value ? `${currency}${value}` : "");
+        totalValue += value;
+      }
       return new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: priceItem.deliverable || "Milestone",
-                    size: 20,
-                    font: defaultFont,
-                    color: convertToHex(defaultColor),
-                  }),
-                ],
-                alignment: AlignmentType.LEFT,
-                spacing: { before: 60, after: 60 },
-              }),
-            ],
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            borders: {
-              top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            },
-            margins: { top: 100, bottom: 100, left: 120, right: 120 },
-            verticalAlign: VerticalAlign.CENTER,
-          }),
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: percentage ? `${percentage}%` : "",
-                    size: 20,
-                    font: defaultFont,
-                    color: "1976D2",
-                    bold: true,
-                  }),
-                ],
-                alignment: AlignmentType.CENTER,
-                spacing: { before: 60, after: 60 },
-              }),
-            ],
-            width: { size: 25, type: WidthType.PERCENTAGE },
-            borders: {
-              top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            },
-            margins: { top: 100, bottom: 100, left: 120, right: 120 },
-            verticalAlign: VerticalAlign.CENTER,
-          }),
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: value ? `${currency}${value}` : "",
-                    size: 20,
-                    font: defaultFont,
-                    color: "1976D2",
-                    bold: true,
-                  }),
-                ],
-                alignment: AlignmentType.RIGHT,
-                spacing: { before: 60, after: 60 },
-              }),
-            ],
-            width: { size: 25, type: WidthType.PERCENTAGE },
-            borders: {
-              top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-              right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            },
-            margins: { top: 100, bottom: 100, left: 120, right: 120 },
-            verticalAlign: VerticalAlign.CENTER,
-          }),
-        ],
+        children: rowArr.map(
+          (cell, i) =>
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: cell,
+                      size: 20,
+                      font: defaultFont,
+                      color: i > 0 ? "1976D2" : convertToHex(defaultColor),
+                      bold: i > 0,
+                    }),
+                  ],
+                  alignment:
+                    i === 0
+                      ? AlignmentType.LEFT
+                      : i === rowArr.length - 1
+                      ? AlignmentType.RIGHT
+                      : AlignmentType.CENTER,
+                  spacing: { before: 60, after: 60 },
+                }),
+              ],
+              width: { size: 100 / rowArr.length, type: WidthType.PERCENTAGE },
+              borders: {
+                top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+                right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              },
+              margins: { top: 100, bottom: 100, left: 120, right: 120 },
+              verticalAlign: VerticalAlign.CENTER,
+            })
+        ),
       });
     });
 
     // Add Total row
+    const totalArr = ["Total"];
+    if (showPercentage) totalArr.push(`${totalPercentage}%`);
+    if (showValue) totalArr.push(`${currency}${totalValue}`);
     const totalRow = new TableRow({
-      children: [
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Total",
-                  bold: true,
-                  size: 20,
-                  font: defaultFont,
-                }),
-              ],
-              alignment: AlignmentType.LEFT,
-              spacing: { before: 60, after: 60 },
-            }),
-          ],
-          width: { size: 50, type: WidthType.PERCENTAGE },
-          borders: {
-            top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-          },
-          margins: { top: 100, bottom: 100, left: 120, right: 120 },
-          verticalAlign: VerticalAlign.CENTER,
-        }),
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${totalPercentage}%`,
-                  bold: true,
-                  size: 20,
-                  font: defaultFont,
-                  color: "1976D2",
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 60, after: 60 },
-            }),
-          ],
-          width: { size: 25, type: WidthType.PERCENTAGE },
-          borders: {
-            top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-          },
-          margins: { top: 100, bottom: 100, left: 120, right: 120 },
-          verticalAlign: VerticalAlign.CENTER,
-        }),
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${currency}${totalValue}`,
-                  bold: true,
-                  size: 20,
-                  font: defaultFont,
-                  color: "1976D2",
-                }),
-              ],
-              alignment: AlignmentType.RIGHT,
-              spacing: { before: 60, after: 60 },
-            }),
-          ],
-          width: { size: 25, type: WidthType.PERCENTAGE },
-          borders: {
-            top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-            right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-          },
-          margins: { top: 100, bottom: 100, left: 120, right: 120 },
-          verticalAlign: VerticalAlign.CENTER,
-        }),
-      ],
+      children: totalArr.map(
+        (cell, i) =>
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: cell,
+                    bold: true,
+                    size: 20,
+                    font: defaultFont,
+                    color: i > 0 ? "1976D2" : convertToHex(defaultColor),
+                  }),
+                ],
+                alignment:
+                  i === 0
+                    ? AlignmentType.LEFT
+                    : i === totalArr.length - 1
+                    ? AlignmentType.RIGHT
+                    : AlignmentType.CENTER,
+                spacing: { before: 60, after: 60 },
+              }),
+            ],
+            width: { size: 100 / totalArr.length, type: WidthType.PERCENTAGE },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+              right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
+            },
+            margins: { top: 100, bottom: 100, left: 120, right: 120 },
+            verticalAlign: VerticalAlign.CENTER,
+          })
+      ),
     });
 
     // Header row
     const headerRow = new TableRow({
-      children: [
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Deliverable",
-                  bold: true,
-                  size: 20,
-                  font: defaultFont,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 80, after: 80 },
-            }),
-          ],
-          width: { size: 50, type: WidthType.PERCENTAGE },
-          borders: {
-            top: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            bottom: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            left: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            right: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-          },
-          margins: { top: 120, bottom: 120, left: 120, right: 120 },
-          verticalAlign: VerticalAlign.CENTER,
-        }),
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Percentage",
-                  bold: true,
-                  size: 20,
-                  font: defaultFont,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 80, after: 80 },
-            }),
-          ],
-          width: { size: 25, type: WidthType.PERCENTAGE },
-          borders: {
-            top: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            bottom: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            left: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            right: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-          },
-          margins: { top: 120, bottom: 120, left: 120, right: 120 },
-          verticalAlign: VerticalAlign.CENTER,
-        }),
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Value",
-                  bold: true,
-                  size: 20,
-                  font: defaultFont,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 80, after: 80 },
-            }),
-          ],
-          width: { size: 25, type: WidthType.PERCENTAGE },
-          borders: {
-            top: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            bottom: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            left: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-            right: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
-          },
-          margins: { top: 120, bottom: 120, left: 120, right: 120 },
-          verticalAlign: VerticalAlign.CENTER,
-        }),
-      ],
+      children: headerLabels.map(
+        (label, i) =>
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: label,
+                    bold: true,
+                    size: 20,
+                    font: defaultFont,
+                  }),
+                ],
+                alignment:
+                  i === 0
+                    ? AlignmentType.CENTER
+                    : i === headerLabels.length - 1
+                    ? AlignmentType.CENTER
+                    : AlignmentType.CENTER,
+                spacing: { before: 80, after: 80 },
+              }),
+            ],
+            width: {
+              size: 100 / headerLabels.length,
+              type: WidthType.PERCENTAGE,
+            },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+              bottom: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+              left: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+              right: { style: BorderStyle.SINGLE, size: 4, color: "1976D2" },
+            },
+            margins: { top: 120, bottom: 120, left: 120, right: 120 },
+            verticalAlign: VerticalAlign.CENTER,
+          })
+      ),
     });
 
     return new Table({
-      rows: [headerRow, ...rows, totalRow],
+      rows: [headerRow, ...tableRows, totalRow],
       width: {
         size: 100,
         type: WidthType.PERCENTAGE,

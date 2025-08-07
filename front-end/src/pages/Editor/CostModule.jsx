@@ -434,27 +434,29 @@ const CostModule = ({ addCostModule, rows, setRows }) => {
           </button>
           <button
             onClick={() => {
+              // Prepare options and values, removing tax/discount/quantity if unchecked
+              const cleanedOptions = {
+                discount: discount,
+                quantity: quantity,
+                currency: currency,
+                tax: tax,
+              };
+              const cleanedValues = { ...values };
+              if (!discount) cleanedValues.discount = null;
+              if (!tax) cleanedValues.tax = null;
+              if (!quantity) cleanedValues.quantity = null;
+
               if (costModuleEdit !== null) {
                 const updated = [...rows];
                 updated[costModuleEdit].content = temp;
-                updated[costModuleEdit].options = {
-                  discount: discount,
-                  quantity: quantity,
-                  currency: currency,
-                  tax: tax,
-                };
-                updated[costModuleEdit].values = values;
+                updated[costModuleEdit].options = cleanedOptions;
+                updated[costModuleEdit].values = cleanedValues;
                 setRows(updated);
               } else {
                 addCostModule(
                   temp,
-                  {
-                    discount: discount,
-                    quantity: quantity,
-                    currency: currency,
-                    tax: tax,
-                  },
-                  values,
+                  cleanedOptions,
+                  cleanedValues,
                   heading
                 );
               }

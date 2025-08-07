@@ -749,14 +749,6 @@ const EditorHeader = ({
                 <GrDownload className=" absolute right-3 text-gray-400" />
               </div>
               <div
-                onClick={handleGenerateWord}
-                className="relative border-[1px] rounded-md w-[90%] py-2 border-blue-200 flex items-center justify-start pl-2 cursor-pointer  gap-3 mt-2 bg-blue-50"
-              >
-                <img src={word} alt="no" />
-                <a className="text-sm text-blue-600 font-medium">Test HTML to Word</a>
-                <GrDownload className=" absolute right-3 text-blue-400" />
-              </div>
-              <div
                 onClick={handleGeneratePdf}
                 className="relative border-[1px] rounded-md w-[90%] py-2 border-gray-200 flex items-center justify-start pl-2  gap-3 mt-2 cursor-pointer"
               >
