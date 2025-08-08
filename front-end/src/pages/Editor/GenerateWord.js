@@ -815,18 +815,48 @@ const JsonToWord = async (jsonData) => {
       const cells = [];
       for (let i = 0; i < headerLabels.length; i++) {
         if (i === 0) {
+          // Split label into main and percentage part
+          let labelParts = [];
+          const match = label.match(/^(.*?)(\(([^)]*)\))?$/);
+          if (match) {
+            const mainText = match[1] || "";
+            const percentText = match[3] || "";
+            if (mainText) {
+              labelParts.push(
+                new TextRun({
+                  text: mainText.trim() + (percentText ? " " : ""),
+                  bold: true,
+                  size: 16,
+                  font: defaultFont,
+                })
+              );
+            }
+            if (percentText) {
+              labelParts.push(
+                new TextRun({
+                  text: `(${percentText})`,
+                  bold: true,
+                  size: 16,
+                  font: defaultFont,
+                  color: "a0a0a0",
+                })
+              );
+            }
+          } else {
+            labelParts.push(
+              new TextRun({
+                text: label,
+                bold: true,
+                size: 16,
+                font: defaultFont,
+              })
+            );
+          }
           cells.push(
             new TableCell({
               children: [
                 new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: label,
-                      bold: true,
-                      size: 16,
-                      font: defaultFont,
-                    }),
-                  ],
+                  children: labelParts,
                   alignment: AlignmentType.LEFT,
                   spacing: { before: 20, after: 20 },
                 }),
@@ -1153,7 +1183,7 @@ const JsonToWord = async (jsonData) => {
                 let size = 44;
                 let heading = null;
                 let font = headingFont;
-                let color = nextItem.textColor || "1976D2";
+                let color = nextItem.textColor || "000000";
                 let bold =
                   children &&
                   children[0] &&
@@ -1215,7 +1245,7 @@ const JsonToWord = async (jsonData) => {
                 bold: true,
                 size: 44,
                 alignment: AlignmentType.CENTER,
-                color: "1976D2",
+                color: "000000",
                 spacing: { before: 240, after: 240 },
               })
             );
