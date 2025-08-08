@@ -533,32 +533,38 @@ const JsonToWord = async (jsonData) => {
   const createCodeBlock = (codeContent, options = {}) => {
     const { spacing = { before: 80, after: 80 } } = options;
 
-    const codeLines = codeContent.split("\n");
-    const codeParagraphs = codeLines.map(
+    const lines = (codeContent || "").toString().split("\n").map((l) => (l === "" ? " " : l));
+
+    // Use a one-cell table to get consistent background, left bar and inner padding
+    const codeParagraphs = lines.map(
       (line) =>
         new Paragraph({
           children: [
-            new TextRun({
-              text: line || " ", // Ensure empty lines are preserved
-              size: 16, // Smaller font size to match web
-              font: codeFont,
-            }),
+            new TextRun({ text: line, size: 16, font: codeFont }),
           ],
-          spacing: { before: 0, after: 20 }, // Tighter line spacing within code block
-          indent: { left: 200 }, // Reduced indentation for code block
-          borders: {
-            left: { style: BorderStyle.SINGLE, size: 4, color: "007ACC" }, // Thinner blue left border
-            top: { style: BorderStyle.SINGLE, size: 2, color: "E0E0E0" },
-            bottom: { style: BorderStyle.SINGLE, size: 2, color: "E0E0E0" },
-            right: { style: BorderStyle.SINGLE, size: 2, color: "E0E0E0" },
-          },
-          shading: {
-            fill: "F3F4F6",
-          },
+          spacing: { before: 0, after: 20 },
         })
     );
 
-    // Add title and wrapper with web-like styling
+    const codeCell = new TableCell({
+      children: codeParagraphs,
+      borders: {
+        left: { style: BorderStyle.SINGLE, size: 8, color: "E0E0E0" },
+        top: { style: BorderStyle.SINGLE, size: 2, color: "E0E0E0" },
+        bottom: { style: BorderStyle.SINGLE, size: 2, color: "E0E0E0" },
+        right: { style: BorderStyle.SINGLE, size: 2, color: "E0E0E0" },
+      },
+      shading: { fill: "F3F4F6" },
+      margins: { top: 120, bottom: 120, left: 200, right: 200 }, // inner padding
+    });
+
+    const codeTable = new Table({
+      rows: [new TableRow({ children: [codeCell] })],
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.AUTOFIT,
+      margins: { top: 0, bottom: 0 },
+    });
+
     return [
       createParagraph("Code:", {
         bold: false,
@@ -566,7 +572,7 @@ const JsonToWord = async (jsonData) => {
         spacing: { before: spacing.before, after: 20 },
         color: "333333",
       }),
-      ...codeParagraphs,
+      codeTable,
       createParagraph("", { spacing: { before: 20, after: spacing.after } }),
     ];
   };
@@ -580,14 +586,14 @@ const JsonToWord = async (jsonData) => {
       underlineAll = [],
       italicAll = [],
       colAlign = [],
-      cellAlignAll = [], // new: per-cell alignment array
+      cellAlignAll = [],
     } = options;
 
     // Helper for background color based on design
     const getCellShading = (colIndex, rowIndex) => {
       switch (design) {
         case "alternativerow":
-          return rowIndex % 2 === 0 ? "E5E7EB" : "F3F4F6"; // gray-200 / gray-100
+          return rowIndex % 2 === 0 ? "E5E7EB" : "F3F4F6";
         case "alternativecol":
           return colIndex % 2 === 0 ? "E5E7EB" : "F3F4F6";
         case "toprow":
@@ -599,24 +605,39 @@ const JsonToWord = async (jsonData) => {
       }
     };
 
+    const toAlign = (val, fallback) => {
+      if (val === "left") return AlignmentType.LEFT;
+      if (val === "center") return AlignmentType.CENTER;
+      if (val === "right") return AlignmentType.RIGHT;
+      return fallback;
+    };
+
     const rows = tableData.map((row, rowIndex) => {
       const cells = Array.isArray(row) ? row : [];
       const isHeaderRow = rowIndex === 0;
       return new TableRow({
         children: cells.map((cellText, cellIndex) => {
-          let textBold = boldAll?.[rowIndex]?.[cellIndex] === true;
-          let textUnderline = underlineAll?.[rowIndex]?.[cellIndex] || false;
-          let textItalic = italicAll?.[rowIndex]?.[cellIndex] || false;
-          let textColor = "212529";
-          // Force all table cell alignment to center
-          let cellAlign = AlignmentType.CENTER;
+          const textBold = boldAll?.[rowIndex]?.[cellIndex] === true;
+          const textUnderline = !!underlineAll?.[rowIndex]?.[cellIndex];
+          const textItalic = !!italicAll?.[rowIndex]?.[cellIndex];
+          const textColor = "212529";
+
+          // Alignment priority: per-cell -> per-col -> default(left first, right last, center otherwise)
+          const perCell = cellAlignAll?.[rowIndex]?.[cellIndex];
+          const perCol = colAlign?.[cellIndex];
+          const defaultAlign = cellIndex === 0
+            ? AlignmentType.LEFT
+            : cellIndex === cells.length - 1
+            ? AlignmentType.RIGHT
+            : AlignmentType.CENTER;
+          const cellAlign = toAlign(perCell, toAlign(perCol, defaultAlign));
 
           return new TableCell({
             children: [
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: cellText?.toString() || "",
+                    text: (cellText ?? "").toString(),
                     size: isHeaderRow ? 18 : 16,
                     font: defaultFont,
                     bold: textBold,
@@ -629,25 +650,15 @@ const JsonToWord = async (jsonData) => {
                 spacing: { before: 10, after: 10 },
               }),
             ],
-            width: {
-              size: 100 / cells.length,
-              type: WidthType.PERCENTAGE,
-            },
+            width: { size: 100 / (cells.length || 1), type: WidthType.PERCENTAGE },
             borders: {
               top: { style: BorderStyle.SINGLE, size: 2, color: "B0B0B0" },
               bottom: { style: BorderStyle.SINGLE, size: 2, color: "B0B0B0" },
               left: { style: BorderStyle.SINGLE, size: 2, color: "B0B0B0" },
               right: { style: BorderStyle.SINGLE, size: 2, color: "B0B0B0" },
             },
-            shading: {
-              fill: getCellShading(cellIndex, rowIndex),
-            },
-            margins: {
-              top: 20,
-              bottom: 20,
-              left: 20,
-              right: 20,
-            },
+            shading: { fill: getCellShading(cellIndex, rowIndex) },
+            margins: { top: 20, bottom: 20, left: 20, right: 20 },
             verticalAlign: VerticalAlign.CENTER,
           });
         }),
@@ -655,16 +666,10 @@ const JsonToWord = async (jsonData) => {
     });
 
     return new Table({
-      rows: rows,
-      width: {
-        size: 100,
-        type: WidthType.PERCENTAGE,
-      },
+      rows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
       layout: TableLayoutType.AUTOFIT,
-      margins: {
-        top: 40,
-        bottom: 40,
-      },
+      margins: { top: 40, bottom: 40 },
     });
   };
 
