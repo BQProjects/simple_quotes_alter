@@ -117,7 +117,7 @@ const isMarkActive = (editor, format) => {
   return marks ? marks[format] === true : false;
 };
 
-const Element = ({ attributes, children, element, size }) => {
+const Element = ({ attributes, children, element, size, theme }) => {
   const alignment =
     element.align === "center"
       ? `text-${element.align}`
@@ -128,7 +128,12 @@ const Element = ({ attributes, children, element, size }) => {
   switch (size) {
     case "heading-one":
       return (
-        <h1 className={`w-full text-[2.5em] ${alignment}`} {...attributes}>
+        <h1
+          className={`w-full text-[2.5em] ${
+            theme !== 2 ? alignment : "text-center"
+          }`}
+          {...attributes}
+        >
           {children}
         </h1>
       );
@@ -234,12 +239,12 @@ const MyRichTextEditor = ({
       return size === "heading-one" ? (
         <div
           style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-          className="h-[10px] w-full"
+          className="h-[8px] w-full"
         ></div>
       ) : size === "heading-two" ? (
         <div
           style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-          className="h-[5px] w-full"
+          className="h-[3px] w-full"
         ></div>
       ) : (
         <div
@@ -251,19 +256,18 @@ const MyRichTextEditor = ({
       return size === "heading-one" ? (
         <div
           style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-          className="h-[10px] w-full"
+          className="h-[8px] w-full"
         ></div>
       ) : size === "heading-two" ? (
-        <div className="w-full h-[5px] flex items-center justify-center">
-          <div
-            style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-            className="h-[10px] w-[20%]"
-          ></div>
-          <div
-            style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-            className="h-[2px] w-[80%]"
-          ></div>
-        </div>
+        <div
+          style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
+          className="h-[3px] w-full"
+        ></div>
+      ) : size === "heading-three" ? (
+        <div
+          style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
+          className="h-[3px] w-full"
+        ></div>
       ) : (
         <div
           style={{ "--tw-bg-opacity": 1, backgroundColor: "white" }}
@@ -375,7 +379,7 @@ const MyRichTextEditor = ({
   }, []);
 
   const renderElement = useCallback(
-    (props) => <Element {...props} size={size} />,
+    (props) => <Element {...props} size={size} theme={settings.theme} />,
     [size]
   );
   const renderLeaf = useCallback(
@@ -581,28 +585,43 @@ const MyRichTextEditor = ({
           renderLeaf={renderLeaf}
           placeholder="Click to add heading"
           style={{
-            "--tw-bg-opacity": 0.4,
+            color:
+              settings.theme === 2 && size === "heading-one"
+                ? "white"
+                : settings.theme !== 0 &&
+                  (size === "heading-one" ||
+                    size === "heading-two" ||
+                    size === "heading-three")
+                ? settings.color
+                : undefined,
             backgroundColor:
-              settings.theme === 5
-                ? lightenColor(settings.color, 0.8)
+              settings.theme === 2 && size === "heading-one"
+                ? settings
                 : "transparent",
           }}
           className={` relative min-h-[20px] ${
-            textColor ? textColor : "text-active_text"
+            settings.theme === 2 && size === "heading-one"
+              ? "rounded-[50px]"
+              : ""
+          } ${
+            settings.theme !== 1 ? textColor || "text-active_text" : ""
           }   px-2 py-1 outline-none   font-${settings.heading} ${
             index === selected && preview !== true ? "none" : "none"
           }`}
           readOnly={preview}
         />
-        {settings.theme !== 0 && (
-          <div
-            className={`absolute w-full h-[15px] px-2 ${
-              settings.theme === 4 ? "top-0" : "-bottom-2"
-            } left-0`}
-          >
-            {createBorder(settings.theme, settings.color)}
-          </div>
-        )}
+        {(settings.theme === 1 || settings.theme === 2) &&
+          (settings.theme === 2 && size === "heading-one" ? (
+            <div></div>
+          ) : (
+            <div
+              className={`absolute w-full h-[15px] px-2 ${
+                settings.theme === 4 ? "top-0" : "-bottom-2"
+              } left-0`}
+            >
+              {createBorder(settings.theme, settings.color)}
+            </div>
+          ))}
       </Slate>
     </div>
   );

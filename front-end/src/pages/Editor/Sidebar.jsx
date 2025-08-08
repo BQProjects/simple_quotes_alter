@@ -16157,6 +16157,7 @@ const Sidebar = ({
                           const temp = { ...settings };
                           temp.color = updatedColor.hex;
                           setSettings(temp);
+                          console.log(temp);
                         }}
                         width="180px"
                       />
