@@ -459,74 +459,296 @@ const JsonToWord = async (jsonData) => {
     return paragraphs;
   };
 
+  const validateImageUrl = (url) => {
+    if (!url || typeof url !== "string") return false;
+
+    try {
+      const urlObj = new URL(url);
+      // Only allow http/https protocols
+      if (!["http:", "https:"].includes(urlObj.protocol)) return false;
+
+      // Check for image file extensions (basic validation)
+      const pathname = urlObj.pathname.toLowerCase();
+      const imageExtensions = [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".bmp",
+        ".webp",
+      ];
+      const hasImageExtension = imageExtensions.some(
+        (ext) => pathname.endsWith(ext) || pathname.includes(ext)
+      );
+
+      // Allow if has image extension OR if it's a dynamic URL (no extension)
+      return hasImageExtension || !pathname.includes(".");
+    } catch {
+      return false;
+    }
+  };
+
+  // Fixed createImageParagraph function with proper error handling and format detection
   const createImageParagraph = async (imageUrl, options = {}) => {
     const {
       alignment = AlignmentType.CENTER,
       width = 400,
       height = 300,
-      spacing = { before: 60, after: 60 }, // Web-like tight spacing
+      spacing = { before: 60, after: 60 },
       maxWidth = 600,
       maxHeight = 400,
       context = "normal",
     } = options;
 
     try {
-      const imageBuffer = await fetchImageAsArrayBuffer(imageUrl);
-      if (imageBuffer) {
-        const dimensions = getImageDimensions(
-          width,
-          height,
-          maxWidth,
-          maxHeight,
-          context
-        );
-
-        return new Paragraph({
-          children: [
-            new ImageRun({
-              data: imageBuffer,
-              transformation: {
-                width: dimensions.width,
-                height: dimensions.height,
-              },
-            }),
-          ],
-          alignment: alignment,
-          spacing: spacing,
-        });
+      // Validate URL
+      if (!imageUrl || typeof imageUrl !== "string") {
+        throw new Error("Invalid image URL");
       }
+
+      const imageBuffer = await fetchImageAsArrayBuffer(imageUrl);
+      if (!imageBuffer || imageBuffer.byteLength === 0) {
+        throw new Error("Empty or invalid image buffer");
+      }
+
+      // Detect image format from buffer
+      const uint8Array = new Uint8Array(imageBuffer);
+      let format = "png"; // default fallback
+
+      // Check magic bytes for common formats
+      if (
+        uint8Array[0] === 0xff &&
+        uint8Array[1] === 0xd8 &&
+        uint8Array[2] === 0xff
+      ) {
+        format = "jpg";
+      } else if (
+        uint8Array[0] === 0x89 &&
+        uint8Array[1] === 0x50 &&
+        uint8Array[2] === 0x4e &&
+        uint8Array[3] === 0x47
+      ) {
+        format = "png";
+      } else if (
+        uint8Array[0] === 0x47 &&
+        uint8Array[1] === 0x49 &&
+        uint8Array[2] === 0x46
+      ) {
+        format = "gif";
+      } else if (
+        uint8Array[0] === 0x52 &&
+        uint8Array[1] === 0x49 &&
+        uint8Array[2] === 0x46 &&
+        uint8Array[3] === 0x46
+      ) {
+        format = "webp";
+      } else if (uint8Array[0] === 0x42 && uint8Array[1] === 0x4d) {
+        format = "bmp";
+      }
+
+      // Skip unsupported formats
+      if (!["jpg", "jpeg", "png", "gif", "bmp"].includes(format)) {
+        throw new Error(`Unsupported image format: ${format}`);
+      }
+
+      const dimensions = getImageDimensions(
+        width,
+        height,
+        maxWidth,
+        maxHeight,
+        context
+      );
+
+      // Validate dimensions
+      if (
+        !dimensions.width ||
+        !dimensions.height ||
+        dimensions.width < 10 ||
+        dimensions.height < 10
+      ) {
+        throw new Error("Invalid image dimensions");
+      }
+
+      // Create the image run with proper error handling
+      const imageRun = new ImageRun({
+        data: imageBuffer,
+        transformation: {
+          width: Math.round(dimensions.width),
+          height: Math.round(dimensions.height),
+        },
+        type: format === "jpg" ? "jpg" : format, // Ensure correct type mapping
+      });
+
+      return new Paragraph({
+        children: [imageRun],
+        alignment: alignment,
+        spacing: spacing,
+      });
     } catch (error) {
       console.error("Error creating image:", error);
+
+      // Return a more styled fallback paragraph
+      const fileName = imageUrl
+        ? imageUrl.split("/").pop() || "image"
+        : "unknown";
+
+      return new Paragraph({
+        children: [
+          new TextRun({
+            text: `[Image unavailable: ${fileName}]`,
+            italic: true,
+            size: 20,
+            color: "999999",
+            font: defaultFont,
+          }),
+        ],
+        alignment: alignment,
+        spacing: spacing,
+        borders: {
+          top: { style: BorderStyle.SINGLE, size: 4, color: "DDDDDD" },
+          bottom: { style: BorderStyle.SINGLE, size: 4, color: "DDDDDD" },
+          left: { style: BorderStyle.SINGLE, size: 4, color: "DDDDDD" },
+          right: { style: BorderStyle.SINGLE, size: 4, color: "DDDDDD" },
+        },
+        shading: {
+          fill: "F8F9FA",
+          type: ShadingType.SOLID,
+        },
+        indent: {
+          left: convertMillimetersToTwip(10),
+          right: convertMillimetersToTwip(10),
+        },
+      });
+    }
+  };
+
+  // Enhanced image fetching with better error handling and timeout
+  const fetchImageAsArrayBuffer = async (url) => {
+    try {
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const response = await fetch(url, {
+        mode: "cors",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          Accept: "image/*",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.startsWith("image/")) {
+        throw new Error(`Invalid content type: ${contentType}`);
+      }
+
+      const buffer = await response.arrayBuffer();
+
+      // Validate buffer size (not too small, not too large)
+      if (buffer.byteLength < 100) {
+        throw new Error("Image file too small");
+      }
+      if (buffer.byteLength > 10 * 1024 * 1024) {
+        // 10MB limit
+        throw new Error("Image file too large");
+      }
+
+      return buffer;
+    } catch (error) {
+      console.error("Error fetching image:", error);
+
+      // Try alternative approach with proxy (only if original fails)
+      if (error.name !== "AbortError") {
+        try {
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+            url
+          )}`;
+          const proxyResponse = await fetch(proxyUrl, {
+            mode: "cors",
+            headers: {
+              Accept: "image/*",
+            },
+          });
+
+          if (proxyResponse.ok) {
+            const buffer = await proxyResponse.arrayBuffer();
+            if (buffer.byteLength > 100) {
+              return buffer;
+            }
+          }
+        } catch (proxyError) {
+          console.error("Proxy fetch also failed:", proxyError);
+        }
+      }
+
+      return null;
+    }
+  };
+
+  // Improved dimension calculation with validation
+  const getImageDimensions = (
+    width,
+    height,
+    maxWidth = 600,
+    maxHeight = 400,
+    context = "normal"
+  ) => {
+    // Parse and validate input dimensions
+    let w = parseInt(width, 10) || maxWidth;
+    let h = parseInt(height, 10) || maxHeight;
+
+    // Ensure positive values
+    w = Math.max(w, 50);
+    h = Math.max(h, 50);
+
+    // Context-specific sizing
+    switch (context) {
+      case "cover":
+        maxWidth = Math.min(maxWidth, 650);
+        maxHeight = Math.min(maxHeight, 450);
+        break;
+      case "inline":
+        maxWidth = Math.min(maxWidth, 500);
+        maxHeight = Math.min(maxHeight, 350);
+        break;
+      case "side":
+        maxWidth = Math.min(maxWidth, 280);
+        maxHeight = Math.min(maxHeight, 200);
+        break;
+      case "double":
+        maxWidth = Math.min(maxWidth, 320);
+        maxHeight = Math.min(maxHeight, 240);
+        break;
     }
 
-    // Web-matching fallback styling
-    return new Paragraph({
-      children: [
-        new TextRun({
-          text: `[Image: ${imageUrl.split("/").pop() || "unavailable"}]`,
-          italic: true,
-          size: 16,
-          color: "6C757D",
-          font: defaultFont,
-        }),
-      ],
-      alignment: alignment,
-      spacing: spacing,
-      borders: {
-        top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-        bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-        left: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-        right: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
-      },
-      shading: {
-        fill: "F8F9FA",
-        type: ShadingType.SOLID,
-      },
-      indent: {
-        left: 100,
-        right: 100,
-      },
-    });
+    // Maintain aspect ratio while fitting within bounds
+    const aspectRatio = w / h;
+
+    if (w > maxWidth) {
+      w = maxWidth;
+      h = Math.round(w / aspectRatio);
+    }
+    if (h > maxHeight) {
+      h = maxHeight;
+      w = Math.round(h * aspectRatio);
+    }
+
+    // Ensure minimum dimensions for Word compatibility
+    const finalWidth = Math.max(Math.round(w), 50);
+    const finalHeight = Math.max(Math.round(h), 50);
+
+    return {
+      width: finalWidth,
+      height: finalHeight,
+    };
   };
 
   // Improved code block formatting to match web view exactly
@@ -1567,30 +1789,46 @@ const JsonToWord = async (jsonData) => {
           break;
 
         case "image":
-          if (item.content) {
-            const imagePara = await createImageParagraph(item.content, {
-              width: parseInt(item.width) || 400,
-              height: parseInt(item.height) || 300,
-              context: "inline",
-              alignment:
-                item.aliegn === "left"
-                  ? AlignmentType.LEFT
-                  : item.aliegn === "right"
-                  ? AlignmentType.RIGHT
-                  : AlignmentType.CENTER,
-              spacing: { before: 80, after: 40 }, // Web-like tight spacing
-            });
-            allContent.push(imagePara);
+          if (item.content && validateImageUrl(item.content)) {
+            try {
+              const imagePara = await createImageParagraph(item.content, {
+                width: parseInt(item.width) || 400,
+                height: parseInt(item.height) || 300,
+                context: "inline",
+                alignment:
+                  item.aliegn === "left"
+                    ? AlignmentType.LEFT
+                    : item.aliegn === "right"
+                    ? AlignmentType.RIGHT
+                    : AlignmentType.CENTER,
+                spacing: { before: 80, after: 40 },
+              });
+              allContent.push(imagePara);
 
-            if (item.caption) {
+              if (item.caption) {
+                allContent.push(
+                  createParagraph(item.caption, {
+                    italic: true,
+                    size: 16,
+                    alignment: AlignmentType.CENTER,
+                    spacing: { before: 20, after: 80 },
+                    color: "6C757D",
+                  })
+                );
+              }
+            } catch (error) {
+              console.error("Failed to process image:", error);
+              // Add fallback text instead of breaking
               allContent.push(
-                createParagraph(item.caption, {
-                  italic: true,
-                  size: 16,
-                  alignment: AlignmentType.CENTER,
-                  spacing: { before: 20, after: 80 },
-                  color: "6C757D",
-                })
+                createParagraph(
+                  `[Image could not be loaded: ${item.content}]`,
+                  {
+                    italic: true,
+                    size: 16,
+                    color: "DC3545",
+                    spacing: { before: 40, after: 40 },
+                  }
+                )
               );
             }
           }
@@ -1603,6 +1841,7 @@ const JsonToWord = async (jsonData) => {
               .join(" ");
             const isLeftAligned = item.align === "left";
 
+            // Make sure to await the image creation
             const imageCell = await createImageParagraph(item.ImageLink, {
               width: parseInt(item.width) || 320,
               height: parseInt(item.height) || 240,
@@ -1689,20 +1928,23 @@ const JsonToWord = async (jsonData) => {
 
         case "double-image":
           if (item.ImageLink1 && item.ImageLink2) {
-            const image1 = await createImageParagraph(item.ImageLink1, {
-              width: parseInt(item.width1) || 320,
-              height: parseInt(item.height1) || 240,
-              context: "double",
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 0, after: 0 },
-            });
-            const image2 = await createImageParagraph(item.ImageLink2, {
-              width: parseInt(item.width2) || 320,
-              height: parseInt(item.height2) || 240,
-              context: "double",
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 0, after: 0 },
-            });
+            // Await both images
+            const [image1, image2] = await Promise.all([
+              createImageParagraph(item.ImageLink1, {
+                width: parseInt(item.width1) || 320,
+                height: parseInt(item.height1) || 240,
+                context: "double",
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 0 },
+              }),
+              createImageParagraph(item.ImageLink2, {
+                width: parseInt(item.width2) || 320,
+                height: parseInt(item.height2) || 240,
+                context: "double",
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 0 },
+              }),
+            ]);
 
             const doubleImageTable = new Table({
               rows: [
