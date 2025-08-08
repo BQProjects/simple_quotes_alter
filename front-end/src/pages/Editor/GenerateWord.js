@@ -533,15 +533,16 @@ const JsonToWord = async (jsonData) => {
   const createCodeBlock = (codeContent, options = {}) => {
     const { spacing = { before: 80, after: 80 } } = options;
 
-    const lines = (codeContent || "").toString().split("\n").map((l) => (l === "" ? " " : l));
+    const lines = (codeContent || "")
+      .toString()
+      .split("\n")
+      .map((l) => (l === "" ? " " : l));
 
     // Use a one-cell table to get consistent background, left bar and inner padding
     const codeParagraphs = lines.map(
       (line) =>
         new Paragraph({
-          children: [
-            new TextRun({ text: line, size: 16, font: codeFont }),
-          ],
+          children: [new TextRun({ text: line, size: 16, font: codeFont })],
           spacing: { before: 0, after: 20 },
         })
     );
@@ -625,11 +626,12 @@ const JsonToWord = async (jsonData) => {
           // Alignment priority: per-cell -> per-col -> default(left first, right last, center otherwise)
           const perCell = cellAlignAll?.[rowIndex]?.[cellIndex];
           const perCol = colAlign?.[cellIndex];
-          const defaultAlign = cellIndex === 0
-            ? AlignmentType.LEFT
-            : cellIndex === cells.length - 1
-            ? AlignmentType.RIGHT
-            : AlignmentType.CENTER;
+          const defaultAlign =
+            cellIndex === 0
+              ? AlignmentType.LEFT
+              : cellIndex === cells.length - 1
+              ? AlignmentType.RIGHT
+              : AlignmentType.CENTER;
           const cellAlign = toAlign(perCell, toAlign(perCol, defaultAlign));
 
           return new TableCell({
@@ -650,7 +652,10 @@ const JsonToWord = async (jsonData) => {
                 spacing: { before: 10, after: 10 },
               }),
             ],
-            width: { size: 100 / (cells.length || 1), type: WidthType.PERCENTAGE },
+            width: {
+              size: 100 / (cells.length || 1),
+              type: WidthType.PERCENTAGE,
+            },
             borders: {
               top: { style: BorderStyle.SINGLE, size: 2, color: "B0B0B0" },
               bottom: { style: BorderStyle.SINGLE, size: 2, color: "B0B0B0" },
@@ -1769,116 +1774,428 @@ const JsonToWord = async (jsonData) => {
           break;
 
         case "sign":
-          if (Array.isArray(item.content)) {
-            allContent.push(
-              createParagraph("Signatures", {
-                bold: true,
-                size: 30,
-                heading: HeadingLevel.HEADING_3,
-                spacing: { before: 400, after: 200 },
-                font: headingFont,
-                color: "1976D2",
-              })
-            );
+          if (Array.isArray(item.content) && item.content.length >= 2) {
+            const proposedName = item.content[0]?.proposedName || "";
+            const acceptedName = item.content[1]?.acceptedName || "";
 
-            // Create separate signature tables to match HTML structure exactly
-            for (let i = 0; i < item.content.length; i++) {
-              const signature = item.content[i];
-
-              if (signature) {
-                const name =
-                  signature.proposedName ||
-                  signature.acceptedName ||
-                  signature.name ||
-                  "Not specified";
-
-                const signatureTable = new Table({
-                  rows: [
-                    new TableRow({
+            // Table row with heading
+            const headingRow = new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
                       children: [
-                        new TableCell({
-                          children: [
-                            new Paragraph({
-                              children: [
-                                new TextRun({
-                                  text: name,
-                                  size: 22,
-                                  font: defaultFont,
-                                }),
-                              ],
-                              spacing: { before: 40, after: 40 },
-                            }),
-                          ],
-                          width: { size: 50, type: WidthType.PERCENTAGE },
-                          borders: {
-                            top: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "CCCCCC",
-                            },
-                            bottom: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "CCCCCC",
-                            },
-                            left: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "CCCCCC",
-                            },
-                            right: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "CCCCCC",
-                            },
-                          },
-                          margins: { top: 40, bottom: 40, left: 40, right: 40 },
-                          verticalAlign: VerticalAlign.TOP,
-                        }),
-                        new TableCell({
-                          children: [
-                            new Paragraph({
-                              children: [new TextRun({ text: "", size: 22 })],
-                              spacing: { before: 40, after: 40 },
-                            }),
-                          ],
-                          width: { size: 50, type: WidthType.PERCENTAGE },
-                          borders: {
-                            top: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "CCCCCC",
-                            },
-                            bottom: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "CCCCCC",
-                            },
-                            left: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "CCCCCC",
-                            },
-                            right: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "CCCCCC",
-                            },
-                          },
-                          margins: { top: 40, bottom: 40, left: 40, right: 40 },
-                          verticalAlign: VerticalAlign.TOP,
+                        new TextRun({
+                          text: "Signatures",
+                          bold: true,
+                          size: 28,
+                          font: headingFont,
+                          color: "000000",
                         }),
                       ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 60, after: 20 },
                     }),
                   ],
-                  width: { size: 100, type: WidthType.PERCENTAGE },
-                  layout: TableLayoutType.AUTOFIT,
-                  margins: { top: 0, bottom: 0 },
-                });
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "FFFFFF",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "FFFFFF",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "FFFFFF",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "FFFFFF",
+                    },
+                  },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 40, bottom: 20, left: 40, right: 40 },
+                }),
+              ],
+            });
 
-                allContent.push(signatureTable);
-              }
-            }
+            // Table row with two columns: Proposed By & Accepted By
+            const labelRow = new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "Proposed By",
+                          bold: true,
+                          size: 20,
+                          font: defaultFont,
+                          color: "000000",
+                        }),
+                      ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 20, after: 10 },
+                    }),
+                  ],
+                  shading: { fill: "F5F5F5" },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                  },
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 20, bottom: 10, left: 40, right: 20 },
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "Accepted By",
+                          bold: true,
+                          size: 20,
+                          font: defaultFont,
+                          color: "000000",
+                        }),
+                      ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 20, after: 10 },
+                    }),
+                  ],
+                  shading: { fill: "F5F5F5" },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                  },
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 20, bottom: 10, left: 20, right: 40 },
+                }),
+              ],
+            });
+
+            // Table row with signature lines
+            const lineRow = new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "",
+                          size: 18,
+                          font: defaultFont,
+                          color: "808080",
+                        }),
+                      ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 10, after: 5 },
+                    }),
+                  ],
+                  shading: { fill: "FFFFFF" },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                  },
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 10, bottom: 5, left: 40, right: 20 },
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "",
+                          size: 18,
+                          font: defaultFont,
+                          color: "808080",
+                        }),
+                      ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 10, after: 5 },
+                    }),
+                  ],
+                  shading: { fill: "FFFFFF" },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                  },
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 10, bottom: 5, left: 20, right: 40 },
+                }),
+              ],
+            });
+
+            // Table row with names
+            const nameRow = new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: proposedName,
+                          size: 18,
+                          font: defaultFont,
+                          color: "000000",
+                        }),
+                      ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 5, after: 5 },
+                    }),
+                  ],
+                  shading: { fill: "FFFFFF" },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                  },
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 5, bottom: 5, left: 40, right: 20 },
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: acceptedName,
+                          size: 18,
+                          font: defaultFont,
+                          color: "000000",
+                        }),
+                      ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 5, after: 5 },
+                    }),
+                  ],
+                  shading: { fill: "FFFFFF" },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                  },
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 5, bottom: 5, left: 20, right: 40 },
+                }),
+              ],
+            });
+
+            // Table row with date fields
+            const dateRow = new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "Date:",
+                          size: 16,
+                          font: defaultFont,
+                          color: "6C757D",
+                        }),
+                      ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 5, after: 5 },
+                    }),
+                  ],
+                  shading: { fill: "FFFFFF" },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                  },
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 5, bottom: 20, left: 40, right: 20 },
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "Date:",
+                          size: 16,
+                          font: defaultFont,
+                          color: "6C757D",
+                        }),
+                      ],
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 5, after: 5 },
+                    }),
+                  ],
+                  shading: { fill: "FFFFFF" },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 2,
+                      color: "B4B4B4",
+                    },
+                  },
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 5, bottom: 20, left: 20, right: 40 },
+                }),
+              ],
+            });
+
+            // Build the table
+            const signatureTable = new Table({
+              rows: [headingRow, labelRow, lineRow, nameRow, dateRow],
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              layout: TableLayoutType.AUTOFIT,
+              margins: { top: 120, bottom: 120 },
+            });
+
+            allContent.push(signatureTable);
           }
           break;
 
