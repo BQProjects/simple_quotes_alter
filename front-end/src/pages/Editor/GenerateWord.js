@@ -819,7 +819,7 @@ const JsonToWord = async (jsonData) => {
 
     // Summary table (separate)
     const summaryRows = [];
-    // Each summary row matches the main table's column count and width
+    // Each summary row matches the main table's column count and width: label in first, value in last, others empty
     const makeFullWidthSummaryRow = (label, value) => {
       // Match main table's column count and width: label in first, value in last, others empty
       const cells = [];
@@ -2287,14 +2287,11 @@ const JsonToWord = async (jsonData) => {
           run: {
             font: defaultFont,
             size: 22,
+
             color: convertToHex(defaultColor),
           },
           paragraph: {
-            spacing: {
-              before: 30,
-              after: 30,
-              line: Math.round(22 * 20 * 1.15), // Web-like line spacing
-            },
+            spacing: { line: 360 },
           },
         },
         {
@@ -2309,11 +2306,7 @@ const JsonToWord = async (jsonData) => {
             color: "1976D2",
           },
           paragraph: {
-            spacing: {
-              before: 160,
-              after: 80,
-              line: Math.round(40 * 20 * 1.05),
-            },
+            spacing: { line: 360 },
           },
         },
         {
@@ -2328,11 +2321,7 @@ const JsonToWord = async (jsonData) => {
             color: "1976D2",
           },
           paragraph: {
-            spacing: {
-              before: 120,
-              after: 60,
-              line: Math.round(32 * 20 * 1.05),
-            },
+            spacing: { line: 360 },
           },
         },
         {
@@ -2349,7 +2338,7 @@ const JsonToWord = async (jsonData) => {
             spacing: {
               before: 0,
               after: 20,
-              line: Math.round(16 * 20 * 1.2),
+              line: 360,
             },
             indent: {
               left: 200,

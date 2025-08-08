@@ -371,7 +371,7 @@ const GeneratePDF = async (jsonData, settings) => {
 
         lines.forEach((line, idx) => {
           doc.text(line, xPosition, currentY);
-          currentY += textSize * 0.5 + 1; // Tight line spacing like Word
+          currentY += textSize * 0.5; // 1.5 line spacing
           checkPageBreak(textSize + 5);
         });
 
@@ -1065,7 +1065,7 @@ const GeneratePDF = async (jsonData, settings) => {
                     xPosition = (pageWidth - doc.getTextWidth(line)) / 2;
                   }
                   doc.text(line, xPosition, currentY);
-                  currentY += size * 0.6 + 2;
+                  currentY += size * 0.5 + 1; // 0.5 line spacing
                   checkPageBreak(size + 10);
                 });
 
