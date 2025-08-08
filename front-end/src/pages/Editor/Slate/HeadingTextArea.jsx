@@ -615,7 +615,7 @@ const MyRichTextEditor = ({
             <div></div>
           ) : (
             <div
-              className={`absolute w-full h-[15px] px-2 py-1 ${
+              className={`absolute w-full h-[15px] px-2  ${
                 settings.theme === 4 ? "top-0" : "-bottom-2"
               } left-0`}
             >
