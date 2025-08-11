@@ -744,10 +744,13 @@ const JsonToWord = async (jsonData) => {
     // Ensure minimum dimensions for Word compatibility
     const finalWidth = Math.max(Math.round(w), 50);
     const finalHeight = Math.max(Math.round(h), 50);
-
+    const singleIMGHeight = Math.max(finalHeight, 250);
+    const singleIMGWidth = Math.max(finalWidth, 250);
     return {
       width: finalWidth,
       height: finalHeight,
+      singlewidth: singleIMGHeight,
+      singleheight: singleIMGWidth,
     };
   };
 
@@ -900,23 +903,32 @@ const JsonToWord = async (jsonData) => {
     });
   };
 
+  // Create a cost table with dynamic column widths
   const createCostTable = (costContent, options = {}) => {
-    // Debug: log costContent to diagnose missing data
     console.log("costContent:", JSON.stringify(costContent, null, 2));
-    // Dynamically build columns based on quantity option
+
     const showQuantity = !!options?.quantity;
-    // If quantity is enabled, show both 'Unit Price' and 'Quantity'.
-    // If quantity is not enabled, show only 'Description' and 'Amount'.
     const headerLabels = showQuantity
       ? ["Description", "Unit Price", "Quantity", "Amount"]
       : ["Description", "Amount"];
 
-    // Map costContent to dataRows for table body, support array of objects
+    const getColumnWidths = () => {
+      const colCount = headerLabels.length;
+      const widths = [];
+      widths.push(60); // Description fixed at 60%
+      const remainingWidth = 40;
+      const otherCols = colCount - 1;
+      const perOtherCol = remainingWidth / otherCols;
+      for (let i = 0; i < otherCols; i++) widths.push(perOtherCol);
+      return widths;
+    };
+
+    const columnWidths = getColumnWidths();
+
     const dataRows = Array.isArray(costContent)
       ? costContent
           .filter((row) => typeof row === "object" && row !== null)
           .map((rowObj) => {
-            // Map object to array in correct order
             const rowArr = showQuantity
               ? [
                   rowObj.deliverable ?? "",
@@ -925,6 +937,7 @@ const JsonToWord = async (jsonData) => {
                   rowObj.amount ?? "",
                 ]
               : [rowObj.deliverable ?? "", rowObj.amount ?? ""];
+
             return new TableRow({
               children: rowArr.map(
                 (cell, i) =>
@@ -938,12 +951,13 @@ const JsonToWord = async (jsonData) => {
                             font: defaultFont,
                           }),
                         ],
-                        alignment: AlignmentType.CENTER,
+                        alignment:
+                          i === 0 ? AlignmentType.LEFT : AlignmentType.CENTER,
                         spacing: { before: 30, after: 30 },
                       }),
                     ],
                     width: {
-                      size: 100 / rowArr.length,
+                      size: columnWidths[i],
                       type: WidthType.PERCENTAGE,
                     },
                     borders: {
@@ -978,7 +992,7 @@ const JsonToWord = async (jsonData) => {
 
     const headerRow = new TableRow({
       children: headerLabels.map(
-        (label) =>
+        (label, i) =>
           new TableCell({
             children: [
               new Paragraph({
@@ -990,17 +1004,15 @@ const JsonToWord = async (jsonData) => {
                     font: defaultFont,
                   }),
                 ],
-                alignment: AlignmentType.CENTER,
+                alignment: i === 0 ? AlignmentType.LEFT : AlignmentType.CENTER,
                 spacing: { before: 30, after: 30 },
               }),
             ],
             width: {
-              size: 100 / headerLabels.length,
+              size: columnWidths[i],
               type: WidthType.PERCENTAGE,
             },
-            shading: {
-              fill: "f5f5f5",
-            },
+            shading: { fill: "f5f5f5" },
             borders: {
               top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
               bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
@@ -1012,98 +1024,54 @@ const JsonToWord = async (jsonData) => {
           })
       ),
     });
+
     if (!Array.isArray(costContent) || costContent.length === 0) return null;
 
     const hasDiscount = options?.discount;
-    const hasQuantity = options?.quantity;
     const hasTax = options?.tax;
     const currency =
       typeof options?.currency === "string" ? options.currency : "$";
     const discountValue = Number(options?.values?.discount ?? 0);
     const taxValue = Number(options?.values?.tax ?? 0);
 
-    // Calculate subtotal
-    let subtotal = 0;
-    if (Array.isArray(costContent)) {
-      subtotal = costContent.reduce((sum, row) => {
-        let amount = 0;
-        if (typeof row === "object" && row !== null && "amount" in row) {
-          amount = Number(row.amount) || 0;
-        } else if (Array.isArray(row)) {
-          amount = Number(row[row.length - 1]) || 0;
-        }
-        return sum + amount;
-      }, 0);
-    }
+    let subtotal = costContent.reduce((sum, row) => {
+      let amount = 0;
+      if (typeof row === "object" && row !== null && "amount" in row) {
+        amount = Number(row.amount) || 0;
+      }
+      return sum + amount;
+    }, 0);
+
     const discountAmount = hasDiscount ? subtotal * (discountValue / 100) : 0;
     const taxAmount = hasTax ? subtotal * (taxValue / 100) : 0;
     const total = subtotal - discountAmount + taxAmount;
 
-    // Summary table (separate)
-    const summaryRows = [];
-    // Each summary row matches the main table's column count and width: label in first, value in last, others empty
     const makeFullWidthSummaryRow = (label, value) => {
-      // Match main table's column count and width: label in first, value in last, others empty
       const cells = [];
-      for (let i = 0; i < headerLabels.length; i++) {
+      headerLabels.forEach((_, i) => {
         if (i === 0) {
-          // Split label into main and percentage part
-          let labelParts = [];
-          const match = label.match(/^(.*?)(\(([^)]*)\))?$/);
-          if (match) {
-            const mainText = match[1] || "";
-            const percentText = match[3] || "";
-            if (mainText) {
-              labelParts.push(
-                new TextRun({
-                  text: mainText.trim() + (percentText ? " " : ""),
-                  bold: true,
-                  size: 16,
-                  font: defaultFont,
-                })
-              );
-            }
-            if (percentText) {
-              labelParts.push(
-                new TextRun({
-                  text: `(${percentText})`,
-                  bold: true,
-                  size: 16,
-                  font: defaultFont,
-                  color: "a0a0a0",
-                })
-              );
-            }
-          } else {
-            labelParts.push(
-              new TextRun({
-                text: label,
-                bold: true,
-                size: 16,
-                font: defaultFont,
-              })
-            );
-          }
           cells.push(
             new TableCell({
               children: [
                 new Paragraph({
-                  children: labelParts,
+                  children: [
+                    new TextRun({
+                      text: label,
+                      bold: true,
+                      size: 16,
+                      font: defaultFont,
+                    }),
+                  ],
                   alignment: AlignmentType.LEFT,
-                  spacing: { before: 20, after: 20 },
                 }),
               ],
-              width: {
-                size: 100 / headerLabels.length,
-                type: WidthType.PERCENTAGE,
-              },
+              width: { size: columnWidths[i], type: WidthType.PERCENTAGE },
               borders: {
                 top: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 bottom: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 left: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 right: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
               },
-              verticalAlign: VerticalAlign.CENTER,
             })
           );
         } else if (i === headerLabels.length - 1) {
@@ -1120,53 +1088,40 @@ const JsonToWord = async (jsonData) => {
                     }),
                   ],
                   alignment: AlignmentType.RIGHT,
-                  spacing: { before: 20, after: 20 },
                 }),
               ],
-              width: {
-                size: 100 / headerLabels.length,
-                type: WidthType.PERCENTAGE,
-              },
+              width: { size: columnWidths[i], type: WidthType.PERCENTAGE },
               borders: {
                 top: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 bottom: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 left: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 right: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
               },
-              verticalAlign: VerticalAlign.CENTER,
             })
           );
         } else {
           cells.push(
             new TableCell({
               children: [
-                new Paragraph({
-                  children: [new TextRun({ text: "" })],
-                  alignment: AlignmentType.CENTER,
-                  spacing: { before: 20, after: 20 },
-                }),
+                new Paragraph({ children: [new TextRun({ text: "" })] }),
               ],
-              width: {
-                size: 100 / headerLabels.length,
-                type: WidthType.PERCENTAGE,
-              },
+              width: { size: columnWidths[i], type: WidthType.PERCENTAGE },
               borders: {
                 top: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 bottom: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 left: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
                 right: { style: BorderStyle.SINGLE, size: 2, color: "FFFFFF" },
               },
-              verticalAlign: VerticalAlign.CENTER,
             })
           );
         }
-      }
+      });
       return new TableRow({ children: cells });
     };
 
-    summaryRows.push(
-      makeFullWidthSummaryRow("Total", `${currency}${subtotal}`)
-    );
+    const summaryRows = [
+      makeFullWidthSummaryRow("Total", `${currency}${subtotal}`),
+    ];
     if (hasDiscount) {
       summaryRows.push(
         makeFullWidthSummaryRow(
@@ -1190,19 +1145,16 @@ const JsonToWord = async (jsonData) => {
       )
     );
 
-    // Return both tables as array
     return [
       new Table({
         rows: [headerRow, ...dataRows],
         width: { size: 100, type: WidthType.PERCENTAGE },
         layout: TableLayoutType.AUTOFIT,
-        margins: { top: 120, bottom: 40 },
       }),
       new Table({
         rows: summaryRows,
         width: { size: 60, type: WidthType.PERCENTAGE },
         layout: TableLayoutType.AUTOFIT,
-        margins: { top: 20, bottom: 120 },
       }),
     ];
   };
@@ -1262,7 +1214,10 @@ const JsonToWord = async (jsonData) => {
                   spacing: { before: 60, after: 60 },
                 }),
               ],
-              width: { size: 100 / rowArr.length, type: WidthType.PERCENTAGE },
+              width: {
+                size: i === 0 ? 60 : 20, // Adjust column widths: 60% for Deliverable, 20% for others
+                type: WidthType.PERCENTAGE,
+              },
               shading: {
                 fill: i === 0 ? "f5f5f5" : "ffffff",
               },
@@ -1307,7 +1262,10 @@ const JsonToWord = async (jsonData) => {
                 spacing: { before: 60, after: 60 },
               }),
             ],
-            width: { size: 100 / totalArr.length, type: WidthType.PERCENTAGE },
+            width: {
+              size: i === 0 ? 60 : 20, // Adjust column widths: 60% for Deliverable, 20% for others
+              type: WidthType.PERCENTAGE,
+            },
             shading: {
               fill: "f5f5f5",
             },
@@ -1340,15 +1298,15 @@ const JsonToWord = async (jsonData) => {
                 ],
                 alignment:
                   i === 0
-                    ? AlignmentType.CENTER
+                    ? AlignmentType.LEFT
                     : i === headerLabels.length - 1
-                    ? AlignmentType.CENTER
+                    ? AlignmentType.RIGHT
                     : AlignmentType.CENTER,
                 spacing: { before: 80, after: 80 },
               }),
             ],
             width: {
-              size: 100 / headerLabels.length,
+              size: i === 0 ? 60 : 20, // Adjust column widths: 60% for Deliverable, 20% for others
               type: WidthType.PERCENTAGE,
             },
             shading: {
@@ -1791,29 +1749,62 @@ const JsonToWord = async (jsonData) => {
         case "image":
           if (item.content && validateImageUrl(item.content)) {
             try {
-              const imagePara = await createImageParagraph(item.content, {
-                width: parseInt(item.width) || 400,
-                height: parseInt(item.height) || 300,
-                context: "inline",
-                alignment:
-                  item.aliegn === "left"
-                    ? AlignmentType.LEFT
-                    : item.aliegn === "right"
-                    ? AlignmentType.RIGHT
-                    : AlignmentType.CENTER,
-                spacing: { before: 80, after: 40 },
-              });
-              allContent.push(imagePara);
+              const imageBuffer = await fetchImageAsArrayBuffer(item.content);
+              if (imageBuffer) {
+                const image = new Image();
+                image.src = URL.createObjectURL(new Blob([imageBuffer]));
 
-              if (item.caption) {
+                await new Promise((resolve) => {
+                  image.onload = resolve;
+                });
+
+                const originalWidth = image.naturalWidth;
+                const originalHeight = image.naturalHeight;
+
+                const dimensions = getImageDimensions(
+                  originalWidth,
+                  originalHeight,
+                  parseInt(item.width) || 400,
+                  parseInt(item.height) || 300,
+                  "inline"
+                );
+
+                const imagePara = await createImageParagraph(item.content, {
+                  width: dimensions.singlewidth,
+                  height: dimensions.singleheight,
+                  context: "inline",
+                  alignment:
+                    item.aliegn === "left"
+                      ? AlignmentType.LEFT
+                      : item.aliegn === "right"
+                      ? AlignmentType.RIGHT
+                      : AlignmentType.CENTER,
+                  spacing: { before: 80, after: 40 },
+                });
+                allContent.push(imagePara);
+
+                if (item.caption) {
+                  allContent.push(
+                    createParagraph(item.caption, {
+                      italic: true,
+                      size: 16,
+                      alignment: AlignmentType.CENTER,
+                      spacing: { before: 20, after: 80 },
+                      color: "6C757D",
+                    })
+                  );
+                }
+              } else {
                 allContent.push(
-                  createParagraph(item.caption, {
-                    italic: true,
-                    size: 16,
-                    alignment: AlignmentType.CENTER,
-                    spacing: { before: 20, after: 80 },
-                    color: "6C757D",
-                  })
+                  createParagraph(
+                    `[Image could not be loaded: ${item.content}]`,
+                    {
+                      italic: true,
+                      size: 16,
+                      color: "DC3545",
+                      spacing: { before: 40, after: 40 },
+                    }
+                  )
                 );
               }
             } catch (error) {
@@ -1865,10 +1856,26 @@ const JsonToWord = async (jsonData) => {
                           children: [imageCell],
                           width: { size: 35, type: WidthType.PERCENTAGE },
                           borders: {
-                            top: { style: BorderStyle.NONE },
-                            bottom: { style: BorderStyle.NONE },
-                            left: { style: BorderStyle.NONE },
-                            right: { style: BorderStyle.NONE },
+                            top: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            bottom: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            left: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            right: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
                           },
                           margins: { top: 0, bottom: 0, left: 0, right: 200 },
                           verticalAlign: VerticalAlign.CENTER,
@@ -1877,10 +1884,26 @@ const JsonToWord = async (jsonData) => {
                           children: [textCell],
                           width: { size: 65, type: WidthType.PERCENTAGE },
                           borders: {
-                            top: { style: BorderStyle.NONE },
-                            bottom: { style: BorderStyle.NONE },
-                            left: { style: BorderStyle.NONE },
-                            right: { style: BorderStyle.NONE },
+                            top: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            bottom: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            left: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            right: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
                           },
                           margins: { top: 0, bottom: 0, left: 200, right: 0 },
                           verticalAlign: VerticalAlign.CENTER,
@@ -1891,10 +1914,26 @@ const JsonToWord = async (jsonData) => {
                           children: [textCell],
                           width: { size: 65, type: WidthType.PERCENTAGE },
                           borders: {
-                            top: { style: BorderStyle.NONE },
-                            bottom: { style: BorderStyle.NONE },
-                            left: { style: BorderStyle.NONE },
-                            right: { style: BorderStyle.NONE },
+                            top: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            bottom: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            left: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            right: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
                           },
                           margins: { top: 0, bottom: 0, left: 0, right: 200 },
                           verticalAlign: VerticalAlign.CENTER,
@@ -1903,10 +1942,26 @@ const JsonToWord = async (jsonData) => {
                           children: [imageCell],
                           width: { size: 35, type: WidthType.PERCENTAGE },
                           borders: {
-                            top: { style: BorderStyle.NONE },
-                            bottom: { style: BorderStyle.NONE },
-                            left: { style: BorderStyle.NONE },
-                            right: { style: BorderStyle.NONE },
+                            top: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            bottom: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            left: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
+                            right: {
+                              style: BorderStyle.SINGLE,
+                              size: 2,
+                              color: "FFFFFF",
+                            },
                           },
                           margins: { top: 0, bottom: 0, left: 200, right: 0 },
                           verticalAlign: VerticalAlign.CENTER,
@@ -1954,10 +2009,29 @@ const JsonToWord = async (jsonData) => {
                       children: [image1],
                       width: { size: 50, type: WidthType.PERCENTAGE },
                       borders: {
-                        top: { style: BorderStyle.NONE },
-                        bottom: { style: BorderStyle.NONE },
-                        left: { style: BorderStyle.NONE },
-                        right: { style: BorderStyle.NONE },
+                        top: {
+                          style: BorderStyle.SINGLE,
+                          size: 2,
+                          color: "FFFFFF",
+                        },
+                        bottom: {
+                          style: BorderStyle.SINGLE,
+                          size: 2,
+                          color: "FFFFFF",
+                        },
+                        style: BorderStyle.SINGLE,
+                        size: 2,
+                        color: "FFFFFF",
+                        left: {
+                          style: BorderStyle.SINGLE,
+                          size: 2,
+                          color: "FFFFFF",
+                        },
+                        right: {
+                          style: BorderStyle.SINGLE,
+                          size: 2,
+                          color: "FFFFFF",
+                        },
                       },
                       margins: { top: 0, bottom: 0, left: 0, right: 100 },
                       verticalAlign: VerticalAlign.CENTER,
@@ -1966,10 +2040,26 @@ const JsonToWord = async (jsonData) => {
                       children: [image2],
                       width: { size: 50, type: WidthType.PERCENTAGE },
                       borders: {
-                        top: { style: BorderStyle.NONE },
-                        bottom: { style: BorderStyle.NONE },
-                        left: { style: BorderStyle.NONE },
-                        right: { style: BorderStyle.NONE },
+                        top: {
+                          style: BorderStyle.SINGLE,
+                          size: 2,
+                          color: "FFFFFF",
+                        },
+                        bottom: {
+                          style: BorderStyle.SINGLE,
+                          size: 2,
+                          color: "FFFFFF",
+                        },
+                        left: {
+                          style: BorderStyle.SINGLE,
+                          size: 2,
+                          color: "FFFFFF",
+                        },
+                        right: {
+                          style: BorderStyle.SINGLE,
+                          size: 2,
+                          color: "FFFFFF",
+                        },
                       },
                       margins: { top: 0, bottom: 0, left: 100, right: 0 },
                       verticalAlign: VerticalAlign.CENTER,
@@ -2020,7 +2110,38 @@ const JsonToWord = async (jsonData) => {
             const proposedName = item.content[0]?.proposedName || "";
             const acceptedName = item.content[1]?.acceptedName || "";
 
-            // Table row with heading
+            // Border helpers
+            const borderVisible = {
+              style: BorderStyle.SINGLE,
+              size: 2,
+              color: "B4B4B4",
+            };
+            const borderHidden = {
+              style: BorderStyle.SINGLE,
+              size: 2,
+              color: "FFFFFF", // Matches white background so inner lines disappear
+            };
+            const labelHidden = {
+              style: BorderStyle.SINGLE,
+              size: 2,
+              color: "EFEFEF",
+            };
+
+            const labelBorder = ({ top, bottom, left, right }) => ({
+              top: top ? borderVisible : labelHidden,
+              bottom: bottom ? borderVisible : labelHidden,
+              left: left ? borderVisible : labelHidden,
+              right: right ? borderVisible : labelHidden,
+            });
+
+            const getBorders = ({ top, bottom, left, right }) => ({
+              top: top ? borderVisible : borderHidden,
+              bottom: bottom ? borderVisible : borderHidden,
+              left: left ? borderVisible : borderHidden,
+              right: right ? borderVisible : borderHidden,
+            });
+
+            // Heading row (spanning both columns)
             const headingRow = new TableRow({
               children: [
                 new TableCell({
@@ -2030,44 +2151,29 @@ const JsonToWord = async (jsonData) => {
                         new TextRun({
                           text: "Signatures",
                           bold: true,
-                          size: 28,
+                          size: 32, // Slightly larger for emphasis
                           font: headingFont,
-                          color: "000000",
+                          color: "333333",
                         }),
                       ],
                       alignment: AlignmentType.LEFT,
-                      spacing: { before: 60, after: 20 },
+                      spacing: { before: 100, after: 60 },
                     }),
                   ],
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "FFFFFF",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "FFFFFF",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "FFFFFF",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "FFFFFF",
-                    },
-                  },
+                  borders: getBorders({
+                    top: false,
+                    bottom: true,
+                    left: false,
+                    right: false,
+                  }),
                   verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 40, bottom: 20, left: 40, right: 40 },
+                  margins: { top: 200, bottom: 100, left: 100, right: 100 },
+                  columnSpan: 2,
                 }),
               ],
             });
 
-            // Table row with two columns: Proposed By & Accepted By
+            // Labels row
             const labelRow = new TableRow({
               children: [
                 new TableCell({
@@ -2077,41 +2183,25 @@ const JsonToWord = async (jsonData) => {
                         new TextRun({
                           text: "Proposed By",
                           bold: true,
-                          size: 20,
+                          size: 22,
                           font: defaultFont,
                           color: "000000",
                         }),
                       ],
                       alignment: AlignmentType.LEFT,
-                      spacing: { before: 20, after: 10 },
+                      spacing: { before: 40, after: 20 },
                     }),
                   ],
-                  shading: { fill: "F5F5F5" },
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                  },
+                  borders: labelBorder({
+                    top: true,
+                    bottom: false,
+                    left: true,
+                    right: false,
+                  }),
+                  shading: { fill: "EFEFEF" },
                   width: { size: 50, type: WidthType.PERCENTAGE },
                   verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 20, bottom: 10, left: 40, right: 20 },
+                  margins: { top: 100, bottom: 40, left: 100, right: 40 },
                 }),
                 new TableCell({
                   children: [
@@ -2120,321 +2210,76 @@ const JsonToWord = async (jsonData) => {
                         new TextRun({
                           text: "Accepted By",
                           bold: true,
-                          size: 20,
+                          size: 22,
                           font: defaultFont,
                           color: "000000",
                         }),
                       ],
                       alignment: AlignmentType.LEFT,
-                      spacing: { before: 20, after: 10 },
+                      spacing: { before: 40, after: 20 },
                     }),
                   ],
-                  shading: { fill: "F5F5F5" },
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                  },
+                  borders: labelBorder({
+                    top: true,
+                    bottom: false,
+                    left: false,
+                    right: true,
+                  }),
+                  shading: { fill: "EFEFEF" },
                   width: { size: 50, type: WidthType.PERCENTAGE },
                   verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 20, bottom: 10, left: 20, right: 40 },
+                  margins: { top: 100, bottom: 40, left: 40, right: 100 },
                 }),
               ],
             });
 
-            // Table row with signature lines
-            const lineRow = new TableRow({
-              children: [
-                new TableCell({
-                  children: [
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: "",
-                          size: 18,
-                          font: defaultFont,
-                          color: "808080",
-                        }),
-                      ],
-                      alignment: AlignmentType.LEFT,
-                      spacing: { before: 10, after: 5 },
-                    }),
-                  ],
-                  shading: { fill: "FFFFFF" },
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                  },
-                  width: { size: 50, type: WidthType.PERCENTAGE },
-                  verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 10, bottom: 5, left: 40, right: 20 },
-                }),
-                new TableCell({
-                  children: [
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: "",
-                          size: 18,
-                          font: defaultFont,
-                          color: "808080",
-                        }),
-                      ],
-                      alignment: AlignmentType.LEFT,
-                      spacing: { before: 10, after: 5 },
-                    }),
-                  ],
-                  shading: { fill: "FFFFFF" },
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                  },
-                  width: { size: 50, type: WidthType.PERCENTAGE },
-                  verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 10, bottom: 5, left: 20, right: 40 },
-                }),
-              ],
-            });
-
-            // Table row with names
+            // Names row
             const nameRow = new TableRow({
               children: [
                 new TableCell({
                   children: [
                     new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: proposedName,
-                          size: 18,
-                          font: defaultFont,
-                          color: "000000",
-                        }),
-                      ],
+                      text: proposedName,
                       alignment: AlignmentType.LEFT,
-                      spacing: { before: 5, after: 5 },
                     }),
                   ],
-                  shading: { fill: "FFFFFF" },
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                  },
+                  borders: labelBorder({
+                    top: false,
+                    bottom: true,
+                    left: true,
+                    right: false,
+                  }),
+                  shading: { fill: "EFEFEF" },
                   width: { size: 50, type: WidthType.PERCENTAGE },
                   verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 5, bottom: 5, left: 40, right: 20 },
+                  margins: { top: 80, bottom: 80, left: 100, right: 40 },
                 }),
                 new TableCell({
                   children: [
                     new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: acceptedName,
-                          size: 18,
-                          font: defaultFont,
-                          color: "000000",
-                        }),
-                      ],
+                      text: acceptedName,
                       alignment: AlignmentType.LEFT,
-                      spacing: { before: 5, after: 5 },
                     }),
                   ],
-                  shading: { fill: "FFFFFF" },
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                  },
+                  borders: labelBorder({
+                    top: false,
+                    bottom: true,
+                    left: false,
+                    right: true,
+                  }),
+                  shading: { fill: "EFEFEF" },
                   width: { size: 50, type: WidthType.PERCENTAGE },
                   verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 5, bottom: 5, left: 20, right: 40 },
+                  margins: { top: 80, bottom: 80, left: 40, right: 100 },
                 }),
               ],
             });
 
-            // Table row with date fields
-            const dateRow = new TableRow({
-              children: [
-                new TableCell({
-                  children: [
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: "Date:",
-                          size: 16,
-                          font: defaultFont,
-                          color: "6C757D",
-                        }),
-                      ],
-                      alignment: AlignmentType.LEFT,
-                      spacing: { before: 5, after: 5 },
-                    }),
-                  ],
-                  shading: { fill: "FFFFFF" },
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                  },
-                  width: { size: 50, type: WidthType.PERCENTAGE },
-                  verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 5, bottom: 20, left: 40, right: 20 },
-                }),
-                new TableCell({
-                  children: [
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: "Date:",
-                          size: 16,
-                          font: defaultFont,
-                          color: "6C757D",
-                        }),
-                      ],
-                      alignment: AlignmentType.LEFT,
-                      spacing: { before: 5, after: 5 },
-                    }),
-                  ],
-                  shading: { fill: "FFFFFF" },
-                  borders: {
-                    top: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    bottom: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    left: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                    right: {
-                      style: BorderStyle.SINGLE,
-                      size: 2,
-                      color: "B4B4B4",
-                    },
-                  },
-                  width: { size: 50, type: WidthType.PERCENTAGE },
-                  verticalAlign: VerticalAlign.CENTER,
-                  margins: { top: 5, bottom: 20, left: 20, right: 40 },
-                }),
-              ],
-            });
-
-            // Build the table
+            // Build table
             const signatureTable = new Table({
-              rows: [headingRow, labelRow, lineRow, nameRow, dateRow],
+              rows: [headingRow, labelRow, nameRow],
               width: { size: 100, type: WidthType.PERCENTAGE },
               layout: TableLayoutType.AUTOFIT,
-              margins: { top: 120, bottom: 120 },
             });
 
             allContent.push(signatureTable);

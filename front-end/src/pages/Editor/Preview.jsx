@@ -6,6 +6,7 @@ import axios from "axios";
 import { DatabaseContext } from "../../context/DatabaseContext";
 import { useParams } from "react-router-dom";
 import GeneratePDF from "./GeneratePDF";
+import JsonToWord from "./GenerateWord";
 import { useRouteTracker } from "../../components/useRouteTracker";
 import ScrollSectionTracker from "../../components/ScrollSectionTracker";
 
@@ -53,7 +54,11 @@ const Preview = () => {
   }, []);
 
   const handleGeneratePdf = () => {
-    GeneratePDF(data);
+    GeneratePDF(rows, settings);
+  };
+
+  const handleGenerateWord = () => {
+    JsonToWord(rows);
   };
 
   const getProposal = async () => {
@@ -120,7 +125,18 @@ const Preview = () => {
             />
           </div>
         </div>
-        <button onClick={handleGeneratePdf}>Generate Pdf</button>
+        <button
+          className="fixed bottom-5 left-4 text-white shadow-sm bg-emerald-600 rounded-md p-1"
+          onClick={handleGeneratePdf}
+        >
+          Generate Pdf
+        </button>
+        <button
+          className="fixed bottom-5 right-4 text-white shadow-sm bg-cyan-600 rounded-md p-1"
+          onClick={handleGenerateWord}
+        >
+          Generate Word
+        </button>
       </DndProvider>
     </div>
   );

@@ -25,7 +25,6 @@ import { CgFileDocument } from "react-icons/cg";
 import { Link } from "react-router-dom";
 import GeneratePDF from "./GeneratePDF";
 import JsonToWord from "./GenerateWord";
-import { exportLiveHTML } from "./HtmltoWord";
 import { AiOutlineDownload } from "react-icons/ai";
 import { GrDownload } from "react-icons/gr";
 import { LiaUndoSolid } from "react-icons/lia";
@@ -161,17 +160,6 @@ const EditorHeader = ({
 
   const handleGenerateWord = () => {
     JsonToWord(rows);
-  };
-
-
-  const handleExportLiveHTML = () => {
-    try {
-      exportLiveHTML(dropCanvasRef, name || proposalName || "Web View Export");
-      toast.success("Optimized HTML exported successfully!");
-    } catch (error) {
-      console.error("Export failed:", error);
-      toast.error("Export failed: " + error.message);
-    }
   };
 
   const handleFavorate = async () => {
@@ -755,14 +743,6 @@ const EditorHeader = ({
                 <img src={pdf} alt="no" />
                 <a className="text-sm text-gray-500 ">PDF Document</a>
                 <GrDownload className=" absolute right-3 text-gray-400" />
-              </div>
-              <div
-                onClick={handleExportLiveHTML}
-                className="relative border-[1px] rounded-md w-[90%] py-2 border-green-200 flex items-center justify-start pl-2 cursor-pointer  gap-3 mt-2 bg-green-50"
-              >
-                <Icon icon="material-symbols:html" className="w-6 h-6 text-green-600" />
-                <a className="text-sm text-green-600 font-medium">Export Optimized HTML</a>
-                <GrDownload className=" absolute right-3 text-green-400" />
               </div>
             </div>
           )}

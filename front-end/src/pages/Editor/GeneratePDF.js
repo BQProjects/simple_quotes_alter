@@ -515,10 +515,6 @@ const GeneratePDF = async (jsonData, settings) => {
     setFillColorFromHex("F3F4F6");
     doc.rect(blockX, currentY - 5, blockWidth, blockHeight, "F");
 
-    // Draw blue left bar - matches Word export
-    setFillColorFromHex("E0E0E0");
-    doc.rect(blockX, currentY - 5, 4, blockHeight, "F");
-
     // Draw border - matches Word export
     doc.setDrawColor(224, 224, 224);
     doc.rect(blockX, currentY - 5, blockWidth, blockHeight);
@@ -707,29 +703,44 @@ const GeneratePDF = async (jsonData, settings) => {
       : [];
 
     const colCount = headerLabels.length;
-    const colWidth = availableWidth / colCount;
-    const rowHeight = 8;
 
+    // New: Column widths with first column at 60%
+    const firstColWidth = availableWidth * 0.6;
+    const otherColWidth = (availableWidth - firstColWidth) / (colCount - 1);
+    const columnWidths = [
+      firstColWidth,
+      ...Array(colCount - 1).fill(otherColWidth),
+    ];
+
+    const rowHeight = 8;
     checkPageBreak((dataRows.length + 6) * rowHeight + 40);
 
-    // Draw header - matches Word export styling
+    // Draw header - left align first column
     let x = 10;
     doc.setFontSize(9);
     doc.setFont(defaultFont, "bold");
     setFillColorFromHex("F5F5F5");
     setColorFromHex("000000");
 
-    headerLabels.forEach((header) => {
+    headerLabels.forEach((header, i) => {
       setFillColorFromHex("F5F5F5");
-      doc.rect(x, currentY, colWidth, rowHeight, "F");
+      doc.rect(x, currentY, columnWidths[i], rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
-      doc.rect(x, currentY, colWidth, rowHeight);
-      doc.text(
-        header.toString(),
-        x + colWidth / 2 - doc.getTextWidth(header) / 2,
-        currentY + 6
-      );
-      x += colWidth;
+      doc.rect(x, currentY, columnWidths[i], rowHeight);
+
+      if (i === 0) {
+        // Left align for first column
+        doc.text(header.toString(), x + 3, currentY + 6);
+      } else {
+        // Center align for others
+        doc.text(
+          header.toString(),
+          x + columnWidths[i] / 2 - doc.getTextWidth(header) / 2,
+          currentY + 6
+        );
+      }
+
+      x += columnWidths[i];
     });
     currentY += rowHeight;
 
@@ -743,21 +754,29 @@ const GeneratePDF = async (jsonData, settings) => {
 
       row.forEach((cell, i) => {
         doc.setDrawColor(222, 226, 230);
-        doc.rect(x, currentY, colWidth, rowHeight);
+        doc.rect(x, currentY, columnWidths[i], rowHeight);
         const cellText = cell !== undefined ? cell.toString() : "";
-        doc.text(
-          cellText,
-          x + colWidth / 2 - doc.getTextWidth(cellText) / 2,
-          currentY + 6
-        );
-        x += colWidth;
+
+        if (i === 0) {
+          // Left align first column
+          doc.text(cellText, x + 3, currentY + 6);
+        } else {
+          // Center align others
+          doc.text(
+            cellText,
+            x + columnWidths[i] / 2 - doc.getTextWidth(cellText) / 2,
+            currentY + 6
+          );
+        }
+
+        x += columnWidths[i];
       });
       currentY += rowHeight;
     });
 
     if (!Array.isArray(costContent) || costContent.length === 0) return;
 
-    // Calculate subtotal - matches Word export logic
+    // Calculate subtotal
     let subtotal = 0;
     if (Array.isArray(costContent)) {
       subtotal = costContent.reduce((sum, row) => {
@@ -775,7 +794,7 @@ const GeneratePDF = async (jsonData, settings) => {
     const taxAmount = hasTax ? subtotal * (taxValue / 100) : 0;
     const total = subtotal - discountAmount + taxAmount;
 
-    // Draw summary rows - matches Word export exactly
+    // Draw summary rows
     const summaryRows = [];
     summaryRows.push(["Total", `${currency}${subtotal.toFixed(2)}`]);
 
@@ -808,14 +827,14 @@ const GeneratePDF = async (jsonData, settings) => {
         doc.setDrawColor(255, 255, 255);
 
         if (isLastRow) {
-          setFillColorFromHex("F5F5F5");
-          doc.rect(x, currentY, colWidth, rowHeight, "F");
+          setFillColorFromHex("FFFFFF");
+          doc.rect(x, currentY, columnWidths[i], rowHeight, "F");
         }
 
-        doc.rect(x, currentY, colWidth, rowHeight);
+        doc.rect(x, currentY, columnWidths[i], rowHeight);
 
         if (i === 0) {
-          // Split label into main and percentage part - matches Word export
+          // Left align first column in summary
           const label = row[0] ?? "";
           const match = label.match(/^(.*?)(\(([^)]*)\))?$/);
           let tx = x + 3;
@@ -847,12 +866,12 @@ const GeneratePDF = async (jsonData, settings) => {
           const valueText = value.toString();
           doc.text(
             valueText,
-            x + colWidth - 3 - doc.getTextWidth(valueText),
+            x + columnWidths[i] - 3 - doc.getTextWidth(valueText),
             currentY + 6
           );
         }
 
-        x += colWidth;
+        x += columnWidths[i];
       }
       currentY += rowHeight;
     });
@@ -874,28 +893,33 @@ const GeneratePDF = async (jsonData, settings) => {
     if (showValue) headerLabels.push("Value");
 
     const colCount = headerLabels.length;
-    const colWidth = availableWidth / colCount;
+    const firstColWidth = availableWidth * 0.6; // 60% for first column
+    const otherColWidth =
+      colCount > 1 ? (availableWidth - firstColWidth) / (colCount - 1) : 0;
     const rowHeight = 9;
 
     checkPageBreak((priceContent.length + 3) * rowHeight + 20);
 
-    // Header row with shading - matches Word export
+    // Header row
     let x = 10;
     doc.setFontSize(10);
     doc.setFont(defaultFont, "bold");
     setFillColorFromHex("F5F5F5");
     setColorFromHex("000000");
 
-    headerLabels.forEach((header) => {
+    headerLabels.forEach((header, i) => {
+      const colWidth = i === 0 ? firstColWidth : otherColWidth;
       setFillColorFromHex("F5F5F5");
       doc.rect(x, currentY, colWidth, rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, colWidth, rowHeight);
-      doc.text(
-        header.toString(),
-        x + colWidth / 2 - doc.getTextWidth(header) / 2,
-        currentY + 7
-      );
+
+      const tx =
+        i === 0
+          ? x + 4 // left aligned
+          : x + colWidth / 2 - doc.getTextWidth(header) / 2;
+
+      doc.text(header.toString(), tx, currentY + 7);
       x += colWidth;
     });
     currentY += rowHeight;
@@ -906,7 +930,7 @@ const GeneratePDF = async (jsonData, settings) => {
     doc.setFont(defaultFont, "normal");
     doc.setFontSize(10);
 
-    // Draw data rows
+    // Data rows
     priceContent.forEach((item) => {
       const row = [item?.deliverable ?? ""];
       if (showPercentage) {
@@ -924,7 +948,8 @@ const GeneratePDF = async (jsonData, settings) => {
 
       x = 10;
       row.forEach((cell, i) => {
-        // Set background for first column
+        const colWidth = i === 0 ? firstColWidth : otherColWidth;
+
         if (i === 0) {
           setFillColorFromHex("F5F5F5");
           doc.rect(x, currentY, colWidth, rowHeight, "F");
@@ -934,28 +959,23 @@ const GeneratePDF = async (jsonData, settings) => {
 
         const align =
           i === 0 ? "left" : i === row.length - 1 ? "right" : "center";
-        let tx;
         const cellText = cell.toString();
+        let tx;
 
-        switch (align) {
-          case "left":
-            tx = x + 4;
-            break;
-          case "right":
-            tx = x + colWidth - 4 - doc.getTextWidth(cellText);
-            break;
-          default:
-            tx = x + colWidth / 2 - doc.getTextWidth(cellText) / 2;
-        }
+        if (align === "left") tx = x + 4;
+        else if (align === "right")
+          tx = x + colWidth - 4 - doc.getTextWidth(cellText);
+        else tx = x + colWidth / 2 - doc.getTextWidth(cellText) / 2;
 
         setColorFromHex("000000");
         doc.text(cellText, tx, currentY + 7);
+
         x += colWidth;
       });
       currentY += rowHeight;
     });
 
-    // Total row with shading - matches Word export
+    // Total row
     const totalRow = ["Total"];
     if (showPercentage) totalRow.push(`${totalPercentage}%`);
     if (showValue) totalRow.push(`${currency}${totalValue}`);
@@ -966,6 +986,7 @@ const GeneratePDF = async (jsonData, settings) => {
     setFillColorFromHex("F5F5F5");
 
     totalRow.forEach((cell, i) => {
+      const colWidth = i === 0 ? firstColWidth : otherColWidth;
       setFillColorFromHex("F5F5F5");
       doc.rect(x, currentY, colWidth, rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
@@ -973,19 +994,13 @@ const GeneratePDF = async (jsonData, settings) => {
 
       const align =
         i === 0 ? "left" : i === totalRow.length - 1 ? "right" : "center";
-      let tx;
       const cellText = cell.toString();
+      let tx;
 
-      switch (align) {
-        case "left":
-          tx = x + 4;
-          break;
-        case "right":
-          tx = x + colWidth - 4 - doc.getTextWidth(cellText);
-          break;
-        default:
-          tx = x + colWidth / 2 - doc.getTextWidth(cellText) / 2;
-      }
+      if (align === "left") tx = x + 4;
+      else if (align === "right")
+        tx = x + colWidth - 4 - doc.getTextWidth(cellText);
+      else tx = x + colWidth / 2 - doc.getTextWidth(cellText) / 2;
 
       setColorFromHex("000000");
       doc.text(cellText, tx, currentY + 7);
@@ -1011,6 +1026,11 @@ const GeneratePDF = async (jsonData, settings) => {
           // Create a text-only cover page, matching web UI formatting
           const nextItems = data.slice(index + 1, index + 5);
           let overlayItemIds = new Set();
+          const topMargin = 30; // Increased top margin for cover page
+
+          if (index === 0) {
+            currentY += topMargin; // Add extra space if cover page is at the top
+          }
 
           for (const nextItem of nextItems) {
             if (
@@ -1298,8 +1318,8 @@ const GeneratePDF = async (jsonData, settings) => {
         case "image":
           if (item.content) {
             await createImageParagraph(item.content, {
-              width: parseInt(item.width) || 80,
-              height: parseInt(item.height) || 60,
+              width: 180,
+              height: 160,
               context: "inline",
               alignment:
                 item.aliegn === "left"
@@ -1329,22 +1349,24 @@ const GeneratePDF = async (jsonData, settings) => {
             const text = item.content
               .map((block) => block?.children?.[0]?.text || "")
               .join(" ");
-            const isLeftAligned = item.align === "left";
+            const isCenterAligned = item.align === "center";
 
             checkPageBreak(60);
 
+            const margin = 20; // Add margin to bring content further inside
+
             const imageWidth = parseInt(item.width) || 50;
             const imageHeight = parseInt(item.height) || 40;
-            const textWidth = availableWidth - imageWidth - 15;
+            const textWidth = availableWidth - imageWidth - margin * 2;
 
-            if (isLeftAligned) {
+            if (isCenterAligned) {
               // Image on left, text on right
               try {
                 if (item.ImageLink) {
                   doc.addImage(
                     item.ImageLink,
                     "JPEG",
-                    10,
+                    margin,
                     currentY,
                     imageWidth,
                     imageHeight
@@ -1353,7 +1375,7 @@ const GeneratePDF = async (jsonData, settings) => {
                   doc.addImage(
                     ImageAlter,
                     "JPEG",
-                    10,
+                    margin,
                     currentY,
                     imageWidth,
                     imageHeight
@@ -1371,7 +1393,7 @@ const GeneratePDF = async (jsonData, settings) => {
               let textY = currentY + 5;
 
               lines.forEach((line) => {
-                doc.text(line, 10 + imageWidth + 10, textY);
+                doc.text(line, margin + imageWidth + 10, textY);
                 textY += 6;
               });
 
@@ -1386,7 +1408,7 @@ const GeneratePDF = async (jsonData, settings) => {
               let textY = currentY + 5;
 
               lines.forEach((line) => {
-                doc.text(line, 10, textY);
+                doc.text(line, margin, textY);
                 textY += 6;
               });
 
@@ -1395,7 +1417,7 @@ const GeneratePDF = async (jsonData, settings) => {
                   doc.addImage(
                     item.ImageLink,
                     "JPEG",
-                    pageWidth - imageWidth - 10,
+                    pageWidth - imageWidth - margin,
                     currentY,
                     imageWidth,
                     imageHeight
@@ -1404,7 +1426,7 @@ const GeneratePDF = async (jsonData, settings) => {
                   doc.addImage(
                     ImageAlter,
                     "JPEG",
-                    pageWidth - imageWidth - 10,
+                    pageWidth - imageWidth - margin,
                     currentY,
                     imageWidth,
                     imageHeight
@@ -1543,13 +1565,6 @@ const GeneratePDF = async (jsonData, settings) => {
             const acceptedName = item.content[1]?.acceptedName || "";
             doc.text(proposedName, leftX, nameY);
             doc.text(acceptedName, rightX, nameY);
-
-            // Optional: Date fields
-            doc.setFontSize(9);
-            setColorFromHex("6C757D");
-            doc.text("Date:", leftX, blockY + 50);
-            doc.text("Date:", rightX, blockY + 50);
-
             currentY = blockY + blockHeight + 10;
           }
           break;
