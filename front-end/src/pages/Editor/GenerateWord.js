@@ -1351,98 +1351,109 @@ const JsonToWord = async (jsonData) => {
 
       switch (item.type) {
         case "cover":
-          // Always create a text-only cover page, but match web UI formatting
-          const nextItems = data.slice(index + 1, index + 5);
-          let overlayItemIds = new Set();
-          let coverParagraphs = [];
-          for (const nextItem of nextItems) {
-            if (
-              (nextItem?.type === "heading" || nextItem?.type === "input") &&
-              nextItem?.content &&
-              Array.isArray(nextItem.content)
-            ) {
-              nextItem.content.forEach((block) => {
-                const children = block?.children;
-                const text =
-                  Array.isArray(children) && children[0]?.text
-                    ? children[0].text
-                    : "";
-                if (!text.trim()) return;
-
-                // Determine style
-                let size = 44;
-                let heading = null;
-                let font = headingFont;
-                let color = nextItem.textColor || "000000";
-                let bold =
-                  children &&
-                  children[0] &&
-                  typeof children[0].bold === "boolean"
-                    ? children[0].bold
-                    : true;
-                let alignment = block?.align
-                  ? block.align.toLowerCase()
-                  : "center";
-                let spacing = { before: 120, after: 120 }; // Tighter cover spacing
-
-                if (block?.type && block.type.includes("heading")) {
-                  const sizeMap = {
-                    "heading-one": 48,
-                    "heading-two": 36,
-                    "heading-three": 30,
-                    "heading-four": 26,
-                    "heading-five": 22,
-                    "heading-six": 20,
-                  };
-                  size = sizeMap[block.type] || 44;
-                  const headingMap = {
-                    "heading-one": HeadingLevel.HEADING_1,
-                    "heading-two": HeadingLevel.HEADING_2,
-                    "heading-three": HeadingLevel.HEADING_3,
-                    "heading-four": HeadingLevel.HEADING_4,
-                    "heading-five": HeadingLevel.HEADING_5,
-                    "heading-six": HeadingLevel.HEADING_6,
-                  };
-                  heading = headingMap[block.type];
-                  font = headingFont;
-                  spacing = { before: 120, after: 120 };
-                }
-
-                coverParagraphs.push(
-                  createParagraph(text, {
-                    bold,
-                    size,
-                    heading,
-                    alignment:
-                      alignment === "center"
-                        ? AlignmentType.CENTER
-                        : alignment === "right"
-                        ? AlignmentType.RIGHT
-                        : AlignmentType.LEFT,
-                    color,
-                    font,
-                    spacing,
-                  })
-                );
-                overlayItemIds.add(nextItem.id);
-              });
-            }
-          }
-
-          if (coverParagraphs.length === 0) {
-            coverParagraphs.push(
-              createParagraph("COVER PAGE", {
-                bold: true,
-                size: 44,
+          if (item.coverType === "full") {
+            // Ensure no image background for full-page covers
+            allContent.push(
+              createParagraph("", {
+                size: 22,
                 alignment: AlignmentType.CENTER,
-                color: "000000",
-                spacing: { before: 240, after: 240 },
+                spacing: { before: 60, after: 60 },
               })
             );
-          }
+          } else if (item.coverType === "half") {
+            // Always create a text-only cover page, but match web UI formatting
+            const nextItems = data.slice(index + 1, index + 5);
+            let overlayItemIds = new Set();
+            let coverParagraphs = [];
+            for (const nextItem of nextItems) {
+              if (
+                (nextItem?.type === "heading" || nextItem?.type === "input") &&
+                nextItem?.content &&
+                Array.isArray(nextItem.content)
+              ) {
+                nextItem.content.forEach((block) => {
+                  const children = block?.children;
+                  const text =
+                    Array.isArray(children) && children[0]?.text
+                      ? children[0].text
+                      : "";
+                  if (!text.trim()) return;
 
-          overlayItemIds.forEach((id) => skipNextItems.add(id));
-          allContent.push(...coverParagraphs);
+                  // Determine style
+                  let size = 44;
+                  let heading = null;
+                  let font = headingFont;
+                  let color = nextItem.textColor || "000000";
+                  let bold =
+                    children &&
+                    children[0] &&
+                    typeof children[0].bold === "boolean"
+                      ? children[0].bold
+                      : true;
+                  let alignment = block?.align
+                    ? block.align.toLowerCase()
+                    : "center";
+                  let spacing = { before: 120, after: 120 }; // Tighter cover spacing
+
+                  if (block?.type && block.type.includes("heading")) {
+                    const sizeMap = {
+                      "heading-one": 48,
+                      "heading-two": 36,
+                      "heading-three": 30,
+                      "heading-four": 26,
+                      "heading-five": 22,
+                      "heading-six": 20,
+                    };
+                    size = sizeMap[block.type] || 44;
+                    const headingMap = {
+                      "heading-one": HeadingLevel.HEADING_1,
+                      "heading-two": HeadingLevel.HEADING_2,
+                      "heading-three": HeadingLevel.HEADING_3,
+                      "heading-four": HeadingLevel.HEADING_4,
+                      "heading-five": HeadingLevel.HEADING_5,
+                      "heading-six": HeadingLevel.HEADING_6,
+                    };
+                    heading = headingMap[block.type];
+                    font = headingFont;
+                    spacing = { before: 120, after: 120 };
+                  }
+
+                  coverParagraphs.push(
+                    createParagraph(text, {
+                      bold,
+                      size,
+                      heading,
+                      alignment:
+                        alignment === "center"
+                          ? AlignmentType.CENTER
+                          : alignment === "right"
+                          ? AlignmentType.RIGHT
+                          : AlignmentType.LEFT,
+                      color,
+                      font,
+                      spacing,
+                    })
+                  );
+                  overlayItemIds.add(nextItem.id);
+                });
+              }
+            }
+
+            if (coverParagraphs.length === 0) {
+              coverParagraphs.push(
+                createParagraph("COVER PAGE", {
+                  bold: true,
+                  size: 44,
+                  alignment: AlignmentType.CENTER,
+                  color: "000000",
+                  spacing: { before: 240, after: 240 },
+                })
+              );
+            }
+
+            overlayItemIds.forEach((id) => skipNextItems.add(id));
+            allContent.push(...coverParagraphs);
+          }
           break;
 
         case "heading":
