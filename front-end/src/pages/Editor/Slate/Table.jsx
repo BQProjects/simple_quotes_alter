@@ -203,33 +203,64 @@ const Table = ({
   };
 
   const getBackgroundColor = (value, colIndex, rowIndex) => {
-    switch (value) {
-      case "alternativerow":
-        if (rowIndex % 2 === 0) {
-          return "bg-gray-200";
-        } else {
-          return "bg-gray-100";
-        }
-      case "alternativecol":
-        if (colIndex % 2 === 0) {
-          return "bg-gray-200";
-        } else {
-          return "bg-gray-100";
-        }
-      case "toprow":
-        if (rowIndex === 0) {
-          return "bg-gray-200";
-        } else {
+    if (settings.theme === 0) {
+      switch (value) {
+        case "alternativerow":
+          if (rowIndex % 2 === 0) {
+            return "bg-gray-200";
+          } else {
+            return "bg-gray-100";
+          }
+        case "alternativecol":
+          if (colIndex % 2 === 0) {
+            return "bg-gray-200";
+          } else {
+            return "bg-gray-100";
+          }
+        case "toprow":
+          if (rowIndex === 0) {
+            return "bg-gray-200";
+          } else {
+            return "white";
+          }
+        case "leftcol":
+          if (colIndex === 0) {
+            return "bg-gray-200";
+          } else {
+            return "white";
+          }
+        default:
           return "white";
-        }
-      case "leftcol":
-        if (colIndex === 0) {
-          return "bg-gray-200";
-        } else {
+      }
+    } else {
+      switch (value) {
+        case "alternativerow":
+          if (rowIndex % 2 === 0) {
+            return `bg-[${settings.color}]`;
+          } else {
+            return "bg-gray-100";
+          }
+        case "alternativecol":
+          if (colIndex % 2 === 0) {
+            return "bg-gray-200";
+          } else {
+            return "bg-gray-100";
+          }
+        case "toprow":
+          if (rowIndex === 0) {
+            return "bg-gray-200";
+          } else {
+            return "white";
+          }
+        case "leftcol":
+          if (colIndex === 0) {
+            return "bg-gray-200";
+          } else {
+            return "white";
+          }
+        default:
           return "white";
-        }
-      default:
-        return "white";
+      }
     }
   };
 

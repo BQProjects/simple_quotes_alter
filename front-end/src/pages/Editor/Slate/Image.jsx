@@ -11,6 +11,7 @@ import { MdOutlineZoomOutMap } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import image_alter from "../../../assets/ImageAlter.png";
 import { TfiReload } from "react-icons/tfi";
+import Select from "react-select";
 
 import {
   FaBold,
@@ -96,6 +97,62 @@ const Image = ({
     }
   };
 
+  const widthOptions = [
+    { value: "100", label: "Container width" },
+    { value: "50", label: "50% width" },
+    { value: "25", label: "25% width" },
+  ];
+  const customStyles = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "28px", // reduce height of control
+      height: "28px",
+      backgroundColor: "white",
+      borderColor: state.isFocused ? "#6b7280" : "#d1d5db", // active vs default
+      boxShadow: "none",
+      borderRadius: "4px",
+      padding: "",
+      fontSize: "12px",
+      cursor: "pointer",
+      "&:hover": {
+        borderColor: "#6b7280",
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#e5e7eb" : "white", // grey on hover
+      color: "#111827",
+      fontSize: "12px",
+      cursor: "pointer",
+    }),
+    menu: (base) => ({
+      ...base,
+      marginTop: 0,
+      zIndex: 1000000000000,
+    }),
+    menuList: (base) => ({
+      ...base,
+      paddingTop: 0, // optional: tighter top padding
+      paddingBottom: 0, // optional: tighter bottom padding
+      zIndex: 1000000000000,
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 4,
+      svg: {
+        width: 13, // reduce width of arrow
+        height: 13, // reduce height of arrow
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999, // or even 100000 if needed
+    }),
+  };
+
   return (
     <div
       ref={divRef}
@@ -145,16 +202,16 @@ const Image = ({
           <div className="w-[1px] h-7 bg-gray-300"></div>
           {/* Width Input */}
           <div className="relative w-fit">
-            <select
-              value={width}
-              onChange={(e) => onWidth(e.target.value)}
-              className="p-1  bg-white outline-none border-[1px] border-gray-200 px-2 text-xs text-lvl_2_txt"
-            >
-              {/* <option value="" hidden></option> */}
-              <option value="100">Container width</option>
-              <option value="50">50% width</option>
-              <option value="25">25% width</option>
-            </select>
+            <Select
+              options={widthOptions}
+              value={widthOptions.find((opt) => opt.value === width)}
+              onChange={(selected) => onWidth(selected.value)}
+              isSearchable={false}
+              menuPortalTarget={document.body} // optional: makes sure the dropdown isn't clipped by overflow:hidden
+              menuPosition="absolute"
+              styles={customStyles}
+              className="w-[120px] text-xs mx-1"
+            />
           </div>
           <div className="w-[1px] h-7 bg-gray-300"></div>
           <button

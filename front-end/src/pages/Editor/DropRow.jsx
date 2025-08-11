@@ -411,7 +411,7 @@ const DropRow = ({
           </div>
         ) : row.type === "heading" ? (
           <div
-            className="w-full transition-all duration-500 ease-out opacity-0 animate-fadeInforRow z-0  "
+            className="w-full transition-all duration-500 ease-out opacity-0 animate-fadeInforRow   "
             onClick={() => setSelected(index)}
           >
             <MyRichTextEditor
@@ -657,7 +657,7 @@ const DropRow = ({
                     </button>
                   </div>
                 )}
-                <div className="w-[48%] flex justify-end">
+                <div className="w-[48%] flex justify-end z-0">
                   <RichTextExample
                     right={true}
                     index={index}

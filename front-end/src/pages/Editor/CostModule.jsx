@@ -2,6 +2,7 @@ import React, { useContext, useState, useRef } from "react";
 import { MdOutlineDelete } from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
 import { StateManageContext } from "../../context/StateManageContext";
+import Select from "react-select";
 
 const CostModule = ({ addCostModule, rows, setRows }) => {
   const scrollableDivRef = useRef(null);
@@ -104,6 +105,64 @@ const CostModule = ({ addCostModule, rows, setRows }) => {
     return total - calculateDiscountedAmount() + calculateTaxAmount();
   };
 
+  const currencyOptions = [
+    { value: "$", label: "USD ($)" },
+    { value: "€", label: "EUR (€)" },
+    { value: "£", label: "GBP (£)" },
+    { value: "₹", label: "INR (₹)" },
+  ];
+
+  const customStyles = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "28px", // reduce height of control
+      height: "28px",
+      backgroundColor: "white",
+      borderColor: state.isFocused ? "#6b7280" : "#d1d5db", // active vs default
+      boxShadow: "none",
+      borderRadius: "4px",
+      padding: "",
+      fontSize: "12px",
+      cursor: "pointer",
+      "&:hover": {
+        borderColor: "#6b7280",
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#e5e7eb" : "white", // grey on hover
+      color: "#111827",
+      fontSize: "12px",
+      cursor: "pointer",
+    }),
+    menu: (base) => ({
+      ...base,
+      marginTop: 0,
+      zIndex: 1000000000000,
+    }),
+    menuList: (base) => ({
+      ...base,
+      paddingTop: 0, // optional: tighter top padding
+      paddingBottom: 0, // optional: tighter bottom padding
+      zIndex: 1000000000000,
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 4,
+      svg: {
+        width: 13, // reduce width of arrow
+        height: 13, // reduce height of arrow
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999, // or even 100000 if needed
+    }),
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4 z-[1000] be-vietnam-pro-regular">
       <div className="bg-white rounded-lg shadow-lg   max-w-6xl  w-full transition-all transform   duration-500 ease-out opacity-15 animate-fadeInforRow  ">
@@ -136,17 +195,15 @@ const CostModule = ({ addCostModule, rows, setRows }) => {
                 >
                   Currency:
                 </label>
-                <select
+                <Select
                   id="currency"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  className="border border-gray-100  bg-backgrounds rounded px-2 py-1 text-sm outline-none cursor-pointer hover:bg-highlight "
-                >
-                  <option value="$">USD ($)</option>
-                  <option value="€">EUR (€)</option>
-                  <option value="£">GBP (£)</option>
-                  <option value="₹">INR (₹)</option>
-                </select>
+                  options={currencyOptions}
+                  value={currencyOptions.find((opt) => opt.value === currency)}
+                  onChange={(selected) => setCurrency(selected.value)}
+                  isSearchable={false}
+                  styles={customStyles}
+                  className="w-[90px] text-sm mt-1"
+                />
               </div>
 
               {/* Checkboxes */}

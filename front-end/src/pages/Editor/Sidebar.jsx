@@ -31,7 +31,10 @@ import theme_1 from "../../assets/theme-1.png";
 import theme_2 from "../../assets/theme-2.png";
 import theme_3 from "../../assets/theme-3.png";
 import theme_4 from "../../assets/theme-4.png";
-import theme_5 from "../../assets/theme-5.png";
+import th_1 from "../../assets/th_1.png";
+import th_2 from "../../assets/th_2.png";
+import th_3 from "../../assets/th_3.png";
+import th_4 from "../../assets/th_4.png";
 
 import ContentSideBar from "./SideBarComponents/ContentSideBar";
 import { FaAngleDoubleLeft } from "react-icons/fa";
@@ -16313,7 +16316,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_0}
+                          src={th_1}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16332,7 +16335,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_1}
+                          src={th_3}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16351,7 +16354,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_2}
+                          src={th_4}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16370,7 +16373,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_3}
+                          src={th_2}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16389,7 +16392,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_4}
+                          src={th_4}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16408,7 +16411,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_5}
+                          src={th_4}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
