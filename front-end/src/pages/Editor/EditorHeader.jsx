@@ -64,6 +64,7 @@ const EditorHeader = ({
   setFavorate,
   settings,
   createdAt,
+  dropCanvasRef,
 }) => {
   const [saving, setSaving] = useState(false);
   const [isDisabledL, setIsDisabledL] = useState(false);
