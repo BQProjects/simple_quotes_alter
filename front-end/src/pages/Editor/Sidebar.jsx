@@ -31,7 +31,10 @@ import theme_1 from "../../assets/theme-1.png";
 import theme_2 from "../../assets/theme-2.png";
 import theme_3 from "../../assets/theme-3.png";
 import theme_4 from "../../assets/theme-4.png";
-import theme_5 from "../../assets/theme-5.png";
+import th_1 from "../../assets/th_1.png";
+import th_2 from "../../assets/th_2.png";
+import th_3 from "../../assets/th_3.png";
+import th_4 from "../../assets/th_4.png";
 
 import ContentSideBar from "./SideBarComponents/ContentSideBar";
 import { FaAngleDoubleLeft } from "react-icons/fa";
@@ -141,6 +144,7 @@ import { FaBookmark } from "react-icons/fa6";
 import { FaRegBookmark } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
 import { Icon } from "@iconify/react";
+import Select from "react-select";
 
 const Sidebar = ({
   selected,
@@ -238,6 +242,71 @@ const Sidebar = ({
       setError("Failed to fetch workspaces. Please try again later.");
     }
   };
+
+  const fontOptions = [
+    { value: "arial", label: "Arial" },
+    { value: "helvetica", label: "Helvetica" },
+    { value: "poppins", label: "Poppins" },
+    { value: "montserrat", label: "Montserrat" },
+    { value: "roboto", label: "Roboto" },
+    { value: "times-new-roman", label: "Times New Roman" },
+    { value: "georgia", label: "Georgia" },
+    { value: "playfair-display", label: "Playfair Display" },
+    { value: "merriweather", label: "Merriweather" },
+    { value: "garamond", label: "Garamond" },
+    { value: "lobster", label: "Lobster" },
+    { value: "pacifico", label: "Pacifico" },
+    { value: "bebas-neue", label: "Bebas Neue" },
+    { value: "anton", label: "Anton" },
+    { value: "oswald", label: "Oswald" },
+  ];
+
+  const customStyles = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "28px", // reduce height of control
+      height: "28px",
+      backgroundColor: "white",
+      borderColor: state.isFocused ? "#6b7280" : "#d1d5db", // active vs default
+      boxShadow: "none",
+      borderRadius: "4px",
+      padding: "",
+      fontSize: "12px",
+      cursor: "pointer",
+      "&:hover": {
+        borderColor: "#6b7280",
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#e5e7eb" : "white", // grey on hover
+      color: "#111827",
+      fontSize: "12px",
+      cursor: "pointer",
+    }),
+    menu: (base) => ({
+      ...base,
+      zIndex: 20,
+      marginTop: 0,
+    }),
+    menuList: (base) => ({
+      ...base,
+      paddingTop: 0, // optional: tighter top padding
+      paddingBottom: 0, // optional: tighter bottom padding
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 4,
+      svg: {
+        width: 13, // reduce width of arrow
+        height: 13, // reduce height of arrow
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+  };
+
   const section_3_row = [
     {
       id: "9e671f88-bd20-45e7-90e5-af5cea534dec",
@@ -16045,14 +16114,14 @@ const Sidebar = ({
                       setDesignDoc("color");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between border-b border-border_clr hover:text-active_text px-4 hover:bg-highlight ${
+                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between border-b border-border_clr active:bg-highlight hover:text-active_text px-4 hover:bg-gray-100 ${
                     designDoc === "color"
-                      ? "bg-highlight text-active_text"
+                      ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
                   } `}
                 >
                   <div className="flex items-center justify-start gap-3">
-                    <div className="h-[32px] flex items-center justify-center  w-[32px] shadow-md shadow-gray-300 rounded-md">
+                    <div className="h-[32px] flex items-center justify-center text-cost_bg  w-[32px] shadow-md shadow-gray-300 rounded-md">
                       <Icon icon="bxs:color" height={21} />
                     </div>
                     Color
@@ -16091,6 +16160,7 @@ const Sidebar = ({
                           const temp = { ...settings };
                           temp.color = updatedColor.hex;
                           setSettings(temp);
+                          console.log(temp);
                         }}
                         width="180px"
                       />
@@ -16107,14 +16177,14 @@ const Sidebar = ({
                       setDesignDoc("typo");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between px-4 hover:bg-highlight hover:text-active_text border-b border-border_clr ${
+                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center active:bg-highlight justify-between px-4 hover:bg-gray-100 hover:text-active_text border-b border-border_clr ${
                     designDoc === "typo"
-                      ? "bg-highlight text-active_text"
+                      ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
                   } `}
                 >
                   <div className="flex items-center justify-start gap-3">
-                    <div className="h-[32px] flex items-center justify-center  w-[32px] shadow-md shadow-gray-300 rounded-md">
+                    <div className="h-[32px] flex items-center justify-center text-cost_bg  w-[32px] shadow-md shadow-gray-300 rounded-md">
                       <Icon icon="tabler:typography" height={20} />
                     </div>
                     Font
@@ -16126,84 +16196,50 @@ const Sidebar = ({
                   />
                 </h3>
                 {designDoc === "typo" && (
-                  <div className="transition-all duration-500 ease-out opacity-0 animate-fadeIn mb-2 ">
-                    <div className="mt-1 ">
-                      <label className="text-xs text-active_text mb-2 ">
+                  <div className="transition-all duration-500 ease-out opacity-0 animate-fadeIn mb-2 z-50">
+                    {/* Heading Font */}
+                    <div className="mt-1">
+                      <label className="text-xs text-active_text mb-2">
                         Heading Font
                       </label>
-                      <div className="relative w-full mt-1">
-                        <select
-                          value={settings.heading}
-                          onChange={(e) => {
+                      <div className="relative w-full mt-1 ">
+                        <Select
+                          options={fontOptions}
+                          value={fontOptions.find(
+                            (f) => f.value === settings.heading
+                          )}
+                          onChange={(selectedOption) => {
                             const temp = { ...settings };
-                            temp.heading = e.target.value;
+                            temp.heading = selectedOption.value;
                             setSettings(temp);
                           }}
-                          className="w-full py-1.5 px-2 pr-8 outline-none border border-border_clr rounded-[2px] text-non_active_text text-xs appearance-none hover:border-active_text focus:border-active_text cursor-pointer"
-                        >
-                          <option value="arial">Arial</option>
-                          <option value="helvetica">Helvetica</option>
-                          <option value="poppins">Poppins</option>
-                          <option value="montserrat">Montserrat</option>
-                          <option value="roboto">Roboto</option>
-                          <option value="times-new-roman">
-                            Times New Roman
-                          </option>
-                          <option value="georgia">Georgia</option>
-                          <option value="playfair-display">
-                            Playfair Display
-                          </option>
-                          <option value="merriweather">Merriweather</option>
-                          <option value="garamond">Garamond</option>
-                          <option value="lobster">Lobster</option>
-                          <option value="pacifico">Pacifico</option>
-                          <option value="bebas-neue">Bebas Neue</option>
-                          <option value="anton">Anton</option>
-                          <option value="oswald">Oswald</option>
-                        </select>
-                        <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-non_active_text text-xs">
-                          <IoIosArrowDown className="text-non_active_text" />
-                        </div>
+                          styles={customStyles}
+                          className="text-xs "
+                          isSearchable={false}
+                        />
                       </div>
                     </div>
+
+                    {/* Body Font */}
                     <div className="mt-3 gap-1">
                       <label className="text-xs text-active_text mb-2">
                         Body Font
                       </label>
                       <div className="relative w-full mt-1">
-                        <select
-                          value={settings.body}
-                          onChange={(e) => {
+                        <Select
+                          options={fontOptions}
+                          value={fontOptions.find(
+                            (f) => f.value === settings.body
+                          )}
+                          onChange={(selectedOption) => {
                             const temp = { ...settings };
-                            temp.body = e.target.value;
+                            temp.body = selectedOption.value;
                             setSettings(temp);
                           }}
-                          className="w-full py-1.5 px-2 pr-8 outline-none border border-border_clr rounded-[2px] text-non_active_text text-xs appearance-none hover:border-active_text focus:border-active_text cursor-pointer
-                     "
-                        >
-                          <option value="arial">Arial</option>
-                          <option value="helvetica">Helvetica</option>
-                          <option value="poppins">Poppins</option>
-                          <option value="montserrat">Montserrat</option>
-                          <option value="roboto">Roboto</option>
-                          <option value="times-new-roman">
-                            Times New Roman
-                          </option>
-                          <option value="georgia">Georgia</option>
-                          <option value="playfair-display">
-                            Playfair Display
-                          </option>
-                          <option value="merriweather">Merriweather</option>
-                          <option value="garamond">Garamond</option>
-                          <option value="lobster">Lobster</option>
-                          <option value="pacifico">Pacifico</option>
-                          <option value="bebas-neue">Bebas Neue</option>
-                          <option value="anton">Anton</option>
-                          <option value="oswald">Oswald</option>
-                        </select>
-                        <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-non_active_text text-xs">
-                          <IoIosArrowDown className="text-non_active_text " />
-                        </div>
+                          styles={customStyles}
+                          className="text-xs"
+                          isSearchable={false}
+                        />
                       </div>
                     </div>
                   </div>
@@ -16244,14 +16280,14 @@ const Sidebar = ({
                       setDesignDoc("theme");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between borderr-b border-border_clr hover:text-active_text px-4 hover:bg-highlight ${
+                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between border-b border-border_clr hover:text-active_text px-4 hover:bg-gray-100 active:bg-highlight ${
                     designDoc === "theme"
-                      ? "bg-highlight text-active_text"
+                      ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
                   } `}
                 >
                   <div className="flex items-center justify-start gap-3">
-                    <div className="h-[32px] flex items-center justify-center  w-[32px] shadow-md shadow-gray-300 rounded-md">
+                    <div className="h-[32px] flex items-center justify-center text-cost_bg  w-[32px] shadow-md shadow-gray-300 rounded-md">
                       <Icon icon="solar:documents-linear" height={20} />
                     </div>
                     Theme
@@ -16280,7 +16316,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_0}
+                          src={th_1}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16299,7 +16335,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_1}
+                          src={th_3}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16318,7 +16354,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_2}
+                          src={th_4}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16337,7 +16373,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_3}
+                          src={th_2}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16356,7 +16392,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_4}
+                          src={th_4}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -16375,7 +16411,7 @@ const Sidebar = ({
                               ? "border border-gradient_darker"
                               : "none"
                           }`}
-                          src={theme_5}
+                          src={th_4}
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
@@ -17198,7 +17234,7 @@ const Sidebar = ({
                       setOpenCover("half");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openCover === "half" ? "text-active_text" : "text-lvl_2_txt"
                   }`}
                 >
@@ -17314,6 +17350,7 @@ const Sidebar = ({
                     />
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
 
                 <p
                   onClick={() => {
@@ -17323,7 +17360,7 @@ const Sidebar = ({
                       setOpenCover("full");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openCover === "full" ? "text-active_text" : "text-lvl_2_txt"
                   }`}
                 >
@@ -17439,6 +17476,7 @@ const Sidebar = ({
                     />
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
               </div>
             ) : (
               <div></div>

@@ -46,7 +46,6 @@ export function StateManageContextProvider({ children }) {
       setWorkspaces(res.data);
     } catch (error) {
       console.error("Error fetching workspaces:", error);
-      setError("Failed to fetch workspaces. Please try again later.");
     }
   };
 

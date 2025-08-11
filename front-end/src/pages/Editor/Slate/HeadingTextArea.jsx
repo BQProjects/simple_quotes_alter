@@ -32,6 +32,7 @@ import { PiTextStrikethrough } from "react-icons/pi";
 import { BsTextCenter } from "react-icons/bs";
 import { BsTextRight } from "react-icons/bs";
 import { BsTextLeft } from "react-icons/bs";
+import Select from "react-select";
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 const ALIGN_TYPES = ["left", "center", "right"];
@@ -117,7 +118,7 @@ const isMarkActive = (editor, format) => {
   return marks ? marks[format] === true : false;
 };
 
-const Element = ({ attributes, children, element, size }) => {
+const Element = ({ attributes, children, element, size, theme }) => {
   const alignment =
     element.align === "center"
       ? `text-${element.align}`
@@ -128,7 +129,12 @@ const Element = ({ attributes, children, element, size }) => {
   switch (size) {
     case "heading-one":
       return (
-        <h1 className={`w-full text-[2.5em] ${alignment}`} {...attributes}>
+        <h1
+          className={`w-full text-[2.5em] ${
+            theme === 2 ? "text-center" : alignment
+          }`}
+          {...attributes}
+        >
           {children}
         </h1>
       );
@@ -234,12 +240,12 @@ const MyRichTextEditor = ({
       return size === "heading-one" ? (
         <div
           style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-          className="h-[10px] w-full"
+          className="h-[8px] w-full"
         ></div>
       ) : size === "heading-two" ? (
         <div
           style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-          className="h-[5px] w-full"
+          className="h-[3px] w-full"
         ></div>
       ) : (
         <div
@@ -251,19 +257,18 @@ const MyRichTextEditor = ({
       return size === "heading-one" ? (
         <div
           style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-          className="h-[10px] w-full"
+          className="h-[8px] w-full"
         ></div>
       ) : size === "heading-two" ? (
-        <div className="w-full h-[5px] flex items-center justify-center">
-          <div
-            style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-            className="h-[10px] w-[20%]"
-          ></div>
-          <div
-            style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
-            className="h-[2px] w-[80%]"
-          ></div>
-        </div>
+        <div
+          style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
+          className="h-[3px] w-full"
+        ></div>
+      ) : size === "heading-three" ? (
+        <div
+          style={{ "--tw-bg-opacity": 1, backgroundColor: color }}
+          className="h-[3px] w-full"
+        ></div>
       ) : (
         <div
           style={{ "--tw-bg-opacity": 1, backgroundColor: "white" }}
@@ -375,13 +380,22 @@ const MyRichTextEditor = ({
   }, []);
 
   const renderElement = useCallback(
-    (props) => <Element {...props} size={size} />,
-    [size]
+    (props) => <Element {...props} size={size} theme={settings.theme} />,
+    [size, settings.theme]
   );
   const renderLeaf = useCallback(
     (props) => <Leaf {...props} size={size} />,
     [size]
   );
+
+  const headingOptions = [
+    { value: "heading-one", label: "H1" },
+    { value: "heading-two", label: "H2" },
+    { value: "heading-three", label: "H3" },
+    { value: "heading-four", label: "H4" },
+    { value: "heading-five", label: "H5" },
+    { value: "heading-six", label: "H6" },
+  ];
 
   const lightenColor = (hex, percent) => {
     // Remove "#" if present
@@ -401,8 +415,127 @@ const MyRichTextEditor = ({
     return `rgb(${r}, ${g}, ${b})`;
   };
 
+  const customStyles = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "28px", // reduce height of control
+      height: "28px",
+      backgroundColor: "white", // active vs default
+      boxShadow: "none",
+      padding: "",
+      fontSize: "12px",
+      cursor: "pointer",
+      border: "none",
+      fontSize: "17px",
+      fontWeight: "600",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: "rgba(140 , 140 , 140 , 1)", // Tailwind text-gray-800
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#e5e7eb" : "white", // grey on hover
+      color: "#111827",
+      fontSize: "12px",
+      cursor: "pointer",
+    }),
+    menu: (base) => ({
+      ...base,
+      marginTop: 0,
+      zIndex: 1000000000000,
+    }),
+    menuList: (base) => ({
+      ...base,
+      paddingTop: 0, // optional: tighter top padding
+      paddingBottom: 0, // optional: tighter bottom padding
+      zIndex: 1000000000000,
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 1,
+      svg: {
+        width: 13, // reduce width of arrow
+        height: 13, // reduce height of arrow
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999, // or even 100000 if needed
+    }),
+  };
+  const customStyles2 = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "28px", // reduce height of control
+      height: "28px",
+      backgroundColor: "white",
+      borderColor: state.isFocused ? "#6b7280" : "#d1d5db", // active vs default
+      boxShadow: "none",
+      borderRadius: "4px",
+      padding: "",
+      fontSize: "12px",
+      cursor: "pointer",
+      "&:hover": {
+        borderColor: "#6b7280",
+      },
+    }),
+    // singleValue: (base) => ({
+    //   ...base,
+    //   color: "rgba(140 , 140 , 140 , 1)", // Tailwind text-gray-800
+    // }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#e5e7eb" : "white", // grey on hover
+      color: "#111827",
+      fontSize: "12px",
+      cursor: "pointer",
+    }),
+    menu: (base) => ({
+      ...base,
+      marginTop: 0,
+      zIndex: 1000000000000,
+    }),
+    menuList: (base) => ({
+      ...base,
+      paddingTop: 0, // optional: tighter top padding
+      paddingBottom: 0, // optional: tighter bottom padding
+      zIndex: 1000000000000,
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 1,
+      svg: {
+        width: 13, // reduce width of arrow
+        height: 13, // reduce height of arrow
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999, // or even 100000 if needed
+    }),
+  };
+
+  const transformOptions = [
+    { value: "uppercase", label: "AA" },
+    { value: "lowercase", label: "aa" },
+    { value: "capitalize", label: "Aa" },
+  ];
+
   // ✅ Usage: Lighten #01070c by 50%
   const lighterColor = lightenColor("#01070c", 0.5);
+
+  const handleChange = (selected) => {
+    if (selected) {
+      transformText(editor, selected.value);
+    }
+  };
 
   return (
     <div
@@ -437,7 +570,7 @@ const MyRichTextEditor = ({
       >
         {index === selected && preview !== true && (
           <Toolbar
-            className="absolute -top-11  left-[26%]  bg-white flex flex-row items-center justify-center border border-gray-100 shadow-md shadow-gray-300 rounded-md  px-1 py-1 "
+            className="absolute -top-11  left-[26%]  bg-white flex flex-row items-center justify-center border border-gray-100 shadow-md shadow-gray-300 rounded-md  px-1 py-1 z-[1000000] "
             ref={toolbarRef}
             onFocus={() => setIndexValue(index)}
             onBlur={(e) => {
@@ -455,38 +588,31 @@ const MyRichTextEditor = ({
 
             {/* Text Transform Dropdown */}
 
-            <div className="relative my-[-3px] flex flex-row ">
-              <select
-                className="   rounded px-1 bg-white py-1 outline-none text-md  font-semibold text-lvl_2_txt"
-                onChange={(e) => {
-                  toggleBlock(editor, e.target.value);
-                  onSizeChange(e.target.value);
+            <div className="relative my-[-3px] flex flex-row items-center">
+              <Select
+                options={headingOptions}
+                value={headingOptions.find((opt) => opt.value === size)}
+                onChange={(selected) => {
+                  toggleBlock(editor, selected.value);
+                  onSizeChange(selected.value);
                 }}
-                defaultValue={size}
-              >
-                <option className="" value="heading-one">
-                  H1
-                </option>
-                <option value="heading-two">H2</option>
-                <option value="heading-three">H3</option>
-                <option value="heading-four">H4</option>
-                <option value="heading-five">H5</option>
-                <option value="heading-six">H6</option>
-              </select>
-              <div className="w-[1px] h-8 bg-gray-200 ml-1"></div>
-              <select
-                className="   bg-white  rounded px-1 py-1 ml-2 outline-none text-md text-gray-500"
-                onChange={(e) => transformText(editor, e.target.value)}
-                defaultValue=""
-              >
-                <option value="" disabled hidden>
-                  Aa
-                </option>
-                <option value="uppercase">AA</option>
-                <option value="lowercase">aa</option>
-                <option value="capitalize">Aa</option>
-              </select>
-              <div className="w-[1px] h-8 bg-gray-200 ml-1"></div>
+                styles={customStyles}
+                isSearchable={false}
+                menuPortalTarget={document.body}
+                menuPosition="absolute"
+                className="w-16 mx-1.5" // Tailwind width control (optional)
+              />
+              <div className="w-[1px] h-8 bg-gray-200 "></div>
+
+              <Select
+                options={transformOptions}
+                onChange={handleChange}
+                styles={customStyles2}
+                placeholder="Aa"
+                isSearchable={false}
+                className="mx-1.5 text-lvl_2_txt"
+              />
+              <div className="w-[1px] h-8 bg-gray-200"></div>
             </div>
 
             <Button
@@ -581,28 +707,47 @@ const MyRichTextEditor = ({
           renderLeaf={renderLeaf}
           placeholder="Click to add heading"
           style={{
-            "--tw-bg-opacity": 0.4,
+            color:
+              settings.theme === 2 && size === "heading-one"
+                ? "white"
+                : settings.theme !== 0 &&
+                  (size === "heading-one" ||
+                    size === "heading-two" ||
+                    size === "heading-three")
+                ? settings.color
+                : undefined,
             backgroundColor:
-              settings.theme === 5
-                ? lightenColor(settings.color, 0.8)
+              settings.theme === 2 && size === "heading-one"
+                ? settings.color
                 : "transparent",
+            ...(settings.theme === 3 && size === "heading-one"
+              ? {
+                  borderLeft: `4px solid ${settings.color}`,
+                  paddingLeft: "0.75rem",
+                }
+              : {}),
           }}
-          className={` relative min-h-[20px] ${
-            textColor ? textColor : "text-active_text"
-          }   px-2 py-1 outline-none   font-${settings.heading} ${
-            index === selected && preview !== true ? "none" : "none"
-          }`}
-          readOnly={preview}
+          className={`relative min-h-[20px] z-0 ${
+            settings.theme === 2 && size === "heading-one"
+              ? "rounded-[50px]"
+              : ""
+          } ${
+            settings.theme !== 1 ? textColor || "text-active_text" : ""
+          } px-2 py-1 outline-none font-${settings.heading}`}
         />
-        {settings.theme !== 0 && (
-          <div
-            className={`absolute w-full h-[15px] px-2 ${
-              settings.theme === 4 ? "top-0" : "-bottom-2"
-            } left-0`}
-          >
-            {createBorder(settings.theme, settings.color)}
-          </div>
-        )}
+
+        {(settings.theme === 1 || settings.theme === 2) &&
+          (settings.theme === 2 && size === "heading-one" ? (
+            <div></div>
+          ) : (
+            <div
+              className={`absolute w-full h-[15px] px-2  ${
+                settings.theme === 4 ? "top-0" : "-bottom-2"
+              } left-0`}
+            >
+              {createBorder(settings.theme, settings.color)}
+            </div>
+          ))}
       </Slate>
     </div>
   );

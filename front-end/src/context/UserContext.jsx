@@ -17,7 +17,7 @@ export function UserContextProvider({ children }) {
   const getUserData = async () => {
     try {
       const res = await axios.get(
-        `https://simple-quotes-alter-s3od.vercel.app/api/auth/getUser`,
+        `https://simple-quotes-alter-ggrf.vercel.app/api/auth/getUser`,
         {
           params: { user_id: user.id },
         }
@@ -57,7 +57,7 @@ export function UserContextProvider({ children }) {
   const expired = async () => {
     try {
       const res = await axios.post(
-        `https://simple-quotes-alter-s3od.vercel.app/api/auth/changeSubscription`,
+        `https://simple-quotes-alter-ggrf.vercel.app/api/auth/changeSubscription`,
         {
           subscription: "expired",
           subscriptionDate: new Date(),

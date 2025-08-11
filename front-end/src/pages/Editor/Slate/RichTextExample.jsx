@@ -29,6 +29,7 @@ import { PiTextStrikethrough } from "react-icons/pi";
 import { BsTextCenter } from "react-icons/bs";
 import { BsTextRight } from "react-icons/bs";
 import { BsTextLeft } from "react-icons/bs";
+import Select from "react-select";
 
 // Block types
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
@@ -408,9 +409,78 @@ const RichTextEditor = ({
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
 
+  const customStyles = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "28px", // reduce height of control
+      height: "28px",
+      backgroundColor: "white",
+      borderColor: state.isFocused ? "#6b7280" : "#d1d5db", // active vs default
+      boxShadow: "none",
+      borderRadius: "4px",
+      padding: "",
+      fontSize: "12px",
+      cursor: "pointer",
+      "&:hover": {
+        borderColor: "#6b7280",
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#e5e7eb" : "white", // grey on hover
+      color: "#111827",
+      fontSize: "12px",
+      cursor: "pointer",
+    }),
+    menu: (base) => ({
+      ...base,
+      marginTop: 0,
+      zIndex: 1000000000000,
+    }),
+    menuList: (base) => ({
+      ...base,
+      paddingTop: 0, // optional: tighter top padding
+      paddingBottom: 0, // optional: tighter bottom padding
+      zIndex: 1000000000000,
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 4,
+      svg: {
+        width: 13, // reduce width of arrow
+        height: 13, // reduce height of arrow
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999, // or even 100000 if needed
+    }),
+  };
+
+  const options = [
+    { value: "heading-one", label: "H1" },
+    { value: "heading-two", label: "H2" },
+    { value: "heading-three", label: "H3" },
+    { value: "heading-four", label: "H4" },
+    { value: "heading-five", label: "H5" },
+    { value: "heading-six", label: "H6" },
+    { value: "paragrapgh", label: "P1" },
+    { value: "paragrapgh-two", label: "P2" },
+  ];
+  const [currentBlockType, setCurrentBlockType] = useState(options[6].value);
+  const [selectedOption, setSelectedOption] = useState(); // P1 by default
+
+  const handleChange = (selected) => {
+    setSelectedOption(selected);
+    toggleBlock(editor, selected.value);
+  };
+
   return (
     <div
-      className={` relative w-[100%] py-0.5 mx-2 rounded  ${
+      className={` relative w-[100%] py-0.5 mx-2 z-10 rounded  ${
         selected === index ? "mt-0.5" : "mt-0.5"
       }`}
       onFocus={() => setSelected(index)}
