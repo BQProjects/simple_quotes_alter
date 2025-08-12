@@ -121,15 +121,17 @@ const JsonToWord = async (jsonData) => {
   const defaultFont = "Arial";
   const headingFont = "Arial";
   const codeFont = "Arial";
-  const defaultColor = settings.color || "#212529";
+  const defaultColor = "#000000";
   const theme = settings.theme || 0;
 
   // Color conversion helper
   const convertToHex = (colorValue) => {
-    if (!colorValue) return defaultColor.replace("#", "");
+    if (!colorValue) return "000000"; // DEFAULT TO BLACK instead of white
 
     // If it's already a valid hex without #, return as-is
     if (typeof colorValue === "string" && /^[0-9A-Fa-f]{6}$/.test(colorValue)) {
+      // Don't return white colors
+      if (colorValue.toUpperCase() === "FFFFFF") return "000000";
       return colorValue;
     }
 
@@ -137,6 +139,8 @@ const JsonToWord = async (jsonData) => {
     if (typeof colorValue === "string" && colorValue.startsWith("#")) {
       const hex = colorValue.slice(1);
       if (/^[0-9A-Fa-f]{6}$/.test(hex)) {
+        // Don't return white colors
+        if (hex.toUpperCase() === "FFFFFF") return "000000";
         return hex;
       }
     }
@@ -144,7 +148,7 @@ const JsonToWord = async (jsonData) => {
     // Handle common color names
     const colorMap = {
       black: "000000",
-      white: "FFFFFF",
+      white: "000000", // CHANGED: white now maps to black
       red: "FF0000",
       green: "008000",
       blue: "0000FF",
@@ -154,7 +158,7 @@ const JsonToWord = async (jsonData) => {
       gray: "808080",
       grey: "808080",
       dark: "333333",
-      light: "F5F5F5",
+      light: "666666", // CHANGED: light now maps to gray instead of very light
     };
 
     if (typeof colorValue === "string") {
@@ -169,26 +173,29 @@ const JsonToWord = async (jsonData) => {
       // Try to extract hex from various formats
       if (/^[0-9A-Fa-f]{3}$/.test(lowerColor)) {
         // Convert 3-digit hex to 6-digit
-        return lowerColor
+        const expanded = lowerColor
           .split("")
           .map((char) => char + char)
           .join("");
+        // Don't return white colors
+        if (expanded.toUpperCase() === "FFFFFF") return "000000";
+        return expanded;
       }
     }
 
-    // Fallback to default color
-    return defaultColor.replace("#", "");
+    // Fallback to black instead of default color
+    return "000000";
   };
 
   // Convert Tailwind CSS text color classes to hex values
   const convertTailwindTextColor = (textColor) => {
     if (!textColor || typeof textColor !== "string") {
-      return convertToHex(defaultColor);
+      return "000000"; // DEFAULT TO BLACK
     }
 
     const colorMap = {
       "text-black": "000000",
-      "text-white": "FFFFFF",
+      "text-white": "000000", // CHANGED: white text now maps to black
       "text-gray-700": "374151",
       "text-gray-600": "4B5563",
       "text-gray-500": "6B7280",
@@ -209,7 +216,9 @@ const JsonToWord = async (jsonData) => {
 
     // If it's already a hex color, process it
     if (textColor.startsWith("#")) {
-      return convertToHex(textColor);
+      const hex = convertToHex(textColor);
+      // Ensure we don't return white
+      return hex === "FFFFFF" ? "000000" : hex;
     }
 
     // Extract color from text-{color}-{shade} pattern
@@ -222,9 +231,9 @@ const JsonToWord = async (jsonData) => {
       }
     }
 
-    // Fallback to default
-    console.warn(`Unknown textColor: ${textColor}, using default`);
-    return convertToHex(defaultColor);
+    // Fallback to black
+    console.warn(`Unknown textColor: ${textColor}, using black`);
+    return "000000";
   };
 
   // Web-matching typography function with ultra-tight spacing
@@ -331,24 +340,24 @@ const JsonToWord = async (jsonData) => {
           headingLevel = headingMap[block.type];
         }
       }
-
-      // Handle list items
+      // Bulleted list
       if (block.type === "bulleted-list") {
-        block.children.forEach((listItem, index) => {
+        block.children.forEach((listItem) => {
           if (listItem.type === "list-item" && listItem.children) {
             const listText = listItem.children
               .map((child) => child.text || "")
               .join("");
             if (listText.trim()) {
               paragraphs.push(
-                createParagraph(listText, {
-                  ...options,
-                  size: textSize,
-                  alignment: blockAlignment,
-                  numbering: {
-                    reference: "bullet-numbering",
-                    level: 0,
-                  },
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: listText,
+                      font: defaultFont,
+                      size: 22,
+                    }),
+                  ],
+                  numbering: { reference: "bullet-list", level: 0 },
                   spacing: { before: 60, after: 60 },
                 })
               );
@@ -357,23 +366,24 @@ const JsonToWord = async (jsonData) => {
         });
         return;
       }
-
+      // Numbered list
       if (block.type === "numbered-list") {
-        block.children.forEach((listItem, index) => {
+        block.children.forEach((listItem) => {
           if (listItem.type === "list-item" && listItem.children) {
             const listText = listItem.children
               .map((child) => child.text || "")
               .join("");
             if (listText.trim()) {
               paragraphs.push(
-                createParagraph(listText, {
-                  ...options,
-                  size: textSize,
-                  alignment: blockAlignment,
-                  numbering: {
-                    reference: "numbered-numbering",
-                    level: 0,
-                  },
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: listText,
+                      font: defaultFont,
+                      size: 22,
+                    }),
+                  ],
+                  numbering: { reference: "numbered-list", level: 0 },
                   spacing: { before: 60, after: 60 },
                 })
               );
@@ -402,7 +412,7 @@ const JsonToWord = async (jsonData) => {
                   text: nestedText,
                   bold: nestedChild.bold || false,
                   italics: nestedChild.italic || false,
-                  underline: nestedChild.underline || false,
+                  underline: nestedChild.underline || nestedChild.link || false,
                   strike: nestedChild.strikethrough || false,
                   size: textSize,
                   color: nestedChild.link
@@ -1350,6 +1360,7 @@ const JsonToWord = async (jsonData) => {
       }
 
       switch (item.type) {
+        // In the cover section processing, around line 600-700, replace the cover text processing with this:
         case "cover":
           if (item.coverType === "full") {
             // Ensure no image background for full-page covers
@@ -1383,7 +1394,29 @@ const JsonToWord = async (jsonData) => {
                   let size = 44;
                   let heading = null;
                   let font = headingFont;
-                  let color = nextItem.textColor || "000000";
+
+                  // FIXED COLOR LOGIC:
+                  let color = "000000"; // Start with black as default
+
+                  // Try to get color from nextItem
+                  if (nextItem.textColor) {
+                    color = convertTailwindTextColor(nextItem.textColor);
+                  }
+
+                  // Try to get color from block children
+                  if (children && children[0] && children[0].color) {
+                    color = convertToHex(children[0].color);
+                  }
+
+                  // Final safety check - never use white
+                  if (
+                    !color ||
+                    color.toUpperCase() === "FFFFFF" ||
+                    color.toUpperCase() === "FFF"
+                  ) {
+                    color = "000000";
+                  }
+
                   let bold =
                     children &&
                     children[0] &&
@@ -1445,7 +1478,7 @@ const JsonToWord = async (jsonData) => {
                   bold: true,
                   size: 44,
                   alignment: AlignmentType.CENTER,
-                  color: "000000",
+                  color: "000000", // EXPLICITLY BLACK
                   spacing: { before: 240, after: 240 },
                 })
               );
@@ -2386,7 +2419,7 @@ const JsonToWord = async (jsonData) => {
             font: defaultFont,
             size: 22,
 
-            color: convertToHex(defaultColor),
+            color: "000000",
           },
           paragraph: {
             spacing: { line: 360 },
@@ -2452,6 +2485,32 @@ const JsonToWord = async (jsonData) => {
               right: { style: BorderStyle.SINGLE, size: 2, color: "E0E0E0" },
             },
           },
+        },
+      ],
+    },
+    numbering: {
+      config: [
+        {
+          reference: "bullet-list",
+          levels: [
+            {
+              level: 0,
+              format: "bullet",
+              text: "•",
+              alignment: AlignmentType.LEFT,
+            },
+          ],
+        },
+        {
+          reference: "numbered-list",
+          levels: [
+            {
+              level: 0,
+              format: "decimal",
+              text: "%1.",
+              alignment: AlignmentType.LEFT,
+            },
+          ],
         },
       ],
     },

@@ -415,15 +415,12 @@ const RichTextEditor = ({
       minHeight: "28px", // reduce height of control
       height: "28px",
       backgroundColor: "white",
-      borderColor: state.isFocused ? "#6b7280" : "#d1d5db", // active vs default
       boxShadow: "none",
-      borderRadius: "4px",
       padding: "",
-      fontSize: "12px",
       cursor: "pointer",
-      "&:hover": {
-        borderColor: "#6b7280",
-      },
+      border: "none",
+      fontSize: "15px",
+      fontWeight: "600",
     }),
     option: (base, state) => ({
       ...base,
@@ -525,23 +522,27 @@ const RichTextEditor = ({
               }
             }}
           >
-            <div className="relative flex flex-row">
-              <select
-                className="  rounded px-1 bg-white py-1 outline-none text-md  font-semibold text-lvl_2_txt"
-                onChange={(e) => toggleBlock(editor, e.target.value)}
-                defaultValue="paragrapgh"
-              >
-                <option value="heading-one">H1</option>
-                <option value="heading-two">H2</option>
-                <option value="heading-three">H3</option>
-                <option value="heading-four">H4</option>
-                <option value="heading-five">H5</option>
-                <option value="heading-six">H6</option>
-                <option value="paragrapgh">P1</option>
-                <option value="paragrapgh-two">P2</option>
-              </select>
-              <div className="w-[1px] h-8 bg-gray-200 ml-1"></div>
-            </div>
+            <Select
+              options={options}
+              value={options.find((opt) => opt.value === currentBlockType)}
+              onChange={(selected) => {
+                toggleBlock(editor, selected.value);
+                setCurrentBlockType(selected.value);
+              }}
+              styles={customStyles}
+              isSearchable={false}
+              menuPortalTarget={document.body}
+              menuPosition="absolute"
+              className="w-16 mx-1.5"
+              onFocus={(e) => {
+                e.stopPropagation(); // Prevent toolbar from hiding
+                setChoosen(true);
+              }}
+              onBlur={(e) => {
+                e.stopPropagation(); // Prevent toolbar from hiding
+              }}
+            />
+            <div className="w-[1px] h-8 bg-gray-200 "></div>
 
             <Button
               onMouseDown={(e) => {

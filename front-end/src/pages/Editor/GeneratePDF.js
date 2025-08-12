@@ -3,21 +3,28 @@ import React from "react";
 import autoTable from "jspdf-autotable";
 import ImageAlter from "../../assets/ImageAlter.png";
 import { BsFileLock } from "react-icons/bs";
+//Arial not so using helvetica similar to arial
+import ARIAL_TTF from "../../../src/assets/Arial_base64.js";
 
 const GeneratePDF = async (jsonData, settings) => {
   const data = jsonData.data || jsonData;
   const documentSettings = jsonData.settings || settings || {};
 
   const doc = new jsPDF();
+  //Arial not so using helvetica similar to arial
+  doc.addFileToVFS("Arial.ttf", ARIAL_TTF);
+  doc.addFont("Arial.ttf", "Arial", "normal");
+  doc.setFont("Arial");
+
   let currentY = 10;
   const pageHeight = doc.internal.pageSize.height;
   const pageWidth = doc.internal.pageSize.width;
   const availableWidth = pageWidth - 20; // 10px margins on each side
 
   // Document-level settings that match Word typography
-  const defaultFont = "Arial";
-  const headingFont = "Arial";
-  const codeFont = "Arial";
+  const defaultFont = "helvetica";
+  const headingFont = "helvetica";
+  const codeFont = "helvetica";
   const defaultColor = documentSettings.color || "#212529";
   const theme = documentSettings.theme || 0;
 
@@ -221,6 +228,15 @@ const GeneratePDF = async (jsonData, settings) => {
   const processSlateContent = (content, options = {}) => {
     if (!content || !Array.isArray(content)) return;
 
+    // Helper to replace emojis with '?'
+    const replaceEmojis = (str) => {
+      // Regex for emoji unicode ranges
+      return str.replace(
+        /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/gu,
+        "?"
+      );
+    };
+
     content.forEach((block) => {
       if (!block || !block.children) return;
 
@@ -258,9 +274,11 @@ const GeneratePDF = async (jsonData, settings) => {
       if (block.type === "bulleted-list") {
         block.children.forEach((listItem, index) => {
           if (listItem.type === "list-item" && listItem.children) {
-            const listText = listItem.children
+            let listText = listItem.children
               .map((child) => child.text || "")
               .join("");
+            // Replace emojis
+            listText = replaceEmojis(listText);
             if (listText.trim()) {
               checkPageBreak(textSize + 5);
 
@@ -293,9 +311,11 @@ const GeneratePDF = async (jsonData, settings) => {
       if (block.type === "numbered-list") {
         block.children.forEach((listItem, index) => {
           if (listItem.type === "list-item" && listItem.children) {
-            const listText = listItem.children
+            let listText = listItem.children
               .map((child) => child.text || "")
               .join("");
+            // Replace emojis
+            listText = replaceEmojis(listText);
             if (listText.trim()) {
               checkPageBreak(textSize + 5);
 
@@ -332,19 +352,23 @@ const GeneratePDF = async (jsonData, settings) => {
       block.children.forEach((child) => {
         if (!child) return;
 
-        const text = child.text || "";
+        let text = child.text || "";
         if (!text && !child.children) return;
 
         // Handle nested content
         if (child.children && Array.isArray(child.children)) {
           child.children.forEach((nestedChild) => {
-            const nestedText = nestedChild.text || "";
+            let nestedText = nestedChild.text || "";
+            // Replace emojis
+            nestedText = replaceEmojis(nestedText);
             if (nestedText) {
               paragraphText += nestedText;
               hasContent = true;
             }
           });
         } else if (text) {
+          // Replace emojis
+          text = replaceEmojis(text);
           paragraphText += text;
           hasContent = true;
         }
