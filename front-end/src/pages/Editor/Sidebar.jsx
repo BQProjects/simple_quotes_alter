@@ -145,6 +145,10 @@ import { FaRegBookmark } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
 import { Icon } from "@iconify/react";
 import Select from "react-select";
+import c_s from "../../assets/c_s.svg";
+import p_s from "../../assets/p_s.svg";
+import t_s from "../../assets/t_s.svg";
+import i_s from "../../assets/i_s.svg";
 
 const Sidebar = ({
   selected,
@@ -15779,7 +15783,7 @@ const Sidebar = ({
                 />
               </div>
 
-              <p className="text-gray-400 ">Design Doc</p>
+              <p className="text-gray-400 ">Doc Style</p>
             </div>
 
             {/* <div
@@ -16882,13 +16886,16 @@ const Sidebar = ({
                       setOpenSections("para");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openSections === "para"
                       ? "text-active_text"
                       : "text-lvl_2_txt"
                   }`}
                 >
-                  Paragraph
+                  <div className="flex items-center gap-2">
+                    <img src={p_s} />
+                    Paragraph
+                  </div>
                   <IoIosArrowDown />
                 </p>
 
@@ -16941,6 +16948,7 @@ const Sidebar = ({
                     </div>
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
 
                 <p
                   onClick={() => {
@@ -16950,13 +16958,16 @@ const Sidebar = ({
                       setOpenSections("tables");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openSections === "tables"
                       ? "text-active_text"
                       : "text-lvl_2_txt"
                   }`}
                 >
-                  Tables
+                  <div className="flex items-center gap-2">
+                    <img src={t_s} />
+                    Tables
+                  </div>
                   <IoIosArrowDown />
                 </p>
 
@@ -17009,6 +17020,7 @@ const Sidebar = ({
                     </div>
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
 
                 <p
                   onClick={() => {
@@ -17018,13 +17030,17 @@ const Sidebar = ({
                       setOpenSections("img");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openSections === "img"
                       ? "text-active_text"
                       : "text-lvl_2_txt"
                   }`}
                 >
-                  Image & Content
+                  {" "}
+                  <div className="flex items-center gap-2">
+                    <img src={i_s} />
+                    Image & Content{" "}
+                  </div>
                   <IoIosArrowDown />
                 </p>
                 {openSections === "img" && (
@@ -17076,6 +17092,7 @@ const Sidebar = ({
                     </div>
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
 
                 <p
                   onClick={() => {
@@ -17085,13 +17102,17 @@ const Sidebar = ({
                       setOpenSections("cost");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openSections === "cost"
                       ? "text-active_text"
                       : "text-lvl_2_txt"
                   }`}
                 >
-                  Cost Module
+                  <div className="flex items-center gap-2">
+                    <img src={c_s} />
+                    Cost Module
+                  </div>
+
                   <IoIosArrowDown />
                 </p>
                 {openSections === "cost" && (
@@ -17143,6 +17164,7 @@ const Sidebar = ({
                     </div>
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
               </div>
             ) : thirdLevel === "pages" ? (
               <div
@@ -17177,7 +17199,7 @@ const Sidebar = ({
                     return (
                       <div
                         key={index}
-                        className="w-[88%] bg-lvl_3_bg py-[15px] flex flex-col items-center justify-center gap-2 rounded-md"
+                        className="w-[88%] bg-lvl_3_bg hover:bg-highlight cursor-pointer py-[15px] flex flex-col items-center justify-center gap-2 rounded-md"
                         onClick={() => {
                           setRows([...rows, ...item.data]);
                           setThirdLevel("");
@@ -17234,7 +17256,7 @@ const Sidebar = ({
                       setOpenCover("half");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text  items-center ${
                     openCover === "half" ? "text-active_text" : "text-lvl_2_txt"
                   }`}
                 >

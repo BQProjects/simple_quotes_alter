@@ -120,7 +120,9 @@ const isMarkActive = (editor, format) => {
 
 const Element = ({ attributes, children, element, size, theme }) => {
   const alignment =
-    element.align === "center"
+    theme === 1
+      ? "text-left"
+      : element.align === "center"
       ? `text-${element.align}`
       : element.align === "right"
       ? "text-right"
