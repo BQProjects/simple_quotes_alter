@@ -16118,7 +16118,7 @@ const Sidebar = ({
                       setDesignDoc("color");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between border-b border-border_clr active:bg-highlight hover:text-active_text px-4 hover:bg-gray-100 ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center justify-between border-b border-border_clr active:bg-highlight hover:text-active_text px-3 hover:bg-gray-100 mx-1 rounded-md ${
                     designDoc === "color"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16181,7 +16181,7 @@ const Sidebar = ({
                       setDesignDoc("typo");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center active:bg-highlight justify-between px-4 hover:bg-gray-100 hover:text-active_text border-b border-border_clr ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center active:bg-highlight justify-between px-3 mx-1 rounded-md hover:bg-gray-100 hover:text-active_text border-b border-border_clr ${
                     designDoc === "typo"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16284,7 +16284,7 @@ const Sidebar = ({
                       setDesignDoc("theme");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between border-b border-border_clr hover:text-active_text px-4 hover:bg-gray-100 active:bg-highlight ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center justify-between border-b border-border_clr hover:text-active_text px-3 mx-1 rounded-md hover:bg-gray-100 active:bg-highlight ${
                     designDoc === "theme"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16896,7 +16896,11 @@ const Sidebar = ({
                     <img src={p_s} />
                     Paragraph
                   </div>
-                  <IoIosArrowDown />
+                  {openSections === "para" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
 
                 {openSections === "para" && (
@@ -16968,7 +16972,11 @@ const Sidebar = ({
                     <img src={t_s} />
                     Tables
                   </div>
-                  <IoIosArrowDown />
+                  {openSections === "tables" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
 
                 {openSections === "tables" && (
@@ -17041,7 +17049,11 @@ const Sidebar = ({
                     <img src={i_s} />
                     Image & Content{" "}
                   </div>
-                  <IoIosArrowDown />
+                  {openSections === "img" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
                 {openSections === "img" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
@@ -17113,7 +17125,11 @@ const Sidebar = ({
                     Cost Module
                   </div>
 
-                  <IoIosArrowDown />
+                  {openSections === "cost" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
                 {openSections === "cost" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
@@ -17270,7 +17286,11 @@ const Sidebar = ({
                     Half Page
                   </div>
 
-                  <IoIosArrowDown />
+                  {openCover === "half" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
                 {openCover === "half" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
@@ -17396,7 +17416,11 @@ const Sidebar = ({
                     Full Page
                   </div>
 
-                  <IoIosArrowDown />
+                  {openCover === "full" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
                 {openCover === "full" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
