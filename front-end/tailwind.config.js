@@ -19,6 +19,7 @@ export default {
       colors: {
         graidient_top: "#130107",
         graidient_bottom: "rgba(223, 6, 78, 1)",
+        graidient_middle: "rgba(200, 5, 68, 1)",
         gradient_darker: "rgba(159 , 0 , 54, 1)",
         overlap: "#F5F5F5",
         botton_white_text: "#DF064d",

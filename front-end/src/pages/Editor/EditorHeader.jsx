@@ -694,7 +694,7 @@ const EditorHeader = ({
               setShare(!share);
               setMenu(false);
             }}
-            className="bg-footer_gradient_bot text-white px-4 rounded-md py-2 text-center text-sm flex gap-1 items-center justify-center hover:bg-graidient_bottom active:bg-gradient_darker"
+            className="bg-footer_gradient_bot hover:bg-graidient_middle text-white px-4 rounded-md py-2 text-center text-sm flex gap-1 items-center justify-center  active:bg-gradient_darker"
           >
             <FaRegShareSquare className="w-3 h-3" />
             Share

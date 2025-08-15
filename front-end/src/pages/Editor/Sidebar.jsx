@@ -145,6 +145,10 @@ import { FaRegBookmark } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
 import { Icon } from "@iconify/react";
 import Select from "react-select";
+import c_s from "../../assets/c_s.svg";
+import p_s from "../../assets/p_s.svg";
+import t_s from "../../assets/t_s.svg";
+import i_s from "../../assets/i_s.svg";
 
 const Sidebar = ({
   selected,
@@ -15779,7 +15783,7 @@ const Sidebar = ({
                 />
               </div>
 
-              <p className="text-gray-400 ">Design Doc</p>
+              <p className="text-gray-400 ">Doc Style</p>
             </div>
 
             {/* <div
@@ -16114,7 +16118,7 @@ const Sidebar = ({
                       setDesignDoc("color");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between border-b border-border_clr active:bg-highlight hover:text-active_text px-4 hover:bg-gray-100 ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center justify-between border-b border-border_clr active:bg-highlight hover:text-active_text px-3 hover:bg-gray-100 mx-1 rounded-md ${
                     designDoc === "color"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16177,7 +16181,7 @@ const Sidebar = ({
                       setDesignDoc("typo");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center active:bg-highlight justify-between px-4 hover:bg-gray-100 hover:text-active_text border-b border-border_clr ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center active:bg-highlight justify-between px-3 mx-1 rounded-md hover:bg-gray-100 hover:text-active_text border-b border-border_clr ${
                     designDoc === "typo"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16280,7 +16284,7 @@ const Sidebar = ({
                       setDesignDoc("theme");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer -mx-3 h-[48px] flex items-center justify-between border-b border-border_clr hover:text-active_text px-4 hover:bg-gray-100 active:bg-highlight ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center justify-between border-b border-border_clr hover:text-active_text px-3 mx-1 rounded-md hover:bg-gray-100 active:bg-highlight ${
                     designDoc === "theme"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16882,14 +16886,21 @@ const Sidebar = ({
                       setOpenSections("para");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openSections === "para"
                       ? "text-active_text"
                       : "text-lvl_2_txt"
                   }`}
                 >
-                  Paragraph
-                  <IoIosArrowDown />
+                  <div className="flex items-center gap-2">
+                    <img src={p_s} />
+                    Paragraph
+                  </div>
+                  {openSections === "para" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
 
                 {openSections === "para" && (
@@ -16941,6 +16952,7 @@ const Sidebar = ({
                     </div>
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
 
                 <p
                   onClick={() => {
@@ -16950,14 +16962,21 @@ const Sidebar = ({
                       setOpenSections("tables");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openSections === "tables"
                       ? "text-active_text"
                       : "text-lvl_2_txt"
                   }`}
                 >
-                  Tables
-                  <IoIosArrowDown />
+                  <div className="flex items-center gap-2">
+                    <img src={t_s} />
+                    Tables
+                  </div>
+                  {openSections === "tables" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
 
                 {openSections === "tables" && (
@@ -17009,6 +17028,7 @@ const Sidebar = ({
                     </div>
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
 
                 <p
                   onClick={() => {
@@ -17018,14 +17038,22 @@ const Sidebar = ({
                       setOpenSections("img");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openSections === "img"
                       ? "text-active_text"
                       : "text-lvl_2_txt"
                   }`}
                 >
-                  Image & Content
-                  <IoIosArrowDown />
+                  {" "}
+                  <div className="flex items-center gap-2">
+                    <img src={i_s} />
+                    Image & Content{" "}
+                  </div>
+                  {openSections === "img" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
                 {openSections === "img" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
@@ -17076,6 +17104,7 @@ const Sidebar = ({
                     </div>
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
 
                 <p
                   onClick={() => {
@@ -17085,14 +17114,22 @@ const Sidebar = ({
                       setOpenSections("cost");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer py-0.5 flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
                     openSections === "cost"
                       ? "text-active_text"
                       : "text-lvl_2_txt"
                   }`}
                 >
-                  Cost Module
-                  <IoIosArrowDown />
+                  <div className="flex items-center gap-2">
+                    <img src={c_s} />
+                    Cost Module
+                  </div>
+
+                  {openSections === "cost" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
                 {openSections === "cost" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
@@ -17143,6 +17180,7 @@ const Sidebar = ({
                     </div>
                   </div>
                 )}
+                <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
               </div>
             ) : thirdLevel === "pages" ? (
               <div
@@ -17177,7 +17215,7 @@ const Sidebar = ({
                     return (
                       <div
                         key={index}
-                        className="w-[88%] bg-lvl_3_bg py-[15px] flex flex-col items-center justify-center gap-2 rounded-md"
+                        className="w-[88%] bg-lvl_3_bg hover:bg-highlight cursor-pointer py-[15px] flex flex-col items-center justify-center gap-2 rounded-md"
                         onClick={() => {
                           setRows([...rows, ...item.data]);
                           setThirdLevel("");
@@ -17234,7 +17272,7 @@ const Sidebar = ({
                       setOpenCover("half");
                     }
                   }}
-                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text items-center ${
+                  className={` w-full text-left text-sm px-[16px] cursor-pointer  flex justify-between hover:text-active_text  items-center ${
                     openCover === "half" ? "text-active_text" : "text-lvl_2_txt"
                   }`}
                 >
@@ -17248,7 +17286,11 @@ const Sidebar = ({
                     Half Page
                   </div>
 
-                  <IoIosArrowDown />
+                  {openCover === "half" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
                 {openCover === "half" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
@@ -17374,7 +17416,11 @@ const Sidebar = ({
                     Full Page
                   </div>
 
-                  <IoIosArrowDown />
+                  {openCover === "full" ? (
+                    <IoIosArrowDown />
+                  ) : (
+                    <IoIosArrowDown className=" -rotate-90" />
+                  )}
                 </p>
                 {openCover === "full" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">

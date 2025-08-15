@@ -34,8 +34,8 @@ const EditorDnD = () => {
   const [share, setShare] = useState(false);
   const [menu, setMenu] = useState(false);
   const [style, setStyle] = useState({
-    headingTypography: "Ariel",
-    paragrapghTypography: "Ariel",
+    headingTypography: "roboto",
+    paragrapghTypography: "roboto",
     headingBorder: "none",
     codeTypography: "mono",
     codeBorder: "1px",

@@ -25,8 +25,8 @@ const Dashboard = ({ children }) => {
           workspace_id: workspace,
           name: "Untitled Proposal",
           settings: {
-            heading: "Arieal",
-            body: "Arieal",
+            heading: "roboto",
+            body: "roboto",
             header: false,
             footer: false,
             color: "#9b9b9b",
