@@ -16118,7 +16118,7 @@ const Sidebar = ({
                       setDesignDoc("color");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center justify-between border-b border-border_clr active:bg-highlight hover:text-active_text px-3 hover:bg-gray-100 mx-1 rounded-md ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center justify-between border-b border-border_clr active:bg-highlight hover:text-active_text px-3 hover:bg-gray-100 rounded-md ${
                     designDoc === "color"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16181,7 +16181,7 @@ const Sidebar = ({
                       setDesignDoc("typo");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center active:bg-highlight justify-between px-3 mx-1 rounded-md hover:bg-gray-100 hover:text-active_text border-b border-border_clr ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center active:bg-highlight justify-between px-3  rounded-md hover:bg-gray-100 hover:text-active_text border-b border-border_clr ${
                     designDoc === "typo"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16200,7 +16200,7 @@ const Sidebar = ({
                   />
                 </h3>
                 {designDoc === "typo" && (
-                  <div className="transition-all duration-500 ease-out opacity-0 animate-fadeIn mb-2 z-50">
+                  <div className="transition-all duration-500 ease-out opacity-0 animate-fadeIn mb-4 z-50 px-3">
                     {/* Heading Font */}
                     <div className="mt-1">
                       <label className="text-xs text-active_text mb-2">
@@ -16284,7 +16284,7 @@ const Sidebar = ({
                       setDesignDoc("theme");
                     }
                   }}
-                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center justify-between border-b border-border_clr hover:text-active_text px-3 mx-1 rounded-md hover:bg-gray-100 active:bg-highlight ${
+                  className={`text-sm  py-2 cursor-pointer  h-[48px] flex items-center justify-between border-b border-border_clr hover:text-active_text px-3 rounded-md hover:bg-gray-100 active:bg-highlight ${
                     designDoc === "theme"
                       ? "bg-gray-100 text-active_text"
                       : "bg-white text-lvl_2_hed"
@@ -16324,7 +16324,7 @@ const Sidebar = ({
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
-                          Classic
+                          Primary
                         </p>
                       </div>
                       <div className="flex flex-col items-center justify-center">
@@ -16343,7 +16343,7 @@ const Sidebar = ({
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
-                          Classic
+                          Pulse Line
                         </p>
                       </div>
                       <div className="flex flex-col items-center justify-center">
@@ -16362,7 +16362,7 @@ const Sidebar = ({
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
-                          Classic
+                          Orbit
                         </p>
                       </div>
                       <div className="flex flex-col items-center justify-center">
@@ -16372,7 +16372,7 @@ const Sidebar = ({
                             temp.theme = 3;
                             setSettings(temp);
                           }}
-                          className={`h-28 w-[100%] hover:border hover:border-graidient_bottom ${
+                          className={`h-28 w-[100%] hover:border hover:border-gray-400 ${
                             settings.theme === 3
                               ? "border border-gradient_darker"
                               : "none"
@@ -16381,10 +16381,10 @@ const Sidebar = ({
                           alt="sometthing"
                         />
                         <p className="text-xs text-non_active_text mt-1">
-                          Classic
+                          Strata
                         </p>
                       </div>
-                      <div className="flex flex-col items-center justify-center">
+                      {/* <div className="flex flex-col items-center justify-center">
                         <img
                           onClick={() => {
                             const temp = { ...settings };
@@ -16402,8 +16402,8 @@ const Sidebar = ({
                         <p className="text-xs text-non_active_text mt-1">
                           Classic
                         </p>
-                      </div>
-                      <div className="flex flex-col items-center justify-center">
+                      </div> */}
+                      {/* <div className="flex flex-col items-center justify-center">
                         <img
                           onClick={() => {
                             const temp = { ...settings };
@@ -16421,7 +16421,7 @@ const Sidebar = ({
                         <p className="text-xs text-non_active_text mt-1">
                           Classic
                         </p>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 )}
@@ -16525,8 +16525,8 @@ const Sidebar = ({
                     </div>
                     {workspaceInclude.includes(item._id) &&
                       (item.proposals && item.proposals.length === 0 ? (
-                        <div className="w-full ml-4 flex items-center justify-start gap-1 my-2 cursor-pointer text-non_active_text transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
-                          <p className="text-xs w-[88%] overflow-hidden text-ellipsis whitespace-nowrap pl-1">
+                        <div className="w-full ml-8 flex items-center justify-start gap-1 my-2 cursor-pointer text-non_active_text transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
+                          <p className="text-xs w-[70%] overflow-hidden text-ellipsis whitespace-nowrap pl-1">
                             No Proposals available
                           </p>
                         </div>
@@ -16534,14 +16534,14 @@ const Sidebar = ({
                         item.proposals?.map((proposal, index) => (
                           <div
                             key={proposal._id || index}
-                            className="w-full ml-4 flex items-center justify-start gap-1 my-2 cursor-pointer text-non_active_text hover:text-active_text transition-all duration-500 ease-out opacity-0 animate-fadeIn"
+                            className="w-full ml-8 flex items-center justify-start gap-1 my-2 cursor-pointer text-non_active_text hover:text-active_text transition-all duration-500 ease-out opacity-0 animate-fadeIn"
                           >
                             <IoDocumentTextOutline />
                             <p
                               onClick={() =>
                                 navigate(`/editor/${proposal._id}`)
                               }
-                              className="text-xs w-[84%] overflow-hidden text-ellipsis whitespace-nowrap pl-1"
+                              className="text-xs w-[70%] overflow-hidden text-ellipsis whitespace-nowrap pl-1"
                             >
                               {proposal.proposalName}
                             </p>

@@ -202,67 +202,104 @@ const Table = ({
     }
   };
 
+  // Mix a color with white to make it lighter
+  const lightenHex = (hex, percent) => {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const r = (num >> 16) & 0xff;
+    const g = (num >> 8) & 0xff;
+    const b = num & 0xff;
+
+    const newR = Math.round(r + (255 - r) * (percent / 100));
+    const newG = Math.round(g + (255 - g) * (percent / 100));
+    const newB = Math.round(b + (255 - b) * (percent / 100));
+
+    return `rgb(${newR}, ${newG}, ${newB})`;
+  };
+
   const getBackgroundColor = (value, colIndex, rowIndex) => {
     if (settings.theme === 0) {
       switch (value) {
         case "alternativerow":
-          if (rowIndex % 2 === 0) {
-            return "bg-gray-200";
-          } else {
-            return "bg-gray-100";
-          }
+          return {
+            backgroundColor: rowIndex % 2 === 0 ? "#e5e7eb" : "#f3f4f6",
+          }; // gray-200 / gray-100
         case "alternativecol":
-          if (colIndex % 2 === 0) {
-            return "bg-gray-200";
-          } else {
-            return "bg-gray-100";
-          }
+          return {
+            backgroundColor: colIndex % 2 === 0 ? "#e5e7eb" : "#f3f4f6",
+          };
         case "toprow":
-          if (rowIndex === 0) {
-            return "bg-gray-200";
-          } else {
-            return "white";
-          }
+          return { backgroundColor: rowIndex === 0 ? "#e5e7eb" : "white" };
         case "leftcol":
-          if (colIndex === 0) {
-            return "bg-gray-200";
-          } else {
-            return "white";
-          }
+          return { backgroundColor: colIndex === 0 ? "#e5e7eb" : "white" };
         default:
-          return "white";
+          return { backgroundColor: "white" };
       }
     } else {
       switch (value) {
         case "alternativerow":
-          if (rowIndex % 2 === 0) {
-            return `bg-[${settings.color}]`;
-          } else {
-            return "bg-gray-100";
-          }
+          return {
+            backgroundColor:
+              rowIndex % 2 === 0
+                ? lightenHex(settings.color, 80)
+                : lightenHex(settings.color, 90),
+          };
         case "alternativecol":
-          if (colIndex % 2 === 0) {
-            return "bg-gray-200";
-          } else {
-            return "bg-gray-100";
-          }
+          return {
+            backgroundColor:
+              colIndex % 2 === 0
+                ? lightenHex(settings.color, 80)
+                : lightenHex(settings.color, 90),
+          };
         case "toprow":
-          if (rowIndex === 0) {
-            return "bg-gray-200";
-          } else {
-            return "white";
-          }
+          return {
+            backgroundColor:
+              rowIndex === 0 ? lightenHex(settings.color, 80) : "white",
+          };
         case "leftcol":
-          if (colIndex === 0) {
-            return "bg-gray-200";
-          } else {
-            return "white";
-          }
+          return {
+            backgroundColor:
+              colIndex === 0 ? lightenHex(settings.color, 80) : "white",
+          };
         default:
-          return "white";
+          return { backgroundColor: "white" };
       }
     }
   };
+
+  // const hexToRgba = (hex, alpha = 1) => {
+  //   const r = parseInt(hex.slice(1, 3), 16);
+  //   const g = parseInt(hex.slice(3, 5), 16);
+  //   const b = parseInt(hex.slice(5, 7), 16);
+  //   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  // };
+
+  // // Lighten a hex color (mix with white)
+  // const lightenHex = (hex, percent = 20) => {
+  //   const num = parseInt(hex.slice(1), 16);
+  //   const r = Math.min(
+  //     255,
+  //     (num >> 16) + (255 - (num >> 16)) * (percent / 100)
+  //   );
+  //   const g = Math.min(
+  //     255,
+  //     ((num >> 8) & 0x00ff) + (255 - ((num >> 8) & 0x00ff)) * (percent / 100)
+  //   );
+  //   const b = Math.min(
+  //     255,
+  //     (num & 0x0000ff) + (255 - (num & 0x0000ff)) * (percent / 100)
+  //   );
+  //   return `rgb(${r}, ${g}, ${b})`;
+  // };
+
+  // const background_1 =
+  //   settings.theme !== 0
+  //     ? hexToRgba(settings.theme, 0.6) // 60% visible
+  //     : "transparent";
+
+  // const background_2 =
+  //   settings.theme !== 0
+  //     ? hexToRgba(settings.theme, 0.3) // lighter (30% visible)
+  //     : "transparent";
 
   return (
     <div
@@ -574,15 +611,16 @@ const Table = ({
               {rows.map((cell, colIndex) => (
                 <td
                   key={colIndex}
-                  className={`text-center relative ${
+                  style={
                     rowIndex === rowIndexs ||
                     colIndex === colIndexs - 1 ||
-                    (alignH === true && col === colIndex) ||
-                    (rowH === true && row === rowIndex) ||
-                    (colH === true && col === colIndex)
-                      ? "bg-red-100"
+                    (alignH && col === colIndex) ||
+                    (rowH && row === rowIndex) ||
+                    (colH && col === colIndex)
+                      ? { backgroundColor: "#fee2e2" } // red-100
                       : getBackgroundColor(design, colIndex, rowIndex)
-                  } border-[2px] border-gray-400`}
+                  }
+                  className="text-center relative border-[2px] border-gray-400"
                 >
                   {preview ? (
                     <p>{cell}</p>
@@ -604,16 +642,17 @@ const Table = ({
                         newData[rowIndex][colIndex] = e.target.value;
                         onUpdate(newData);
                       }}
+                      style={
+                        rowIndex === rowIndexs ||
+                        colIndex === colIndexs - 1 ||
+                        (alignH && col === colIndex) ||
+                        (rowH && row === rowIndex) ||
+                        (colH && col === colIndex)
+                          ? { backgroundColor: "#fee2e2" } // red-100
+                          : getBackgroundColor(design, colIndex, rowIndex)
+                      }
                       className={`w-full resize-none p-1
-                     ${
-                       rowIndex === rowIndexs ||
-                       colIndex === colIndexs - 1 ||
-                       (alignH === true && col === colIndex) ||
-                       (rowH === true && row === rowIndex) ||
-                       (colH === true && col === colIndex)
-                         ? "bg-red-100"
-                         : getBackgroundColor(design, colIndex, rowIndex)
-                     }
+                
                      ${
                        colAlign[colIndex] === "center"
                          ? "text-center"
