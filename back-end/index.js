@@ -57,7 +57,8 @@ passport.use(
     {
       clientID: google_client_id,
       clientSecret: google_client_secret,
-      callbackURL: "https://simple-jet-eta.vercel.app/auth/google/callback",
+      callbackURL:
+        "https://simple-quotes-alter-ggrf.vercel.app/auth/google/callback",
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -100,12 +101,12 @@ app.get(
 app.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "https://simplefront-iota.vercel.app/login",
+    failureRedirect: "https://simple-quotes-alter.vercel.app/login",
   }),
   (req, res) => {
     const userId = req.user._id;
     res.redirect(
-      `https://simplefront-iota.vercel.app/#/redirect?userId=${userId}`
+      `https://simple-quotes-alter.vercel.app/#/redirect?userId=${userId}`
     );
   }
 );
