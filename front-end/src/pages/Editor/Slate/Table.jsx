@@ -240,8 +240,8 @@ const Table = ({
           return {
             backgroundColor:
               rowIndex % 2 === 0
-                ? lightenHex(settings.color, 80)
-                : lightenHex(settings.color, 90),
+                ? lightenHex(settings.color, 90)
+                : lightenHex(settings.color, 98),
           };
         case "alternativecol":
           return {
