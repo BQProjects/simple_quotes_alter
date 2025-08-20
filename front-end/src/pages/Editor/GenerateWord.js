@@ -63,54 +63,6 @@ const fetchImageAsArrayBuffer = async (url) => {
   }
 };
 
-// Improved image dimensions to maintain proper aspect ratios
-const getImageDimensions = (
-  width,
-  height,
-  maxWidth = 600,
-  maxHeight = 400,
-  context = "normal"
-) => {
-  let w = parseInt(width) || maxWidth;
-  let h = parseInt(height) || maxHeight;
-
-  // Context-specific sizing to match web layout exactly
-  switch (context) {
-    case "cover":
-      maxWidth = 650;
-      maxHeight = 450;
-      break;
-    case "inline":
-      maxWidth = 500;
-      maxHeight = 350;
-      break;
-    case "side":
-      maxWidth = 280;
-      maxHeight = 200;
-      break;
-    case "double":
-      maxWidth = 320;
-      maxHeight = 240;
-      break;
-  }
-
-  // Maintain aspect ratio while fitting within bounds
-  const aspectRatio = w / h;
-
-  if (w > maxWidth) {
-    w = maxWidth;
-    h = w / aspectRatio;
-  }
-  if (h > maxHeight) {
-    h = maxHeight;
-    w = h * aspectRatio;
-  }
-
-  return {
-    width: Math.round(Math.max(w, 120)),
-    height: Math.round(Math.max(h, 80)),
-  };
-};
 
 const JsonToWord = async (jsonData) => {
   const data = jsonData.data || jsonData;
@@ -1876,152 +1828,376 @@ const JsonToWord = async (jsonData) => {
               .join(" ");
             const isLeftAligned = item.align === "left";
 
-            // Make sure to await the image creation
-            const imageCell = await createImageParagraph(item.ImageLink, {
-              width: parseInt(item.width) || 320,
-              height: parseInt(item.height) || 240,
-              context: "side",
-              spacing: { before: 0, after: 0 },
-              alignment: AlignmentType.CENTER,
-            });
+            try {
+              // Fetch image to get natural dimensions (same approach as "image" case)
+              const imageBuffer = await fetchImageAsArrayBuffer(item.ImageLink);
+              if (imageBuffer) {
+                const image = new Image();
+                image.src = URL.createObjectURL(new Blob([imageBuffer]));
 
-            const textCell = createParagraph(text, {
-              size: 22,
-              spacing: { before: 80, after: 80 },
-              lineSpacing: 1.3,
-            });
+                await new Promise((resolve) => {
+                  image.onload = resolve;
+                });
 
-            const imageParaTable = new Table({
-              rows: [
-                new TableRow({
-                  children: isLeftAligned
-                    ? [
-                        new TableCell({
-                          children: [imageCell],
-                          width: { size: 35, type: WidthType.PERCENTAGE },
-                          borders: {
-                            top: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            bottom: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            left: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            right: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                          },
-                          margins: { top: 0, bottom: 0, left: 0, right: 200 },
-                          verticalAlign: VerticalAlign.CENTER,
-                        }),
-                        new TableCell({
-                          children: [textCell],
-                          width: { size: 65, type: WidthType.PERCENTAGE },
-                          borders: {
-                            top: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            bottom: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            left: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            right: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                          },
-                          margins: { top: 0, bottom: 0, left: 200, right: 0 },
-                          verticalAlign: VerticalAlign.CENTER,
-                        }),
-                      ]
-                    : [
-                        new TableCell({
-                          children: [textCell],
-                          width: { size: 65, type: WidthType.PERCENTAGE },
-                          borders: {
-                            top: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            bottom: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            left: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            right: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                          },
-                          margins: { top: 0, bottom: 0, left: 0, right: 200 },
-                          verticalAlign: VerticalAlign.CENTER,
-                        }),
-                        new TableCell({
-                          children: [imageCell],
-                          width: { size: 35, type: WidthType.PERCENTAGE },
-                          borders: {
-                            top: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            bottom: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            left: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                            right: {
-                              style: BorderStyle.SINGLE,
-                              size: 2,
-                              color: "FFFFFF",
-                            },
-                          },
-                          margins: { top: 0, bottom: 0, left: 200, right: 0 },
-                          verticalAlign: VerticalAlign.CENTER,
-                        }),
-                      ],
-                }),
-              ],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              layout: TableLayoutType.FIXED,
-            });
+                const originalWidth = image.naturalWidth;
+                const originalHeight = image.naturalHeight;
 
-            allContent.push(
-              createParagraph("", { spacing: { before: 100, after: 40 } }), // Web-like spacing
-              imageParaTable,
-              createParagraph("", { spacing: { before: 40, after: 100 } }) // Web-like spacing
-            );
+                // Use better dimensions with proper aspect ratio
+                const dimensions = getImageDimensions(
+                  originalWidth,
+                  originalHeight,
+                  parseInt(item.width) || 400,
+                  parseInt(item.height) || 300,
+                  "inline" // Changed from "side" to "inline" for better dimensions
+                );
+
+                const imageCell = await createImageParagraph(item.ImageLink, {
+                  width: dimensions.width, // Use calculated width instead of forced minimum
+                  height: dimensions.height, // Use calculated height instead of forced minimum
+                  context: "inline", // Changed from "side" to allow larger dimensions
+                  spacing: { before: 0, after: 0 },
+                  alignment: AlignmentType.CENTER,
+                });
+
+                const textCell = createParagraph(text, {
+                  size: 22,
+                  spacing: { before: 80, after: 80 },
+                  lineSpacing: 1.3,
+                });
+
+                const imageParaTable = new Table({
+                  rows: [
+                    new TableRow({
+                      children: isLeftAligned
+                        ? [
+                            new TableCell({
+                              children: [imageCell],
+                              width: { size: 35, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                bottom: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                left: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                right: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 0,
+                                right: 200,
+                              },
+                              verticalAlign: VerticalAlign.CENTER,
+                            }),
+                            new TableCell({
+                              children: [textCell],
+                              width: { size: 65, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                bottom: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                left: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                right: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 200,
+                                right: 0,
+                              },
+                              verticalAlign: VerticalAlign.CENTER,
+                            }),
+                          ]
+                        : [
+                            new TableCell({
+                              children: [textCell],
+                              width: { size: 65, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                bottom: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                left: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                right: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 0,
+                                right: 200,
+                              },
+                              verticalAlign: VerticalAlign.CENTER,
+                            }),
+                            new TableCell({
+                              children: [imageCell],
+                              width: { size: 35, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                bottom: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                left: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                right: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 200,
+                                right: 0,
+                              },
+                              verticalAlign: VerticalAlign.CENTER,
+                            }),
+                          ],
+                    }),
+                  ],
+                  width: { size: 100, type: WidthType.PERCENTAGE },
+                  layout: TableLayoutType.FIXED,
+                });
+
+                allContent.push(
+                  createParagraph("", { spacing: { before: 100, after: 40 } }), // Web-like spacing
+                  imageParaTable,
+                  createParagraph("", { spacing: { before: 40, after: 100 } }) // Web-like spacing
+                );
+              } else {
+                // Fallback if image can't be loaded
+                const fallbackImageCell = await createImageParagraph(
+                  item.ImageLink,
+                  {
+                    width: parseInt(item.width) || 320,
+                    height: parseInt(item.height) || 240,
+                    context: "side",
+                    spacing: { before: 0, after: 0 },
+                    alignment: AlignmentType.CENTER,
+                  }
+                );
+
+                const textCell = createParagraph(text, {
+                  size: 22,
+                  spacing: { before: 80, after: 80 },
+                  lineSpacing: 1.3,
+                });
+
+                const imageParaTable = new Table({
+                  rows: [
+                    new TableRow({
+                      children: isLeftAligned
+                        ? [
+                            new TableCell({
+                              children: [fallbackImageCell],
+                              width: { size: 35, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                bottom: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                left: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                right: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 0,
+                                right: 200,
+                              },
+                              verticalAlign: VerticalAlign.CENTER,
+                            }),
+                            new TableCell({
+                              children: [textCell],
+                              width: { size: 65, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                bottom: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                left: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                right: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 200,
+                                right: 0,
+                              },
+                              verticalAlign: VerticalAlign.CENTER,
+                            }),
+                          ]
+                        : [
+                            new TableCell({
+                              children: [textCell],
+                              width: { size: 65, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                bottom: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                left: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                right: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 0,
+                                right: 200,
+                              },
+                              verticalAlign: VerticalAlign.CENTER,
+                            }),
+                            new TableCell({
+                              children: [fallbackImageCell],
+                              width: { size: 35, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                bottom: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                left: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                                right: {
+                                  style: BorderStyle.SINGLE,
+                                  size: 2,
+                                  color: "FFFFFF",
+                                },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 200,
+                                right: 0,
+                              },
+                              verticalAlign: VerticalAlign.CENTER,
+                            }),
+                          ],
+                    }),
+                  ],
+                  width: { size: 100, type: WidthType.PERCENTAGE },
+                  layout: TableLayoutType.FIXED,
+                });
+
+                allContent.push(
+                  createParagraph("", { spacing: { before: 100, after: 40 } }),
+                  imageParaTable,
+                  createParagraph("", { spacing: { before: 40, after: 100 } })
+                );
+              }
+            } catch (error) {
+              console.error("Error processing image-para:", error);
+              // Fallback to simple text if everything fails
+              allContent.push(
+                createParagraph(text, {
+                  size: 22,
+                  spacing: { before: 80, after: 80 },
+                  lineSpacing: 1.3,
+                })
+              );
+            }
           }
           break;
 

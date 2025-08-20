@@ -533,7 +533,7 @@ const RichTextEditor = ({
               isSearchable={false}
               menuPortalTarget={document.body}
               menuPosition="absolute"
-              className="w-16 mx-1.5"
+              className="w-15"
               onFocus={(e) => {
                 e.stopPropagation(); // Prevent toolbar from hiding
                 setChoosen(true);
