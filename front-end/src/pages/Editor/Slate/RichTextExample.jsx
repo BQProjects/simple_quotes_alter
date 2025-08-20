@@ -419,8 +419,12 @@ const RichTextEditor = ({
       padding: "",
       cursor: "pointer",
       border: "none",
-      fontSize: "15px",
+      fontSize: "17px",
       fontWeight: "600",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: "rgba(140 , 140 , 140 , 1)", // Tailwind text-gray-800
     }),
     option: (base, state) => ({
       ...base,
@@ -442,7 +446,7 @@ const RichTextEditor = ({
     }),
     dropdownIndicator: (base) => ({
       ...base,
-      padding: 4,
+      padding: 1,
       svg: {
         width: 13, // reduce width of arrow
         height: 13, // reduce height of arrow
@@ -533,7 +537,7 @@ const RichTextEditor = ({
               isSearchable={false}
               menuPortalTarget={document.body}
               menuPosition="absolute"
-              className="w-15"
+              className="w-16"
               onFocus={(e) => {
                 e.stopPropagation(); // Prevent toolbar from hiding
                 setChoosen(true);
