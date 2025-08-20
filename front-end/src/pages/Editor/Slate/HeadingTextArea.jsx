@@ -425,7 +425,6 @@ const MyRichTextEditor = ({
       backgroundColor: "white", // active vs default
       boxShadow: "none",
       padding: "",
-      fontSize: "12px",
       cursor: "pointer",
       border: "none",
       fontSize: "17px",
