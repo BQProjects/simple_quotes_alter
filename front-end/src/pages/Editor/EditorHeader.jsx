@@ -5,7 +5,7 @@ import { CiSearch } from "react-icons/ci";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import axios from "axios";
 import { DatabaseContext } from "../../context/DatabaseContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { GrUndo, GrRedo } from "react-icons/gr";
 import { MdOutlineHistory } from "react-icons/md";
 import { IoNotificationsOutline } from "react-icons/io5";
@@ -660,9 +660,10 @@ const EditorHeader = ({
 
         <div className="h-16 w-[1px] bg-gray-200  z-20 "></div>
         <p
+          onClick={() => navigate(`/view/${id}`)}
           onMouseEnter={() => setTool("Preview document")}
           onMouseLeave={() => setTool(null)}
-          className="text-gray-500 cursor-pointer text-sm"
+          className="text-gray-500 cursor-pointer text-sm hover:text-active_text"
         >
           Preview
         </p>
