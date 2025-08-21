@@ -169,7 +169,7 @@ const CoverPageSlate = ({
           {show && (
             <div
               ref={toolbarRef}
-              className="w-fit h-8 bg-white border border-gray-100 shadow-md  flex flex-row items-center space-x-2 p-2 rounded text-sm absolute top-10 left-20 px-4 z-[100000] "
+              className="fixed -top-9 left-20 w-fit h-8 bg-white border border-gray-100 shadow-md flex flex-row items-center space-x-2 p-2 rounded text-sm px-4 z-[999999]"
             >
               <Slider
                 value={darkness}

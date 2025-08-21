@@ -9,6 +9,11 @@ import { FaRegFolder } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa6";
 import { FaRegFileLines } from "react-icons/fa6";
 import { StateManageContext } from "../../context/StateManageContext";
+import { TfiArrowTopLeft } from "react-icons/tfi";
+import { RxArrowTopLeft } from "react-icons/rx";
+import { GoArrowUp } from "react-icons/go";
+import { GoArrowDown } from "react-icons/go";
+import { GoDash } from "react-icons/go";
 
 const DashboardHome = () => {
   const { user } = useContext(UserContext);
@@ -16,6 +21,7 @@ const DashboardHome = () => {
   const [favorate, setFavorate] = useState([]);
   const [favW, setFavW] = useState([]);
   const [views, setViews] = useState(null);
+
   const navigate = useNavigate();
 
   const getLastSeen = (date) => {
@@ -93,6 +99,7 @@ const DashboardHome = () => {
         params: { user_id: user.id },
       });
       console.log(res.data);
+
       setViews(res.data);
     } catch (error) {
       console.error("Error fetching workspaces:", error);
@@ -105,9 +112,11 @@ const DashboardHome = () => {
     <>
       <div className="w-[100%] bg-gray-100 min-h-[90vh]   ">
         <div className="w-full h-[85vh] overflow-auto scrollbar-hide">
-          <h1 className=" p-3 text-2xl">Hello {user.username}</h1>
+          <h1 className=" p-3 text-2xl flex items-start gap-2">
+            Hello {user.username}
+          </h1>
           <div className="grid grid-cols-2 gap-5">
-            <div className="bg-white h-[30vh] w-full rounded-lg flex flex-col justify-between items-center p-3 relative ">
+            <div className="bg-white h-[230px] w-full rounded-lg flex flex-col justify-between items-center p-3 relative ">
               <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 pl-6 pt-2">
                 <FaRegFolder className="text-gray-500" />
                 <h1>Workspaces</h1>
@@ -170,33 +179,73 @@ const DashboardHome = () => {
                 </button>
               </div>
             </div>
-            <div className="bg-white h-[40vh] w-full rounded-lg px-8 py-3">
+            <div className="bg-white h-[310px] w-full rounded-lg px-8 py-3">
               <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700  pt-2">
                 <h1>Views Overview</h1>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[13vh] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer ">
+                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer ">
                   <h3 className="text-xs text-gray-400">Today</h3>
-                  <p className="text-2xl text-gray-600 pl-2">
-                    {views?.dailyViews}{" "}
-                    <span className="text-sm text-graidient_bottom">views</span>
+                  <p className="text-2xl text-gray-600 pl-2 flex items-end">
+                    {views?.dailyViews}
+                    <span
+                      className={`text-[10px] flex items-center  mx-1 ${
+                        views.dailyChange === 0
+                          ? "text-gray-600"
+                          : views.dailyChange < 0
+                          ? "text-red-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      {views.dailyChange === 0 ? (
+                        <GoDash />
+                      ) : views.dailyChange < 0 ? (
+                        <GoArrowDown />
+                      ) : (
+                        <GoArrowUp />
+                      )}
+                      {views.dailyChange}%
+                    </span>
+                    <span className="text-sm text-graidient_bottom ml-1 mb-0.5">
+                      views
+                    </span>
                   </p>
                 </div>
-                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[13vh] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
+                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
                   <h3 className="text-xs text-gray-400">This Week</h3>
-                  <p className="text-2xl text-gray-600 pl-2">
-                    {views?.weekViews}{" "}
-                    <span className="text-sm text-graidient_bottom">views</span>
+                  <p className="text-2xl text-gray-600 pl-2 flex items-end">
+                    {views?.weekViews}
+                    <span
+                      className={`text-[10px] flex items-center  mx-1 ${
+                        views.weekChange === 0
+                          ? "text-gray-600"
+                          : views.weekChange < 0
+                          ? "text-red-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      {views.weekChange === 0 ? (
+                        <GoDash />
+                      ) : views.weekChange < 0 ? (
+                        <GoArrowDown />
+                      ) : (
+                        <GoArrowUp />
+                      )}
+                      {views.weekChange}%
+                    </span>
+                    <span className="text-sm text-graidient_bottom ml-1 mb-0.5">
+                      views
+                    </span>
                   </p>
                 </div>
-                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[13vh] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
+                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
                   <h3 className="text-xs text-gray-400">Total Views</h3>
                   <p className="text-2xl text-gray-600 pl-2">
                     {views?.totalViews}{" "}
                     <span className="text-sm text-graidient_bottom">views</span>
                   </p>
                 </div>
-                <div className=" mt-3 mr-3 placeholder:w-[100%]  h-[13vh] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
+                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
                   <h3 className="text-xs text-gray-400">Avg Time Spent</h3>
                   <p className="text-2xl text-gray-600 pl-2">
                     {Math.floor(views?.timespent)}{" "}
@@ -205,7 +254,7 @@ const DashboardHome = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-white h-[70vh] w-full rounded-lg -mt-[10vh] px-6 py-4 relative">
+            <div className="bg-white h-[530px] w-full rounded-lg -mt-[10vh] px-6 py-4 relative">
               <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 ">
                 <FaRegFileLines className="text-gray-500" />
                 <h1>Proposals</h1>
@@ -265,7 +314,7 @@ const DashboardHome = () => {
                 </button>
               </div>
             </div>
-            <div className="bg-white h-[60vh] w-full rounded-lg px-6 py-4">
+            <div className="bg-white h-[450px] w-full rounded-lg px-6 py-4">
               <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 ">
                 <h1>Templates</h1>
               </div>

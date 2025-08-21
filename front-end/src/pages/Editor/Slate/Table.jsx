@@ -240,25 +240,25 @@ const Table = ({
           return {
             backgroundColor:
               rowIndex % 2 === 0
-                ? lightenHex(settings.color, 90)
-                : lightenHex(settings.color, 98),
+                ? lightenHex(settings.color, 85)
+                : lightenHex(settings.color, 92),
           };
         case "alternativecol":
           return {
             backgroundColor:
               colIndex % 2 === 0
-                ? lightenHex(settings.color, 80)
-                : lightenHex(settings.color, 90),
+                ? lightenHex(settings.color, 85)
+                : lightenHex(settings.color, 92),
           };
         case "toprow":
           return {
             backgroundColor:
-              rowIndex === 0 ? lightenHex(settings.color, 80) : "white",
+              rowIndex === 0 ? lightenHex(settings.color, 85) : "white",
           };
         case "leftcol":
           return {
             backgroundColor:
-              colIndex === 0 ? lightenHex(settings.color, 80) : "white",
+              colIndex === 0 ? lightenHex(settings.color, 85) : "white",
           };
         default:
           return { backgroundColor: "white" };

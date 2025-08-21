@@ -559,42 +559,81 @@ const getViews = async (req, res) => {
   let avg = 0;
   let sum = 0;
 
-  // Get today's start and end time
+  // ----- Today -----
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
   const endOfToday = new Date();
   endOfToday.setHours(23, 59, 59, 999);
 
-  // Get start of the current week (assuming Sunday as start)
+  // ----- Yesterday -----
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
+  const endOfYesterday = new Date(endOfToday);
+  endOfYesterday.setDate(endOfYesterday.getDate() - 1);
+
+  // ----- This Week -----
   const now = new Date();
   const dayOfWeek = now.getDay(); // 0 (Sun) to 6 (Sat)
   const startOfWeek = new Date(now);
   startOfWeek.setDate(now.getDate() - dayOfWeek);
   startOfWeek.setHours(0, 0, 0, 0);
 
+  // ----- Last Week -----
+  const startOfLastWeek = new Date(startOfWeek);
+  startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+
+  const endOfLastWeek = new Date(startOfWeek);
+  endOfLastWeek.setMilliseconds(-1); // one ms before this week's start
+
   try {
-    const [daily, week, total] = await Promise.all([
+    const [daily, yesterday, week, lastWeek, total] = await Promise.all([
+      // Today
       ViewModel.find({
         user: user_id,
         createdAt: { $gte: startOfToday, $lte: endOfToday },
       }),
+      // Yesterday
+      ViewModel.find({
+        user: user_id,
+        createdAt: { $gte: startOfYesterday, $lte: endOfYesterday },
+      }),
+      // This week
       ViewModel.find({
         user: user_id,
         createdAt: { $gte: startOfWeek },
       }),
+      // Last week
+      ViewModel.find({
+        user: user_id,
+        createdAt: { $gte: startOfLastWeek, $lte: endOfLastWeek },
+      }),
+      // Total
       ViewModel.find({ user: user_id }),
     ]);
 
+    // Average time spent
     total.forEach((item) => {
       sum += item.averageTime || 0;
     });
-
     avg = total.length > 0 ? sum / total.length : 0;
+
+    // Calculate percentage change (safe divide)
+    const calcChange = (current, prev) => {
+      if (prev === 0) return current > 0 ? 100 : 0; // avoid /0
+      return ((current - prev) / prev) * 100;
+    };
 
     return res.json({
       dailyViews: daily.length,
+      yesterdayViews: yesterday.length,
+      dailyChange: calcChange(daily.length, yesterday.length),
+
       weekViews: week.length,
+      lastWeekViews: lastWeek.length,
+      weekChange: calcChange(week.length, lastWeek.length),
+
       totalViews: total.length,
       timespent: avg,
     });
