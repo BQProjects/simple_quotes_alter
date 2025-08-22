@@ -54,7 +54,7 @@ const Dashboard = ({ children }) => {
         {newProposal && (
           <NewProposal handleCreateNewProposal={handleCreateNewProposal} />
         )}
-        <div className="px-10 pt-5 w-[85%] flex items-start justify-center rounded-lg">
+        <div className="px-10 pt-5 w-[85%] flex items-start justify-center rounded-lg overflow-hidden">
           {children}
         </div>
       </div>

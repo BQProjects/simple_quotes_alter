@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/Web_logo.png";
+import sq_logo from "../../assets/sq_logo.svg";
 import { CiSearch } from "react-icons/ci";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { UserContext } from "../../context/UserContext";
@@ -20,6 +21,7 @@ const DashboardHeader = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [allItems, setAllItems] = useState([]);
   const [sortP, setSortP] = useState("default");
+  const bellRef = useRef(null);
   const notificationRef = useRef(null);
   const searchRef = useRef(null);
   const notifications = [
@@ -153,7 +155,7 @@ const DashboardHeader = () => {
   // Navigate to item when selected
   const handleSelectItem = (item) => {
     if (item.type === "proposal") {
-      navigate(`/proposals`);
+      navigate(`/editor/${item._id}`);
     } else if (item.type === "workspace") {
       navigate(`/workspace/${item._id || item.id}`);
     }
@@ -207,12 +209,25 @@ const DashboardHeader = () => {
     }
   };
 
+  const handleClickOutsideBell = (event) => {
+    if (bellRef.current && !bellRef.current.contains(event.target)) {
+      setNotification(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutsideBell);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideBell);
+    };
+  }, []);
+
   return (
     <div className="h-[8vh] w-full flex items-center justify-between shadow-lg shadow-gray-200 border-b border-gray-200">
       <div className="w-[15%] flex items-center">
         <img
-          className="w-[190px] h-[52px] object-contain ml-2"
-          src={Logo}
+          className="w-[120px] h-[52px] object-contain ml-9"
+          src={sq_logo}
           alt="Logo"
           style={{ opacity: 1 }}
         />
@@ -221,12 +236,12 @@ const DashboardHeader = () => {
         className="w-[30%] flex items-center justify-center text-gray-600 ml-[15%] relative"
         ref={searchRef}
       >
-        <div className="flex items-center border-[1px] rounded-lg border-gray-300 w-[90%] bg-gray-100">
+        <div className="flex items-center border-[1px] rounded-md border-gray-200 w-[90%] hover:border-active_text focus-within:border-active_text ">
           <CiSearch className="w-10 text-gray-600" />
           <input
             type="text"
             placeholder="Search for workspaces and proposals..."
-            className="pr-6 py-1 bg-gray-100 text-sm w-full"
+            className="pr-5 py-1.5  text-sm w-full"
             style={{ outline: "none" }}
             value={searchQuery}
             onChange={handleSearchChange}
@@ -259,15 +274,17 @@ const DashboardHeader = () => {
                           : "bg-green-500"
                       } rounded-full mr-2`}
                     ></div>
-                    <div className="flex-1">
-                      <div className="flex justify-between">
-                        <p className="text-gray-700 font-medium">
-                          {item.title ||
-                            item.name ||
-                            item.workspaceName ||
-                            item.proposalName ||
-                            "Unnamed Item"}
-                        </p>
+                    <div className="flex-1 w-full">
+                      <div className="flex justify-between ">
+                        <div className="flex ">
+                          <p className="text-gray-700 font-medium text-sm w-[60%] whitespace-nowrap text-ellipsis overflow-hidden">
+                            {item.title ||
+                              item.name ||
+                              item.workspaceName ||
+                              item.proposalName ||
+                              "Unnamed Item"}
+                          </p>
+                        </div>
                         <span className="text-xs text-gray-500 ml-2">
                           {item.type === "proposal" ? "Proposal" : "Workspace"}
                         </span>
@@ -309,7 +326,7 @@ const DashboardHeader = () => {
                       } else {
                         // Fallback if original item not found
                         if (item.type === "proposal") {
-                          navigate(`/proposals`);
+                          navigate(`/editor/${item._id}`);
                         } else if (item.type === "workspace") {
                           navigate(`/workspace/${item.id}`);
                         }
@@ -325,7 +342,7 @@ const DashboardHeader = () => {
                     ></div>
                     <div className="flex-1">
                       <div className="flex justify-between">
-                        <p className="text-gray-700 font-medium">
+                        <p className="text-gray-700 font-medium text-sm">
                           {item.title || "Unnamed Item"}
                         </p>
                         <span className="text-xs text-gray-500 ml-2">
@@ -357,19 +374,21 @@ const DashboardHeader = () => {
         )}
       </div>
 
-      <div className="w-[30%] flex items-center justify-end gap-4 mr-16">
+      <div className="w-[30%] relative flex items-center justify-end gap-4 mr-16">
         {/* Notification button with dropdown */}
-        <div className="relative" ref={notificationRef}>
+        <div className="" ref={notificationRef}>
           <button
-            className="relative bg-gray-200 p-1 rounded-[50%] mr-1 cursor-pointer"
+            className={`relative  hover:bg-gray-200 p-2 rounded-[50%] mr-1 cursor-pointer ${
+              showNotifications ? "bg-gray-200" : "bg-gray-100"
+            }`}
             onClick={toggleNotifications}
           >
-            <div className="h-[6px] w-[6px] bg-graidient_bottom absolute top-[4px] right-[2px] rounded-[50%]"></div>
+            <div className="h-[6px] w-[6px] bg-graidient_bottom absolute top-[8px] right-[8px] rounded-[50%]"></div>
             <IoNotificationsOutline className="h-5 w-5 text-gray-500" />
           </button>
 
           {/* Notification dropdown */}
-          {showNotifications && (
+          {/* {showNotifications && (
             <div className="absolute right-0 mt-2 w-[380px] bg-white rounded-lg shadow-lg z-20 border border-gray-100 overflow-hidden">
               <div className="p-4 border-b border-gray-100">
                 <h3 className="text-xl font-medium text-gray-800">
@@ -430,11 +449,58 @@ const DashboardHeader = () => {
                 </button>
               </div>
             </div>
+          )} */}
+          {showNotifications && (
+            <div
+              ref={bellRef}
+              className="bg-white border border-gray-100 p-5 w-[450px] absolute z-[6000] rounded-lg flex flex-col items-center justify-center gap-1 top-12 right-20   px-2 py-3 shadow-gray-400 shadow-lg"
+              style={{
+                left: "50%",
+                transform: "translate(-50%)",
+              }}
+            >
+              <div className="w-full pt-1 ">
+                <h2 className="ml-3 font-semibold text-gray-600">
+                  Notifications
+                </h2>
+              </div>
+              {[1, 2, 3].map((item) => {
+                return (
+                  <div className="flex justify-between w-full mt-3 py-2  rounded-md">
+                    <div className="w-[10%]  h-full flex items-start justify-center">
+                      <div className="mt-2 w-1.5 h-1.5 rounded-[50%] bg-graidient_bottom"></div>
+                    </div>
+                    <div className="w-[90%]">
+                      <p className="font-semibold text-gray-600 text-sm flex justify-between pr-7">
+                        Proposal Sent Successfully!
+                        <span
+                          className="text-xs font-normal"
+                          style={{
+                            color: "rgba(140, 140, 140, 1)",
+                          }}
+                        >
+                          02:00 pm
+                        </span>
+                      </p>
+                      <p
+                        className="w-[90%] text-xs  mt-2"
+                        style={{
+                          color: "rgba(140, 140, 140, 1)",
+                        }}
+                      >
+                         Introducing Prospero’s AI Writing Assistant! Streamline
+                        proposal creation with smart, AI-driven.
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
         <button
           onClick={() => navigate("/subscription")}
-          className="text-center py-2 px-2 border border-graidient_bottom rounded-md text-graidient_bottom 
+          className="text-center py-2 px-2 border border-gray-300 rounded-md text-graidient_bottom 
           flex items-center gap-2 justify-center hover:bg-graidient_bottom hover:text-white transition-colors text-sm"
         >
           Upgrade

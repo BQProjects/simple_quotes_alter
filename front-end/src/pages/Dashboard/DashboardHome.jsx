@@ -9,50 +9,34 @@ import { FaRegFolder } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa6";
 import { FaRegFileLines } from "react-icons/fa6";
 import { StateManageContext } from "../../context/StateManageContext";
-import { TfiArrowTopLeft } from "react-icons/tfi";
-import { RxArrowTopLeft } from "react-icons/rx";
-import { GoArrowUp } from "react-icons/go";
-import { GoArrowDown } from "react-icons/go";
-import { GoDash } from "react-icons/go";
+import { GoArrowUp, GoArrowDown, GoDash } from "react-icons/go";
 
 const DashboardHome = () => {
   const { user } = useContext(UserContext);
   const { databaseUrl } = useContext(DatabaseContext);
+  const { setNewProposal } = useContext(StateManageContext);
+
   const [favorate, setFavorate] = useState([]);
   const [favW, setFavW] = useState([]);
-  const [views, setViews] = useState(null);
+  const [views, setViews] = useState({
+    dailyViews: 0,
+    dailyChange: 0,
+    weekViews: 0,
+    weekChange: 0,
+    totalViews: 0,
+    timespent: 0,
+  });
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
-  const getLastSeen = (date) => {
-    if (!date) return "No data";
-
-    const now = new Date();
-    const lastSeenDate = new Date(date);
-    const diffInSeconds = Math.floor((now - lastSeenDate) / 1000);
-
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds} seconds ago`;
-    } else if (diffInSeconds < 3600) {
-      return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-    } else if (diffInSeconds < 86400) {
-      return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-    } else {
-      return `${Math.floor(diffInSeconds / 86400)} days ago`;
-    }
-  };
-
   const formatDate = (dateInput) => {
     if (!dateInput) return "Invalid Date";
-
     const date = new Date(dateInput);
-
-    if (isNaN(date.getTime())) return "Invalid Date"; // Handle invalid dates
-
+    if (isNaN(date.getTime())) return "Invalid Date";
     const day = date.getDate();
-    const month = date.toLocaleString("en-US", { month: "short" }); // Get short month name (e.g., "Jan")
+    const month = date.toLocaleString("en-US", { month: "short" });
     const year = date.getFullYear();
-
     return `${day} ${month} ${year}`;
   };
 
@@ -86,36 +70,43 @@ const DashboardHome = () => {
         }
       );
 
-      setFavorate(res.data);
-      setFavW(res2.data);
+      setFavorate(res.data || []);
+      setFavW(res2.data || []);
     } catch (error) {
       console.error("Error fetching workspaces:", error);
       setError("Failed to fetch workspaces. Please try again later.");
     }
   };
+
   const getViews = async () => {
     try {
       const res = await axios.get(`${databaseUrl}/api/workspace/getviews`, {
         params: { user_id: user.id },
       });
-      console.log(res.data);
-
-      setViews(res.data);
+      setViews(res.data || {});
     } catch (error) {
-      console.error("Error fetching workspaces:", error);
-      setError("Failed to fetch workspaces. Please try again later.");
+      console.error("Error fetching views:", error);
+      setError("Failed to fetch views. Please try again later.");
     }
   };
-  const { setNewProposal } = useContext(StateManageContext);
 
   return (
     <>
-      <div className="w-[100%] bg-gray-100 min-h-[90vh]   ">
-        <div className="w-full h-[85vh] overflow-auto scrollbar-hide">
-          <h1 className=" p-3 text-2xl flex items-start gap-2">
-            Hello {user.username}
+      <div className="w-[100%] bg-gray-100 min-h-[90vh]">
+        <div className="w-full h-[88vh] overflow-auto scrollbar-hide">
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-100 text-red-600 p-2 m-3 rounded-md">
+              {error}
+            </div>
+          )}
+
+          <h1 className="p-3 text-2xl flex items-start gap-2">
+            Hello {user?.username || "Guest"}
           </h1>
+
           <div className="grid grid-cols-2 gap-5">
+            {/* Workspaces */}
             <div className="bg-white h-[230px] w-full rounded-lg flex flex-col justify-between items-center p-3 relative ">
               <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 pl-6 pt-2">
                 <FaRegFolder className="text-gray-500" />
@@ -133,41 +124,42 @@ const DashboardHome = () => {
                     Create Workspace to See here
                   </div>
                 ) : (
-                  favW.map((workspace, index) => {
-                    return (
+                  favW.map((workspace, index) => (
+                    <div
+                      key={index}
+                      onClick={() =>
+                        workspace?._id &&
+                        navigate(`/workspace/${workspace._id}`)
+                      }
+                      className="mt-3 mr-3 placeholder:w-[100%] h-14 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer"
+                    >
                       <div
-                        key={index}
-                        onClick={() => navigate(`/workspace/${workspace._id}`)}
-                        className=" mt-3 mr-3 placeholder:w-[100%] h-14 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer "
+                        className={`h-10 w-12 p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300`}
                       >
-                        <div
-                          className={`h-10 w-12  p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300 `}
-                        >
-                          <FaRegFolder
-                            style={{
-                              color: workspace.workspaceColor,
-                            }}
-                            className=" h-5 w-5"
-                          />
-                        </div>
-                        <div className="text-sm flex flex-col w-[90%] ">
-                          <h2 className=" text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-ellipsis flex items-center justify-start gap-1">
-                            <span>{workspace.workspaceName}</span>
-                            <span>
-                              {workspace.favorate ? (
-                                <FaStar className="text-graidient_bottom" />
-                              ) : (
-                                <FaRegStar className="text-gray-500" />
-                              )}
-                            </span>
-                          </h2>
-                          <p className="text-xs text-gray-400">
-                            {workspace.proposals.length} Proposals
-                          </p>
-                        </div>
+                        <FaRegFolder
+                          style={{
+                            color: workspace?.workspaceColor || "#888",
+                          }}
+                          className="h-5 w-5"
+                        />
                       </div>
-                    );
-                  })
+                      <div className="text-sm flex flex-col w-[90%] ">
+                        <h2 className="text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-ellipsis flex items-center justify-start gap-1">
+                          <span>{workspace?.workspaceName}</span>
+                          <span>
+                            {workspace?.favorate ? (
+                              <FaStar className="text-graidient_bottom" />
+                            ) : (
+                              <FaRegStar className="text-gray-500" />
+                            )}
+                          </span>
+                        </h2>
+                        <p className="text-xs text-gray-400">
+                          {workspace?.proposals?.length || 0} Proposals
+                        </p>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
               <div className="w-full flex items-center justify-end mt-3">
@@ -175,85 +167,96 @@ const DashboardHome = () => {
                   className="mr-2 text-gray-500 flex items-center justify-end gap-2 text-sm p-2"
                   onClick={() => navigate("/workspaces")}
                 >
-                  View More <FaArrowRight />{" "}
+                  View More <FaArrowRight />
                 </button>
               </div>
             </div>
+
+            {/* Views Overview */}
             <div className="bg-white h-[310px] w-full rounded-lg px-8 py-3">
-              <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700  pt-2">
+              <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 pt-2">
                 <h1>Views Overview</h1>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer ">
+                {/* Today */}
+                <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
                   <h3 className="text-xs text-gray-400">Today</h3>
                   <p className="text-2xl text-gray-600 pl-2 flex items-end">
-                    {views?.dailyViews}
+                    {views?.dailyViews || 0}
                     <span
-                      className={`text-[10px] flex items-center  mx-1 ${
-                        views.dailyChange === 0
+                      className={`text-[10px] flex items-center mx-1 ${
+                        views?.dailyChange === 0
                           ? "text-gray-600"
-                          : views.dailyChange < 0
+                          : views?.dailyChange < 0
                           ? "text-red-600"
                           : "text-green-600"
                       }`}
                     >
-                      {views.dailyChange === 0 ? (
+                      {views?.dailyChange === 0 ? (
                         <GoDash />
-                      ) : views.dailyChange < 0 ? (
+                      ) : views?.dailyChange < 0 ? (
                         <GoArrowDown />
                       ) : (
                         <GoArrowUp />
                       )}
-                      {views.dailyChange}%
+                      {Math.abs(views?.dailyChange || 0)}%
                     </span>
                     <span className="text-sm text-graidient_bottom ml-1 mb-0.5">
                       views
                     </span>
                   </p>
                 </div>
-                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
+
+                {/* This Week */}
+                <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
                   <h3 className="text-xs text-gray-400">This Week</h3>
                   <p className="text-2xl text-gray-600 pl-2 flex items-end">
-                    {views?.weekViews}
+                    {views?.weekViews || 0}
                     <span
-                      className={`text-[10px] flex items-center  mx-1 ${
-                        views.weekChange === 0
+                      className={`text-[10px] flex items-center mx-1 ${
+                        views?.weekChange === 0
                           ? "text-gray-600"
-                          : views.weekChange < 0
+                          : views?.weekChange < 0
                           ? "text-red-600"
                           : "text-green-600"
                       }`}
                     >
-                      {views.weekChange === 0 ? (
+                      {views?.weekChange === 0 ? (
                         <GoDash />
-                      ) : views.weekChange < 0 ? (
+                      ) : views?.weekChange < 0 ? (
                         <GoArrowDown />
                       ) : (
                         <GoArrowUp />
                       )}
-                      {views.weekChange}%
+                      {Math.abs(views?.weekChange || 0)}%
                     </span>
                     <span className="text-sm text-graidient_bottom ml-1 mb-0.5">
                       views
                     </span>
                   </p>
                 </div>
-                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
+
+                {/* Total Views */}
+                <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
                   <h3 className="text-xs text-gray-400">Total Views</h3>
                   <p className="text-2xl text-gray-600 pl-2">
-                    {views?.totalViews}{" "}
+                    {views?.totalViews || 0}{" "}
                     <span className="text-sm text-graidient_bottom">views</span>
                   </p>
                 </div>
-                <div className=" mt-3 mr-3 placeholder:w-[100%] h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start  gap-2 cursor-pointer ">
+
+                {/* Avg Time Spent */}
+                <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
                   <h3 className="text-xs text-gray-400">Avg Time Spent</h3>
                   <p className="text-2xl text-gray-600 pl-2">
-                    {Math.floor(views?.timespent)}{" "}
+                    {Math.floor(views?.timespent || 0)}{" "}
                     <span className="text-sm text-graidient_bottom">sec</span>
                   </p>
                 </div>
               </div>
             </div>
+
+            {/* Proposals */}
             <div className="bg-white h-[530px] w-full rounded-lg -mt-[10vh] px-6 py-4 relative">
               <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 ">
                 <FaRegFileLines className="text-gray-500" />
@@ -268,41 +271,39 @@ const DashboardHome = () => {
               <div className="flex flex-col items-start justify-start gap-3 w-full">
                 {favorate.length === 0 ? (
                   <div className="w-full h-full flex items-center justify-center text-sm text-gray-500">
-                    Create Propsals to see here
+                    Create Proposals to see here
                   </div>
                 ) : (
-                  favorate.map((item, index) => {
-                    return (
-                      <div
-                        key={index}
-                        onClick={() => navigate(`/editor/${item._id}`)}
-                        className=" mt-3 mr-3 w-[100%] h-16 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer "
-                      >
-                        <div
-                          className={`h-10 w-12  p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300 `}
-                        >
-                          <FaRegFileLines className=" h-5 w-5 text-gray-500" />
-                        </div>
-                        <div className="text-sm flex flex-col w-[90%] ml-2 ">
-                          <h2 className=" text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-ellipsis flex items-center justify-start gap-1">
-                            <span>{item.proposalName}</span>
-                            <span>
-                              {item.favorate ? (
-                                <FaStar className="text-graidient_bottom" />
-                              ) : (
-                                <FaRegStar className="text-gray-500" />
-                              )}
-                            </span>
-                          </h2>
-                          <p className="text-xs text-gray-400">
-                            <span className="text-xs text-gray-500  ">
-                              Created on {formatDate(item.createdAt)}
-                            </span>
-                          </p>
-                        </div>
+                  favorate.map((item, index) => (
+                    <div
+                      key={index}
+                      onClick={() =>
+                        item?._id && navigate(`/editor/${item._id}`)
+                      }
+                      className="mt-3 mr-3 w-[100%] h-16 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer"
+                    >
+                      <div className="h-10 w-12 p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300">
+                        <FaRegFileLines className="h-5 w-5 text-gray-500" />
                       </div>
-                    );
-                  })
+                      <div className="text-sm flex flex-col w-[90%] ml-2 ">
+                        <h2 className="text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-ellipsis flex items-center justify-start gap-1">
+                          <span>{item?.proposalName}</span>
+                          <span>
+                            {item?.favorate ? (
+                              <FaStar className="text-graidient_bottom" />
+                            ) : (
+                              <FaRegStar className="text-gray-500" />
+                            )}
+                          </span>
+                        </h2>
+                        <p className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-500">
+                            Created on {formatDate(item?.createdAt)}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
               <div className="w-full flex items-center justify-end mt-3">
@@ -314,6 +315,8 @@ const DashboardHome = () => {
                 </button>
               </div>
             </div>
+
+            {/* Templates */}
             <div className="bg-white h-[450px] w-full rounded-lg px-6 py-4">
               <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 ">
                 <h1>Templates</h1>
