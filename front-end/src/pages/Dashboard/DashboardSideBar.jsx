@@ -135,7 +135,7 @@ const DashboardSideBar = ({ setBody }) => {
               className="w-7 h-7 rounded-[50%] text-gray-500 "
             />
           </span>
-          <span className="w-[80%] overflow-hidden text-sm">
+          <span className="w-[80%] overflow-hidden text-sm ">
             {user?.username}
           </span>
         </button>
