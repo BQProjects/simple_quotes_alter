@@ -247,23 +247,34 @@ const Sidebar = ({
     }
   };
 
-  const fontOptions = [
-    { value: "arial", label: "Arial" },
-    { value: "helvetica", label: "Helvetica" },
-    { value: "poppins", label: "Poppins" },
-    { value: "montserrat", label: "Montserrat" },
-    { value: "roboto", label: "Roboto" },
-    { value: "times-new-roman", label: "Times New Roman" },
-    { value: "georgia", label: "Georgia" },
-    { value: "playfair-display", label: "Playfair Display" },
-    { value: "merriweather", label: "Merriweather" },
-    { value: "garamond", label: "Garamond" },
-    { value: "lobster", label: "Lobster" },
-    { value: "pacifico", label: "Pacifico" },
-    { value: "bebas-neue", label: "Bebas Neue" },
-    { value: "anton", label: "Anton" },
-    { value: "oswald", label: "Oswald" },
-  ];
+ const fontOptions = [
+   { value: "anton", label: "Anton" },
+   { value: "arial", label: "Arial" },
+   { value: "bebas-neue", label: "Bebas Neue" },
+   { value: "garamond", label: "Garamond" },
+   { value: "georgia", label: "Georgia" },
+   { value: "helvetica", label: "Helvetica" },
+   { value: "ibm-plex-sans", label: "IBM Plex Sans" },
+   { value: "lato", label: "Lato" },
+   { value: "libre-baskerville", label: "Libre Baskerville" },
+   { value: "lora", label: "Lora" },
+   { value: "lobster", label: "Lobster" },
+   { value: "merriweather", label: "Merriweather" },
+   { value: "montserrat", label: "Montserrat" },
+   { value: "nunito", label: "Nunito" },
+   { value: "open-sans", label: "Open Sans" },
+   { value: "oswald", label: "Oswald" },
+   { value: "pacifico", label: "Pacifico" },
+   { value: "playfair-display", label: "Playfair Display" },
+   { value: "poppins", label: "Poppins" },
+   { value: "pt-sans", label: "PT Sans" },
+   { value: "raleway", label: "Raleway" },
+   { value: "roboto", label: "Roboto" },
+   { value: "source-sans-pro", label: "Source Sans Pro" },
+   { value: "times-new-roman", label: "Times New Roman" },
+   { value: "work-sans", label: "Work Sans" },
+ ];
+
 
   const customStyles = {
     control: (base, state) => ({
@@ -16220,6 +16231,11 @@ const Sidebar = ({
                           styles={customStyles}
                           className="text-xs "
                           isSearchable={false}
+                          formatOptionLabel={(option) => (
+                            <span style={{ fontFamily: option.label }}>
+                              {option.label}
+                            </span>
+                          )}
                         />
                       </div>
                     </div>
@@ -16243,6 +16259,11 @@ const Sidebar = ({
                           styles={customStyles}
                           className="text-xs"
                           isSearchable={false}
+                          formatOptionLabel={(option) => (
+                            <span style={{ fontFamily: option.label }}>
+                              {option.label}
+                            </span>
+                          )}
                         />
                       </div>
                     </div>
