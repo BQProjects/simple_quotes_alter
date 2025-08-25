@@ -1373,95 +1373,67 @@ const GeneratePDF = async (jsonData, settings) => {
             const text = item.content
               .map((block) => block?.children?.[0]?.text || "")
               .join(" ");
-            const isCenterAligned = item.align === "center";
 
             checkPageBreak(60);
 
-            const margin = 20; // Add margin to bring content further inside
-
-            const imageWidth = parseInt(item.width) || 50;
+            // 50% for image (container), 50% for text
+            const halfWidth = availableWidth / 2;
+            const margin = 10;
+            // Use specified width/height or default, but do not stretch to fill halfWidth
+            const imageWidth = Math.min(
+              parseInt(item.width) || 50,
+              halfWidth - margin * 2
+            );
             const imageHeight = parseInt(item.height) || 40;
-            const textWidth = availableWidth - imageWidth - margin * 2;
+            const textWidth = halfWidth - margin * 2;
 
-            if (isCenterAligned) {
-              // Image on left, text on right
-              try {
-                if (item.ImageLink) {
-                  doc.addImage(
-                    item.ImageLink,
-                    "JPEG",
-                    margin,
-                    currentY,
-                    imageWidth,
-                    imageHeight
-                  );
-                } else {
-                  doc.addImage(
-                    ImageAlter,
-                    "JPEG",
-                    margin,
-                    currentY,
-                    imageWidth,
-                    imageHeight
-                  );
-                }
-              } catch (error) {
-                console.log("Image load error:", error);
+            // Center image in left half
+            const imageX = margin + (halfWidth - imageWidth) / 2;
+
+            // Always: image on left (centered in left half), text on right (centered in right half)
+            try {
+              if (item.ImageLink) {
+                doc.addImage(
+                  item.ImageLink,
+                  "JPEG",
+                  imageX,
+                  currentY,
+                  imageWidth,
+                  imageHeight
+                );
+              } else {
+                doc.addImage(
+                  ImageAlter,
+                  "JPEG",
+                  imageX,
+                  currentY,
+                  imageWidth,
+                  imageHeight
+                );
               }
-
-              doc.setFontSize(11);
-              doc.setFont(defaultFont, "normal");
-              setColorFromHex("000000");
-
-              const lines = doc.splitTextToSize(text, textWidth);
-              let textY = currentY + 5;
-
-              lines.forEach((line) => {
-                doc.text(line, margin + imageWidth + 10, textY);
-                textY += 6;
-              });
-
-              currentY += Math.max(imageHeight, lines.length * 6) + 10;
-            } else {
-              // Text on left, image on right
-              doc.setFontSize(11);
-              doc.setFont(defaultFont, "normal");
-              setColorFromHex("000000");
-
-              const lines = doc.splitTextToSize(text, textWidth);
-              let textY = currentY + 5;
-
-              lines.forEach((line) => {
-                doc.text(line, margin, textY);
-                textY += 6;
-              });
-
-              try {
-                if (item.ImageLink) {
-                  doc.addImage(
-                    item.ImageLink,
-                    "JPEG",
-                    pageWidth - imageWidth - margin,
-                    currentY,
-                    imageWidth,
-                    imageHeight
-                  );
-                } else {
-                  doc.addImage(
-                    ImageAlter,
-                    "JPEG",
-                    pageWidth - imageWidth - margin,
-                    currentY,
-                    imageWidth,
-                    imageHeight
-                  );
-                }
-              } catch (error) {
-                console.log("Image load error:", error);
-              }
-
-              currentY += Math.max(imageHeight, lines.length * 6) + 10;
+            } catch (error) {
+              console.log("Image load error:", error);
             }
+
+            doc.setFontSize(11);
+            doc.setFont(defaultFont, "normal");
+            setColorFromHex("000000");
+
+            const lines = doc.splitTextToSize(text, textWidth);
+            const totalTextHeight = lines.length * 6;
+            // Vertically center text block in the max of imageHeight/text block height
+            const blockHeight = Math.max(imageHeight, totalTextHeight);
+            let textY = currentY + (blockHeight - totalTextHeight) / 2;
+
+            lines.forEach((line) => {
+              // Center text in the right half
+              const textX =
+                margin + halfWidth + (textWidth - doc.getTextWidth(line)) / 2;
+              doc.text(line, textX, textY);
+              textY += 6;
+            });
+
+            currentY += blockHeight + 10;
           }
           break;
 
@@ -1530,12 +1502,7 @@ const GeneratePDF = async (jsonData, settings) => {
 
         case "line":
           checkPageBreak(15);
-          currentY += 6;
-
-          doc.setDrawColor(222, 226, 230);
-          doc.line(10, currentY, pageWidth - 10, currentY);
-
-          currentY += 6;
+          currentY += 12;
           break;
 
         case "sign":

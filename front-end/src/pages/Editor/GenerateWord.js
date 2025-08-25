@@ -2314,7 +2314,7 @@ const JsonToWord = async (jsonData) => {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: "─".repeat(60),
+                  text: " ".repeat(60),
                   size: 14,
                   color: "DEE2E6",
                 }),
