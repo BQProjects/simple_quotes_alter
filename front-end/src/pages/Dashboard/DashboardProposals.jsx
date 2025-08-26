@@ -20,6 +20,11 @@ import { StateManageContext } from "../../context/StateManageContext";
 import { RiArrowUpDownLine } from "react-icons/ri";
 
 const DashboardProposals = () => {
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    id: null,
+    name: "",
+  });
   const { user } = useContext(UserContext);
   const { databaseUrl } = useContext(DatabaseContext);
   const {
@@ -70,6 +75,7 @@ const DashboardProposals = () => {
       console.log(error);
     } finally {
       setThreeDots(null);
+      setDeleteModal({ open: false, id: null, name: "" });
     }
   };
 
@@ -227,14 +233,75 @@ const DashboardProposals = () => {
       document.removeEventListener("mousedown", handleClickOutsideSort);
     };
   }, []);
+
+  // ConfirmProposalDeletion modal component
+  const ConfirmProposalDeletion = ({
+    open,
+    onCancel,
+    onConfirm,
+    proposalName,
+  }) => {
+    if (!open) return null;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+        <div className="flex flex-col justify-center items-center gap-6 p-6 w-[506px] rounded-[0.625rem] bg-white shadow-lg">
+          <div className="flex justify-between items-center self-stretch w-full">
+            <div className="text-[#1f1f1f] text-center font-semibold text-lg leading-normal w-full">
+              Confirm Proposal Deletion
+            </div>
+            <button onClick={onCancel} className="ml-2">
+              <svg
+                width={16}
+                height={17}
+                viewBox="0 0 16 17"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4.26536 13.1693L3.33203 12.2359L7.06536 8.5026L3.33203 4.76927L4.26536 3.83594L7.9987 7.56927L11.732 3.83594L12.6654 4.76927L8.93203 8.5026L12.6654 12.2359L11.732 13.1693L7.9987 9.43594L4.26536 13.1693Z"
+                  fill="#8C8C8C"
+                />
+              </svg>
+            </button>
+          </div>
+          <div className="self-stretch text-neutral-600 text-sm leading-normal">
+            Are you sure you want to delete <b>{proposalName}</b>? All nested
+            subpages will also be deleted.
+          </div>
+          <div className="flex justify-end items-center gap-4 w-full">
+            <button
+              className="flex justify-center items-center py-2 px-4 rounded-[0.3125rem] bg-[#f7f7f7] cancel text-[#8c8c8c] text-sm font-medium leading-normal"
+              onClick={onCancel}
+            >
+              Cancel
+            </button>
+            <button
+              className="flex justify-center items-center py-2 px-4 rounded-[0.3125rem] bg-[#df064e] delete text-white text-sm font-medium leading-normal"
+              onClick={onConfirm}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
+      {/* Confirm Deletion Modal */}
+      <ConfirmProposalDeletion
+        open={deleteModal.open}
+        proposalName={deleteModal.name}
+        onCancel={() => setDeleteModal({ open: false, id: null, name: "" })}
+        onConfirm={() => handleDelete(deleteModal.id)}
+      />
       {move !== null && (
         <div className="fixed inset-0 bg-transparent bg-opacity-40 flex justify-center items-center z-50">
           <div className="w-[30%] h-[60%] bg-white px-4 py-3 flex flex-col shadow-lg shadow-gray-200">
             <h1 className="text-xl w-full text-center mt-4">Move To</h1>
             <p className="w-full text-xs  text-gray-500 text-center">
-              select a workspace for the proposal to move
+              Organize your proposals by workspace. Select one to continue.
             </p>
             <input
               type="text"
@@ -256,7 +323,7 @@ const DashboardProposals = () => {
                     key={item._id}
                     className={` mt-3 mr-3 placeholder:w-[100%] h-14 px-3 py-2 border ${
                       selected === item._id
-                        ? "border-graidient_bottom"
+                        ? "border-graidient_bottom bg-[#EEEEEE]"
                         : "border-gray-100"
                     }  rounded-md flex items-center justify-start gap-2 cursor-pointer `}
                   >
@@ -338,11 +405,12 @@ const DashboardProposals = () => {
           <table className="auto-table w-full ">
             <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0">
               <tr>
-                <th className="rounded-l-sm px-4 py-2 w-[45%]">
+                <th className="rounded-l-sm px-4 py-2 w-[35%]">
                   Proposal Name
                 </th>
+                <th className="px-4 py-2 w-[25%]">Workspace</th>
                 <th className="px-4 py-2 w-[25%]">Views</th>
-                <th className="rounded-r-sm pl-10 py-2 w-[20%]">
+                <th className="rounded-r-sm pl-10 py-2 w-[15%]">
                   Quick Action
                 </th>
               </tr>
@@ -351,7 +419,7 @@ const DashboardProposals = () => {
               {proposals.map((proposal, index) => {
                 return (
                   <tr
-                    className="border-b border-gray-100 mt-1 text-gray-600 hover:bg-gray-50 cursor-pointer h-14 "
+                    className="border-b border-gray-100 mt-1 text-gray-600 hover:bg-gray-50 cursor-pointer h-14 pl-10 pr-10 "
                     key={index}
                   >
                     <td
@@ -393,9 +461,9 @@ const DashboardProposals = () => {
                           }
                           className={`w-[70%] overflow-hidden whitespace-nowrap text-ellipsis outline-none ${
                             rename === proposal._id
-                              ? "border-b border-gray-800"
-                              : "none"
-                          } `}
+                              ? "border-b border-gray-800 bg-gray-50 cursor-text"
+                              : "bg-transparent border-none cursor-pointer"
+                          }`}
                           onChange={(e) => setRenameV(e.target.value)}
                           readOnly={rename === proposal._id ? false : true}
                         />
@@ -409,6 +477,27 @@ const DashboardProposals = () => {
                       </span>
                       <span className="text-xs text-gray-500 ml-7 ">
                         Created on {formatDate(proposal.createdAt)}
+                      </span>
+                    </td>
+                    <td className="pl-5 pr-3">
+                      <span className="text-gray-700">
+                        {
+                          // Find the workspace object by ID and show its name
+                          (() => {
+                            if (
+                              proposal.workspaces &&
+                              proposal.workspaces.length > 0 &&
+                              workspaces &&
+                              workspaces.length > 0
+                            ) {
+                              const ws = workspaces.find(
+                                (w) => w._id === proposal.workspaces[0]
+                              );
+                              return ws ? ws.workspaceName : "No workspaceName";
+                            }
+                            return "No workspaceName";
+                          })()
+                        }
                       </span>
                     </td>
                     <td className="pl-5 pr-3">
@@ -430,33 +519,59 @@ const DashboardProposals = () => {
                     </td>
                     <td>
                       <div className="flex flex-row gap-4  ml-8 ">
-                        <GoLink
-                          onClick={() => {
-                            copyToClipboard(proposal._id);
-                          }}
-                          className="w-4 h-4 text-gray-600 "
-                        />
-                        <SiSimpleanalytics
-                          onClick={() => navigate(`/analytics/${proposal._id}`)}
-                          className="w-4 h-4 text-gray-600 "
-                        />
-                        <IoMdLock
-                          className={`${
-                            proposal.locked || selLocked.includes(proposal._id)
-                              ? "text-graidient_bottom"
-                              : "text-gray-500"
-                          } w-5 h-4 text-gray-600 `}
-                          onClick={() => {
-                            handleLocked(!proposal.locked, proposal._id);
-                            const temp = [...proposals];
-                            temp[index].locked = !proposal.locked;
-                            setProposals(temp);
-                          }}
-                        />
+                        <span className="group relative flex items-center">
+                          <GoLink
+                            onClick={() => {
+                              copyToClipboard(proposal._id);
+                            }}
+                            className="w-4 h-4 text-gray-600 hover:text-graidient_bottom cursor-pointer"
+                          />
+                          <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
+                            Copy Link
+                          </span>
+                        </span>
+                        <span className="group relative flex items-center">
+                          <SiSimpleanalytics
+                            onClick={() =>
+                              navigate(`/analytics/${proposal._id}`)
+                            }
+                            className="w-4 h-4 text-gray-600 hover:text-graidient_bottom cursor-pointer"
+                          />
+                          <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
+                            Analytics
+                          </span>
+                        </span>
+                        <span className="group relative flex items-center">
+                          <IoMdLock
+                            className={
+                              proposal.locked ||
+                              selLocked.includes(proposal._id)
+                                ? "w-5 h-4 text-graidient_bottom"
+                                : "w-5 h-4 text-gray-500 hover:text-graidient_bottom"
+                            }
+                            onClick={() => {
+                              handleLocked(!proposal.locked, proposal._id);
+                              const temp = [...proposals];
+                              temp[index].locked = !proposal.locked;
+                              setProposals(temp);
+                            }}
+                          />
+                          <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
+                            {proposal.locked || selLocked.includes(proposal._id)
+                              ? "Unlock"
+                              : "Lock"}
+                          </span>
+                        </span>
 
-                        <FaRegCopy
-                          onClick={() => handleDuplicate(proposal._id)}
-                        />
+                        <span className="group relative flex items-center">
+                          <FaRegCopy
+                            className="text-gray-600 hover:text-graidient_bottom cursor-pointer"
+                            onClick={() => handleDuplicate(proposal._id)}
+                          />
+                          <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
+                            Duplicate
+                          </span>
+                        </span>
                         <div className="relative" ref={popRef}>
                           <BsThreeDotsVertical
                             onClick={() => {
@@ -498,7 +613,11 @@ const DashboardProposals = () => {
                               </p>
                               <p
                                 onClick={() => {
-                                  handleDelete(proposal._id);
+                                  setDeleteModal({
+                                    open: true,
+                                    id: proposal._id,
+                                    name: proposal.proposalName,
+                                  });
                                   setThreeDots(null);
                                 }}
                                 className="py-1 px-1 w-full hover:bg-gray-100"
