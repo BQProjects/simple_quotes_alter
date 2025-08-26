@@ -293,7 +293,7 @@ const AllWorkspace = () => {
             return (
               <div
                 key={index}
-                className=" mt-4 mr-4 placeholder:w-[95%] h-16 px-3 py-2 border border-gray-300 rounded-md flex items-center justify-start gap-2 cursor-pointer "
+                className=" mt-4 mr-4 placeholder:w-[95%] h-16 px-3 py-2 border border-gray-200 rounded-md flex items-center justify-start gap-2 cursor-pointer "
               >
                 <div
                   onClick={() => navigate(`/workspace/${workspace._id}`)}

@@ -10,11 +10,12 @@ import { FaArrowRight } from "react-icons/fa6";
 import { FaRegFileLines } from "react-icons/fa6";
 import { StateManageContext } from "../../context/StateManageContext";
 import { GoArrowUp, GoArrowDown, GoDash } from "react-icons/go";
+import ProposalsLineChart from "../../components/ProposalsLineChart";
 
 const DashboardHome = () => {
   const { user } = useContext(UserContext);
   const { databaseUrl } = useContext(DatabaseContext);
-  const { setNewProposal } = useContext(StateManageContext);
+  const { setNewProposal, proposals } = useContext(StateManageContext);
 
   const [favorate, setFavorate] = useState([]);
   const [favW, setFavW] = useState([]);
@@ -325,6 +326,9 @@ const DashboardHome = () => {
                 <h1 className="text-gray-500">Templates Not Available Yet!</h1>
               </div>
             </div>
+          </div>
+          <div className="mt-6 mb-6">
+            <ProposalsLineChart proposals={proposals} />
           </div>
         </div>
       </div>
