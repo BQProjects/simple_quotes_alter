@@ -28,6 +28,29 @@ const GeneratePDF = async (jsonData, settings) => {
   const defaultColor = documentSettings.color || "#212529";
   const theme = documentSettings.theme || 0;
 
+  // Helper function to get table header/highlight color based on theme for PDF
+  const getTableHighlightColorPdf = () => {
+    if (documentSettings.theme === 0) {
+      return "F5F5F5"; // Default gray
+    } else {
+      // Use user's selected color, lightened
+      const userColor = documentSettings.color || "#000000";
+      const cleanHex = userColor.replace("#", "");
+      const num = parseInt(cleanHex, 16);
+      const r = (num >> 16) & 0xff;
+      const g = (num >> 8) & 0xff;
+      const b = num & 0xff;
+
+      const newR = Math.round(r + (255 - r) * 0.85);
+      const newG = Math.round(g + (255 - g) * 0.85);
+      const newB = Math.round(b + (255 - b) * 0.85);
+
+      return `${newR.toString(16).padStart(2, "0")}${newG
+        .toString(16)
+        .padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`.toUpperCase();
+    }
+  };
+
   // Set default font
   doc.setFont(defaultFont, "normal");
 
@@ -570,19 +593,63 @@ const GeneratePDF = async (jsonData, settings) => {
       cellAlignAll = [],
     } = options;
 
-    // Helper for background color based on design - matches Word export
+    // Helper function to convert hex to RGB for PDF
+    const hexToRgb = (hex) => {
+      const cleanHex = hex.replace("#", "");
+      const num = parseInt(cleanHex, 16);
+      const r = (num >> 16) & 0xff;
+      const g = (num >> 8) & 0xff;
+      const b = num & 0xff;
+      return [r, g, b];
+    };
+
+    // Helper function to lighten RGB colors for PDF export
+    const lightenRgbForPdf = (rgb, percent) => {
+      return rgb.map((channel) =>
+        Math.round(channel + (255 - channel) * (percent / 100))
+      );
+    };
+
+    // Helper for background color based on design - now uses user's color selection
     const getCellShading = (colIndex, rowIndex) => {
-      switch (design) {
-        case "alternativerow":
-          return rowIndex % 2 === 0 ? [229, 231, 235] : [243, 244, 246];
-        case "alternativecol":
-          return colIndex % 2 === 0 ? [229, 231, 235] : [243, 244, 246];
-        case "toprow":
-          return rowIndex === 0 ? [229, 231, 235] : [255, 255, 255];
-        case "leftcol":
-          return colIndex === 0 ? [229, 231, 235] : [255, 255, 255];
-        default:
-          return [255, 255, 255];
+      // If theme is 0 (default), use gray colors
+      if (documentSettings.theme === 0) {
+        switch (design) {
+          case "alternativerow":
+            return rowIndex % 2 === 0 ? [229, 231, 235] : [243, 244, 246];
+          case "alternativecol":
+            return colIndex % 2 === 0 ? [229, 231, 235] : [243, 244, 246];
+          case "toprow":
+            return rowIndex === 0 ? [229, 231, 235] : [255, 255, 255];
+          case "leftcol":
+            return colIndex === 0 ? [229, 231, 235] : [255, 255, 255];
+          default:
+            return [255, 255, 255];
+        }
+      } else {
+        // Use user's selected color with different lightness levels
+        const userColor = documentSettings.color || "#000000";
+        const baseRgb = hexToRgb(userColor);
+        switch (design) {
+          case "alternativerow":
+            return rowIndex % 2 === 0
+              ? lightenRgbForPdf(baseRgb, 85)
+              : lightenRgbForPdf(baseRgb, 92);
+          case "alternativecol":
+            return colIndex % 2 === 0
+              ? lightenRgbForPdf(baseRgb, 85)
+              : lightenRgbForPdf(baseRgb, 92);
+          case "toprow":
+            return rowIndex === 0
+              ? lightenRgbForPdf(baseRgb, 85)
+              : [255, 255, 255];
+          case "leftcol":
+            return colIndex === 0
+              ? lightenRgbForPdf(baseRgb, 85)
+              : [255, 255, 255];
+          default:
+            return [255, 255, 255];
+        }
       }
     };
 
@@ -743,11 +810,11 @@ const GeneratePDF = async (jsonData, settings) => {
     let x = 10;
     doc.setFontSize(9);
     doc.setFont(defaultFont, "bold");
-    setFillColorFromHex("F5F5F5");
+    setFillColorFromHex(getTableHighlightColorPdf());
     setColorFromHex("000000");
 
     headerLabels.forEach((header, i) => {
-      setFillColorFromHex("F5F5F5");
+      setFillColorFromHex(getTableHighlightColorPdf());
       doc.rect(x, currentY, columnWidths[i], rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, columnWidths[i], rowHeight);
@@ -928,12 +995,12 @@ const GeneratePDF = async (jsonData, settings) => {
     let x = 10;
     doc.setFontSize(10);
     doc.setFont(defaultFont, "bold");
-    setFillColorFromHex("F5F5F5");
+    setFillColorFromHex(getTableHighlightColorPdf());
     setColorFromHex("000000");
 
     headerLabels.forEach((header, i) => {
       const colWidth = i === 0 ? firstColWidth : otherColWidth;
-      setFillColorFromHex("F5F5F5");
+      setFillColorFromHex(getTableHighlightColorPdf());
       doc.rect(x, currentY, colWidth, rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, colWidth, rowHeight);
@@ -975,7 +1042,7 @@ const GeneratePDF = async (jsonData, settings) => {
         const colWidth = i === 0 ? firstColWidth : otherColWidth;
 
         if (i === 0) {
-          setFillColorFromHex("F5F5F5");
+          setFillColorFromHex(getTableHighlightColorPdf());
           doc.rect(x, currentY, colWidth, rowHeight, "F");
         }
         doc.setDrawColor(222, 226, 230);
@@ -1007,11 +1074,11 @@ const GeneratePDF = async (jsonData, settings) => {
     x = 10;
     doc.setFont(defaultFont, "bold");
     doc.setFontSize(10);
-    setFillColorFromHex("F5F5F5");
+    setFillColorFromHex(getTableHighlightColorPdf());
 
     totalRow.forEach((cell, i) => {
       const colWidth = i === 0 ? firstColWidth : otherColWidth;
-      setFillColorFromHex("F5F5F5");
+      setFillColorFromHex(getTableHighlightColorPdf());
       doc.rect(x, currentY, colWidth, rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, colWidth, rowHeight);
@@ -1074,7 +1141,7 @@ const GeneratePDF = async (jsonData, settings) => {
 
                 // Determine style
                 let size = 22;
-                let color = "000000";
+                let color = "000000"; // Default to black
                 let bold =
                   children &&
                   children[0] &&
@@ -1084,6 +1151,21 @@ const GeneratePDF = async (jsonData, settings) => {
                 let alignment = block?.align
                   ? block.align.toLowerCase()
                   : "center";
+
+                // Apply enhanced color logic similar to heading processing
+                if (
+                  documentSettings.theme !== 0 &&
+                  nextItem.type === "heading" &&
+                  (nextItem.size === "heading-one" ||
+                    nextItem.size === "heading-two" ||
+                    nextItem.size === "heading-three")
+                ) {
+                  // For themes other than default and primary heading levels, use user's selected color
+                  color = convertToHex(documentSettings.color);
+                } else if (nextItem.textColor) {
+                  // Otherwise use the textColor property with fallback
+                  color = convertTailwindTextColor(nextItem.textColor);
+                }
 
                 if (block?.type && block.type.includes("heading")) {
                   const sizeMap = {
@@ -1099,7 +1181,7 @@ const GeneratePDF = async (jsonData, settings) => {
 
                 doc.setFontSize(size);
                 doc.setFont(headingFont, bold ? "bold" : "normal");
-                setColorFromHex("000000");
+                setColorFromHex(color); // Use the calculated color instead of hardcoded black
 
                 let xPosition = getAlignedXPosition(text, alignment);
                 const lines = doc.splitTextToSize(text, availableWidth - 20);
@@ -1155,7 +1237,21 @@ const GeneratePDF = async (jsonData, settings) => {
                   typeof children[0].bold === "boolean"
                     ? children[0].bold
                     : true;
-                const textColor = convertTailwindTextColor(item.textColor);
+
+                // Enhanced color handling to match web interface
+                let textColor;
+                if (
+                  documentSettings.theme !== 0 &&
+                  (size === "heading-one" ||
+                    size === "heading-two" ||
+                    size === "heading-three")
+                ) {
+                  // For themes other than default and primary heading levels, use user's selected color
+                  textColor = convertToHex(documentSettings.color);
+                } else {
+                  // Otherwise use the textColor property with fallback
+                  textColor = convertTailwindTextColor(item.textColor);
+                }
 
                 // Web-matching heading sizes
                 const sizeMap = {
@@ -1178,7 +1274,7 @@ const GeneratePDF = async (jsonData, settings) => {
 
                 doc.setFontSize(sizeMap[size] || 16);
                 doc.setFont(headingFont, isBold ? "bold" : "normal");
-                setColorFromHex("000000");
+                setColorFromHex(textColor);
 
                 let xPosition = getAlignedXPosition(text, alignment);
                 const lines = doc.splitTextToSize(text, availableWidth - 20);

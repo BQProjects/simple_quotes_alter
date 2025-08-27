@@ -58,7 +58,7 @@ const Preview = () => {
   };
 
   const handleGenerateWord = () => {
-    JsonToWord(rows);
+    JsonToWord(rows, settings);
   };
 
   const getProposal = async () => {
