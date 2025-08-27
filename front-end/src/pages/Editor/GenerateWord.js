@@ -70,9 +70,9 @@ const JsonToWord = async (jsonData) => {
   const allContent = [];
 
   // Document-level settings that match web typography
-  const defaultFont = "Arial";
-  const headingFont = "Arial";
-  const codeFont = "Arial";
+  const defaultFont = settings.body ;
+  const headingFont = settings.heading;
+  const codeFont = settings.body;
   const defaultColor = "#000000";
   const theme = settings.theme || 0;
 
@@ -1446,22 +1446,12 @@ const JsonToWord = async (jsonData) => {
             item.content.forEach((headingBlock, idx) => {
               try {
                 const children = headingBlock?.children;
-                const text =
-                  Array.isArray(children) && children[0]?.text
-                    ? children[0].text
-                    : "";
-                if (!text.trim()) return;
+                if (!Array.isArray(children) || children.length === 0) return;
 
                 const size = item.size || "heading-two";
                 const alignment = headingBlock?.align
                   ? headingBlock.align.toLowerCase()
                   : "left";
-                const isBold =
-                  children &&
-                  children[0] &&
-                  typeof children[0].bold === "boolean"
-                    ? children[0].bold
-                    : true;
                 const textColor = convertTailwindTextColor(item.textColor);
 
                 // Web-matching heading sizes - exact match to CSS
@@ -1515,16 +1505,28 @@ const JsonToWord = async (jsonData) => {
                     : { before: 40, after: 20 },
                 };
 
+                // Build all text runs with formatting
+                const textRuns = children.map(
+                  (child) =>
+                    new TextRun({
+                      text: child.text || "",
+                      bold: !!child.bold,
+                      italics: !!child.italic,
+                      underline: !!child.underline,
+                      strike: !!child.strikethrough,
+                      size: sizeMap[size] || 32,
+                      font: headingFont,
+                      color: textColor,
+                    })
+                );
+
                 allContent.push(
-                  createParagraph(text, {
-                    bold: isBold,
-                    size: sizeMap[size] || 32,
-                    alignment: alignmentMap[alignment] || AlignmentType.LEFT,
+                  new Paragraph({
+                    children: textRuns,
                     heading: headingMap[size] || HeadingLevel.HEADING_2,
-                    color: textColor,
+                    alignment: alignmentMap[alignment] || AlignmentType.LEFT,
                     spacing: spacingMap[size] || { before: 40, after: 20 },
-                    font: headingFont,
-                    lineSpacing: 1.05, // Even tighter line spacing
+                    lineSpacing: 1.05,
                   })
                 );
               } catch (err) {
