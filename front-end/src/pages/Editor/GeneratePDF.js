@@ -810,11 +810,11 @@ const GeneratePDF = async (jsonData, settings) => {
     let x = 10;
     doc.setFontSize(9);
     doc.setFont(defaultFont, "bold");
-    setFillColorFromHex(getTableHighlightColorPdf());
+    setFillColorFromHex("F5F5F5");
     setColorFromHex("000000");
 
     headerLabels.forEach((header, i) => {
-      setFillColorFromHex(getTableHighlightColorPdf());
+    setFillColorFromHex("F5F5F5");
       doc.rect(x, currentY, columnWidths[i], rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, columnWidths[i], rowHeight);
@@ -995,12 +995,12 @@ const GeneratePDF = async (jsonData, settings) => {
     let x = 10;
     doc.setFontSize(10);
     doc.setFont(defaultFont, "bold");
-    setFillColorFromHex(getTableHighlightColorPdf());
+    setFillColorFromHex("F5F5F5");
     setColorFromHex("000000");
 
     headerLabels.forEach((header, i) => {
       const colWidth = i === 0 ? firstColWidth : otherColWidth;
-      setFillColorFromHex(getTableHighlightColorPdf());
+    setFillColorFromHex("F5F5F5");
       doc.rect(x, currentY, colWidth, rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, colWidth, rowHeight);
@@ -1042,7 +1042,7 @@ const GeneratePDF = async (jsonData, settings) => {
         const colWidth = i === 0 ? firstColWidth : otherColWidth;
 
         if (i === 0) {
-          setFillColorFromHex(getTableHighlightColorPdf());
+         setFillColorFromHex("F5F5F5");
           doc.rect(x, currentY, colWidth, rowHeight, "F");
         }
         doc.setDrawColor(222, 226, 230);
@@ -1074,11 +1074,11 @@ const GeneratePDF = async (jsonData, settings) => {
     x = 10;
     doc.setFont(defaultFont, "bold");
     doc.setFontSize(10);
-    setFillColorFromHex(getTableHighlightColorPdf());
+         setFillColorFromHex("F5F5F5");
 
     totalRow.forEach((cell, i) => {
       const colWidth = i === 0 ? firstColWidth : otherColWidth;
-      setFillColorFromHex(getTableHighlightColorPdf());
+         setFillColorFromHex("F5F5F5");
       doc.rect(x, currentY, colWidth, rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, colWidth, rowHeight);

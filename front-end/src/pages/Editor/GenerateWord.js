@@ -1059,7 +1059,7 @@ const JsonToWord = async (jsonData, settings) => {
               size: columnWidths[i],
               type: WidthType.PERCENTAGE,
             },
-            shading: { fill: getTableHighlightColor() },
+            shading: { fill: "f5f5f5" },
             borders: {
               top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
               bottom: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
@@ -1266,7 +1266,7 @@ const JsonToWord = async (jsonData, settings) => {
                 type: WidthType.PERCENTAGE,
               },
               shading: {
-                fill: i === 0 ? getTableHighlightColor() : "ffffff",
+                fill: i === 0 ? "f5f5f5" : "ffffff",
               },
               borders: {
                 top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
@@ -1314,7 +1314,7 @@ const JsonToWord = async (jsonData, settings) => {
               type: WidthType.PERCENTAGE,
             },
             shading: {
-              fill: getTableHighlightColor(),
+              fill: "f5f5f5",
             },
             borders: {
               top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
@@ -1357,7 +1357,7 @@ const JsonToWord = async (jsonData, settings) => {
               type: WidthType.PERCENTAGE,
             },
             shading: {
-              fill: getTableHighlightColor(),
+              fill: "f5f5f5",
             },
             borders: {
               top: { style: BorderStyle.SINGLE, size: 2, color: "DEE2E6" },
