@@ -107,6 +107,7 @@ const UserSchema = new Schema({
   ProposalN: {
     type: Boolean,
   },
+  notifications: [{ type: Object }],
 });
 
 const UserModel = mongoose.model("User", UserSchema);

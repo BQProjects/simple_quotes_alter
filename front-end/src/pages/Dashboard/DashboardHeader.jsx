@@ -11,7 +11,8 @@ import { FaChevronRight } from "react-icons/fa";
 
 const DashboardHeader = () => {
   const { user } = useContext(UserContext);
-  const { workspaces, proposals } = useContext(StateManageContext);
+  const { workspaces, proposals, notifications, notifi, setNotifi } =
+    useContext(StateManageContext);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -24,37 +25,47 @@ const DashboardHeader = () => {
   const bellRef = useRef(null);
   const notificationRef = useRef(null);
   const searchRef = useRef(null);
-  const notifications = [
-    {
-      id: 1,
-      type: "trial",
-      title: "Free Trial",
-      message:
-        "You have 7 days remaining in your free trial and 3 documents left to create. Upgrade now to unlock unlimited features!...",
-      actionText: "Upgrade Plan Now",
-      actionLink: "/subscription",
-      time: "02:00 pm",
-      read: false,
-    },
-    {
-      id: 2,
-      type: "subscription",
-      title: "Thank you for subscribing!",
-      message:
-        "We're thrilled to let you know that your subscription has unlocked unlimited creations and access to all premium features to help you achieve more with ease!",
-      time: "03:00 pm",
-      read: false,
-    },
-    {
-      id: 3,
-      type: "news",
-      title: "Exciting News! 🚀 New Templates are added!",
-      message:
-        "You can upload your own custom font and set a default font for all your new proposals created from scratch.",
-      time: "04:10 pm",
-      read: false,
-    },
-  ];
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // const notifications = [
+  //   {
+  //     id: 1,
+  //     type: "trial",
+  //     title: "Free Trial",
+  //     message:
+  //       "You have 7 days remaining in your free trial and 3 documents left to create. Upgrade now to unlock unlimited features!...",
+  //     actionText: "Upgrade Plan Now",
+  //     actionLink: "/subscription",
+  //     time: "02:00 pm",
+  //     read: false,
+  //   },
+  //   {
+  //     id: 2,
+  //     type: "subscription",
+  //     title: "Thank you for subscribing!",
+  //     message:
+  //       "We're thrilled to let you know that your subscription has unlocked unlimited creations and access to all premium features to help you achieve more with ease!",
+  //     time: "03:00 pm",
+  //     read: false,
+  //   },
+  //   {
+  //     id: 3,
+  //     type: "news",
+  //     title: "Exciting News! 🚀 New Templates are added!",
+  //     message:
+  //       "You can upload your own custom font and set a default font for all your new proposals created from scratch.",
+  //     time: "04:10 pm",
+  //     read: false,
+  //   },
+  // ];
 
   // Combine proposals and workspaces on component mount
   useEffect(() => {
@@ -122,7 +133,7 @@ const DashboardHeader = () => {
   };
 
   const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
+    setNotifi(!notifi);
   };
 
   // Navigate to action link when notification action is clicked
@@ -140,7 +151,7 @@ const DashboardHeader = () => {
         notificationRef.current &&
         !notificationRef.current.contains(e.target)
       ) {
-        setShowNotifications(false);
+        setNotifi(false);
       }
 
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -450,7 +461,7 @@ const DashboardHeader = () => {
               </div>
             </div>
           )} */}
-          {showNotifications && (
+          {notifi && (
             <div
               ref={bellRef}
               className="bg-white border border-gray-100 p-5 w-[450px] absolute z-[6000] rounded-lg flex flex-col items-center justify-center gap-1 top-12 right-20   px-2 py-3 shadow-gray-400 shadow-lg"
@@ -464,37 +475,45 @@ const DashboardHeader = () => {
                   Notifications
                 </h2>
               </div>
-              {[1, 2, 3].map((item) => {
-                return (
-                  <div className="flex justify-between w-full mt-3 py-2  rounded-md">
-                    <div className="w-[10%]  h-full flex items-start justify-center">
-                      <div className="mt-2 w-1.5 h-1.5 rounded-[50%] bg-graidient_bottom"></div>
-                    </div>
-                    <div className="w-[90%]">
-                      <p className="font-semibold text-gray-600 text-sm flex justify-between pr-7">
-                        Proposal Sent Successfully!
-                        <span
-                          className="text-xs font-normal"
-                          style={{
-                            color: "rgba(140, 140, 140, 1)",
-                          }}
-                        >
-                          02:00 pm
-                        </span>
-                      </p>
-                      <p
-                        className="w-[90%] text-xs  mt-2"
-                        style={{
-                          color: "rgba(140, 140, 140, 1)",
-                        }}
-                      >
-                         Introducing Prospero’s AI Writing Assistant! Streamline
-                        proposal creation with smart, AI-driven.
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+              {!notifications ? (
+                <div className="w-full py-3 text-non_active_text flex items-start justify-center text-sm">
+                  No Notifications are there
+                </div>
+              ) : (
+                [...notifications]
+                  .reverse()
+                  .slice(0, 4)
+                  .map((item) => {
+                    return (
+                      <div className="flex justify-between w-full mt-3 py-2  rounded-md">
+                        <div className="w-[10%]  h-full flex items-start justify-center">
+                          <div className="mt-2 w-1.5 h-1.5 rounded-[50%] bg-graidient_bottom"></div>
+                        </div>
+                        <div className="w-[90%]">
+                          <p className="font-semibold text-gray-600 text-sm flex justify-between pr-7">
+                            {item.title}
+                            <span
+                              className="text-xs font-normal"
+                              style={{
+                                color: "rgba(140, 140, 140, 1)",
+                              }}
+                            >
+                              {formatTime(item.createdAt)}
+                            </span>
+                          </p>
+                          <p
+                            className="w-[90%] text-xs  mt-2"
+                            style={{
+                              color: "rgba(140, 140, 140, 1)",
+                            }}
+                          >
+                            {item.discription}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
             </div>
           )}
         </div>

@@ -27,6 +27,8 @@ export function StateManageContextProvider({ children }) {
   const [que, setQue] = useState([]);
   const [historyPreview, setHistoryPreview] = useState(null);
   const [count, setCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [notifi, setNotifi] = useState(false);
 
   useEffect(() => {
     if (user?.id && databaseUrl) {
@@ -62,6 +64,27 @@ export function StateManageContextProvider({ children }) {
       });
 
       setProposals(res.data);
+    } catch (error) {
+      console.error("Error fetching workspaces:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id && databaseUrl) {
+      getNotifications();
+    }
+  }, [user?.id, databaseUrl, notifi]);
+
+  const getNotifications = async () => {
+    try {
+      const res = await axios.get(
+        `${databaseUrl}/api/workspace/getnotification`,
+        {
+          params: { user_id: user.id },
+        }
+      );
+      console.log(res.data);
+      setNotifications(res.data);
     } catch (error) {
       console.error("Error fetching workspaces:", error);
     }
@@ -105,6 +128,10 @@ export function StateManageContextProvider({ children }) {
         setHistoryPreview,
         count,
         setCount,
+        notifications,
+        setNotifications,
+        notifi,
+        setNotifi,
       }}
     >
       {children}

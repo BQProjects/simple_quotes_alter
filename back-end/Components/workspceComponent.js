@@ -109,6 +109,20 @@ const workspaceCreate = async (req, res) => {
     // Find the user profile with populated collabs
     const profile = await UserModel.findById(user_id).populate("collab");
 
+    const temp = `${profile.fullName} has successfully created a new workspace titled "${workspaceName}". You can review the details and track its progress in your dashboard.`;
+
+    if (profile.notifications === undefined) {
+      profile.notifications = [];
+    }
+
+    profile.notifications.push({
+      title: "Workspace created Successfully!",
+      discription: temp,
+      createdAt: new Date(),
+    });
+
+    await profile.save();
+
     // Loop through the user's collabs
     for (let collab of profile.collab) {
       const isFullType = collab.type === "full";
@@ -211,6 +225,22 @@ const getfavorate = async (req, res) => {
       .limit(5);
 
     return res.status(200).json(proposals);
+  } catch (error) {
+    console.error("Error fetching Proposals:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getNotifications = async (req, res) => {
+  const { user_id } = req.query;
+
+  if (!user_id) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    const proposals = await UserModel.findById(user_id);
+    return res.status(200).json(proposals.notifications);
   } catch (error) {
     console.error("Error fetching Proposals:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -1326,4 +1356,5 @@ module.exports = {
   getAllWorkspacesIncluded,
   editCollab,
   deleteCollabUser,
+  getNotifications,
 };

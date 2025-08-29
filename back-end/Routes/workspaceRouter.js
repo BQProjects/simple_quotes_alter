@@ -45,6 +45,7 @@ const {
   getAllWorkspacesIncluded,
   editCollab,
   deleteCollabUser,
+  getNotifications,
 } = require("../Components/workspceComponent");
 
 const workspace = express.Router();
@@ -52,6 +53,7 @@ const workspace = express.Router();
 workspace.use(cors());
 
 workspace.get("/getall", workspaceGetAll);
+workspace.get("/getnotification", getNotifications);
 workspace.get("/single", workspaceGet);
 workspace.post("/new", workspaceCreate);
 workspace.put("/update", workspaceUpdate);

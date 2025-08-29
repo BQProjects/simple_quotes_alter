@@ -70,7 +70,7 @@ const EditorHeader = ({
   const [isDisabledL, setIsDisabledL] = useState(false);
   const [isDisabledF, setIsDisabledF] = useState(false);
   const [headerName, setHeaderName] = useState(proposalName);
-  const [notifiacations, setNotification] = useState(false);
+  // const [notifiacations, setNotification] = useState(false);
   const [lock, setLock] = useState(false);
   const { databaseUrl } = useContext(DatabaseContext);
   const [copySuccess, setCopySuccess] = useState("");
@@ -85,7 +85,8 @@ const EditorHeader = ({
   const [changing, setChanging] = useState(false);
   const [view, setView] = useState(true);
   const [tool, setTool] = useState(null);
-  const { que, setQue, count, setCount } = useContext(StateManageContext);
+  const { que, setQue, count, setCount, notifications, notifi, setNotifi } =
+    useContext(StateManageContext);
   const date = new Date(createdAt);
 
   const day = String(date.getDate()).padStart(2, "0");
@@ -230,7 +231,7 @@ const EditorHeader = ({
   };
   const handleClickOutsideBell = (event) => {
     if (bellRef.current && !bellRef.current.contains(event.target)) {
-      setNotification(false);
+      setNotifi(false);
     }
   };
   const handleClickOutsideShare = (event) => {
@@ -313,6 +314,15 @@ const EditorHeader = ({
 
   const spanRef = useRef(null);
   const [inputWidth, setInputWidth] = useState(50); // initial width
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
 
   useEffect(() => {
     if (spanRef.current) {
@@ -531,11 +541,11 @@ const EditorHeader = ({
         <div className="relative">
           <button
             className={`p-[7px] text-gray-500 rounded-md flex items-center justify-center -ml-1 -mr-1  relative active:bg-gradient_darker ${
-              notifiacations === true
+              notifi === true
                 ? "bg-graidient_bottom text-white"
                 : " hover:bg-graidient_bottom hover:text-white"
             } `}
-            onClick={() => setNotification(!notifiacations)}
+            onClick={() => setNotifi(!notifi)}
             onMouseEnter={() => setTool("Notifications")}
             onMouseLeave={() => setTool(null)}
           >
@@ -543,11 +553,11 @@ const EditorHeader = ({
             <Icon
               icon="famicons:notifications-outline"
               className={`h-[19px] w-[19px]    ${
-                notifiacations ? "text-white" : "hover:text-white "
+                notifi ? "text-white" : "hover:text-white "
               }`}
             />
           </button>
-          {notifiacations && (
+          {notifi && (
             <div
               ref={bellRef}
               className="bg-white border border-gray-100 p-5 w-[450px] absolute z-[6000] rounded-lg flex flex-col items-center justify-center gap-1 top-12 right-20    px-2 py-3 shadow-gray-400 shadow-lg"
@@ -561,37 +571,45 @@ const EditorHeader = ({
                   Notifications
                 </h2>
               </div>
-              {[1, 2, 3].map((item) => {
-                return (
-                  <div className="flex justify-between w-full mt-3 py-2  rounded-md">
-                    <div className="w-[10%]  h-full flex items-start justify-center">
-                      <div className="mt-2 w-1.5 h-1.5 rounded-[50%] bg-graidient_bottom"></div>
-                    </div>
-                    <div className="w-[90%]">
-                      <p className="font-semibold text-gray-600 text-sm flex justify-between pr-7">
-                        Proposal Sent Successfully!
-                        <span
-                          className="text-xs font-normal"
-                          style={{
-                            color: "rgba(140, 140, 140, 1)",
-                          }}
-                        >
-                          02:00 pm
-                        </span>
-                      </p>
-                      <p
-                        className="w-[90%] text-xs  mt-2"
-                        style={{
-                          color: "rgba(140, 140, 140, 1)",
-                        }}
-                      >
-                         Introducing Prospero’s AI Writing Assistant! Streamline
-                        proposal creation with smart, AI-driven.
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+              {!notifications ? (
+                <div className="w-full py-3 text-non_active_text flex items-start justify-center text-sm">
+                  No Notifications are there
+                </div>
+              ) : (
+                [...notifications]
+                  .reverse()
+                  .slice(0, 4)
+                  .map((item) => {
+                    return (
+                      <div className="flex justify-between w-full mt-3 py-2  rounded-md">
+                        <div className="w-[10%]  h-full flex items-start justify-center">
+                          <div className="mt-2 w-1.5 h-1.5 rounded-[50%] bg-graidient_bottom"></div>
+                        </div>
+                        <div className="w-[90%]">
+                          <p className="font-semibold text-gray-600 text-sm flex justify-between pr-7">
+                            {item.title}
+                            <span
+                              className="text-xs font-normal"
+                              style={{
+                                color: "rgba(140, 140, 140, 1)",
+                              }}
+                            >
+                              {formatTime(item.createdAt)}
+                            </span>
+                          </p>
+                          <p
+                            className="w-[90%] text-xs  mt-2"
+                            style={{
+                              color: "rgba(140, 140, 140, 1)",
+                            }}
+                          >
+                            {item.discription}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
             </div>
           )}
         </div>
