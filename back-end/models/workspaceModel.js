@@ -20,6 +20,7 @@ const WorkspaceSchema = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+        index: true,
       },
     ],
     userActive: [

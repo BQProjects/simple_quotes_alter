@@ -40,6 +40,17 @@ const createProposal = async (req, res) => {
 
     user.proposals.push(proposal._id);
 
+    if (user.notifications === undefined) {
+      user.notifications = [];
+    }
+    const temp = `${user.fullName} has successfully created a new proposal titled "${name}". You can review the details and track its progress in your dashboard.`;
+
+    user.notifications.push({
+      title: "Proposal created Successfully!",
+      discription: temp,
+      createdAt: new Date(),
+    });
+
     await user.save();
 
     const workspace = await WorkspaceModel.findById(workspace_id);

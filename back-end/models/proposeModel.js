@@ -20,6 +20,7 @@ const ProposalSchema = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Workspaces",
+        index: true,
       },
     ],
     readOnlyUsers: [
@@ -32,6 +33,7 @@ const ProposalSchema = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+        index: true,
       },
     ],
     AcceptedUsers: [
