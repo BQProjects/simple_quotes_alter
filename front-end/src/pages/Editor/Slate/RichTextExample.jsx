@@ -412,15 +412,22 @@ const RichTextEditor = ({
   const customStyles = {
     control: (base, state) => ({
       ...base,
-      minHeight: "28px", // reduce height of control
-      height: "28px",
+      minHeight: "38px", // reduce height of control
+      height: "38px",
       backgroundColor: "white",
       boxShadow: "none",
       padding: "",
       cursor: "pointer",
       border: "none",
-      fontSize: "15px",
+      fontSize: "17px",
       fontWeight: "600",
+      "&:hover": {
+        backgroundColor: "#f0f0f0",
+      },
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: "rgba(140 , 140 , 140 , 1)", // Tailwind text-gray-800
     }),
     option: (base, state) => ({
       ...base,
@@ -442,7 +449,7 @@ const RichTextEditor = ({
     }),
     dropdownIndicator: (base) => ({
       ...base,
-      padding: 4,
+      padding: 1,
       svg: {
         width: 13, // reduce width of arrow
         height: 13, // reduce height of arrow
@@ -533,7 +540,7 @@ const RichTextEditor = ({
               isSearchable={false}
               menuPortalTarget={document.body}
               menuPosition="absolute"
-              className="w-15"
+              className="w-16"
               onFocus={(e) => {
                 e.stopPropagation(); // Prevent toolbar from hiding
                 setChoosen(true);
@@ -550,7 +557,7 @@ const RichTextEditor = ({
                 toggleMark(editor, "bold");
               }}
               active={isMarkActive(editor, "bold")}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
             >
               <FaBold />
             </Button>
@@ -559,7 +566,7 @@ const RichTextEditor = ({
                 e.preventDefault();
                 toggleMark(editor, "italic");
               }}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               active={isMarkActive(editor, "italic")}
             >
               <FaItalic />
@@ -569,7 +576,7 @@ const RichTextEditor = ({
                 e.preventDefault();
                 toggleMark(editor, "underline");
               }}
-              className="flex items-center justify-center pt-[3px]"
+              className="flex items-center justify-center text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               active={isMarkActive(editor, "underline")}
             >
               <FaUnderline />
@@ -579,7 +586,7 @@ const RichTextEditor = ({
                 e.preventDefault();
                 toggleMark(editor, "strikethrough");
               }}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               active={isMarkActive(editor, "strikethrough")}
             >
               <FaStrikethrough />
@@ -589,7 +596,7 @@ const RichTextEditor = ({
                 e.preventDefault();
                 toggleMark(editor, "link");
               }}
-              className="flex items-center justify-center text-lg"
+              className="flex items-center justify-center text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               active={isMarkActive(editor, "link")}
             >
               <IoLink />
@@ -602,7 +609,7 @@ const RichTextEditor = ({
             >
               {/* Selected align icon */}
               <button
-                className="text-gray-700 text-xl"
+                className="text-gray-700 text-xl hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
                 onClick={() => setOpenA((prev) => !prev)}
               >
                 {alignments.find((a) => a.name === selectedAlign)?.icon}
@@ -643,6 +650,7 @@ const RichTextEditor = ({
             <div className="h-8 w-[1px] my-[-4px] bg-gray-300"></div>
 
             <Button
+              className="text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               onMouseDown={(e) => {
                 e.preventDefault();
                 toggleBlock(editor, "bulleted-list");
@@ -652,6 +660,7 @@ const RichTextEditor = ({
               <MdFormatListBulleted className="text-lg" />
             </Button>
             <Button
+              className="text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               onMouseDown={(e) => {
                 e.preventDefault();
                 toggleBlock(editor, "numbered-list");

@@ -80,7 +80,7 @@ const DashboardSideBar = ({ setBody }) => {
           ${isActive("/workspaces") ? "bg-gray-200 text-active_text" : ""}`}
         >
           <span className="w-8 h-8 flex items-center justify-center shadow-md shadow-gray-300 rounded-lg bg-white">
-            <GoFileDirectory className="w-5 h-5 text-gray-500" />
+            <GoFileDirectory className="w-5 h-5" />
           </span>
           Workspaces
         </button>

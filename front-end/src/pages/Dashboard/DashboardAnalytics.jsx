@@ -155,10 +155,10 @@ const DashboardAnalytics = () => {
       <div className="bg-white w-full h-[85vh] flex flex-col items-center overflow-y-auto relative">
         <div className="w-full pt-4 pb-4 px-6 flex gap-4  bg-white sticky top-0 z-50">
           <button className="text-xl" onClick={() => navigate(-1)}>
-            <IoMdArrowRoundBack />
+            <IoMdArrowRoundBack className="text-[#525252]" />
           </button>
           <button className="p-2 px-3 shadow-md shadow-gray-300 rounded-lg text-lg">
-            <SiGoogleanalytics />
+            <SiGoogleanalytics className="text-[#525252]" />
           </button>
           <div>
             <h2>Overview Analysis</h2>
@@ -189,13 +189,12 @@ const DashboardAnalytics = () => {
         <div className="w-full py-4 px-8 mt-2">
           <h2 className="text-gray-500 text-lg ">Recent Views</h2>
           <table className="table-auto w-full mt-4 ">
-            <thead className="bg-gray-100 text-center h-12">
+            <thead className="bg-gray-100 text-center h-12 rounded-full">
               <tr>
                 <th>Opened At</th>
                 <th>Time Spent</th>
                 <th>Location</th>
                 <th>Browser</th>
-                <th>View Details</th>
               </tr>
             </thead>
             <tbody>
@@ -204,7 +203,14 @@ const DashboardAnalytics = () => {
                   item.totalTime < 20000 && (
                     <tr
                       key={idx}
-                      className={`${slected === idx ? "bg-gray-50" : "none"}`}
+                      className={`cursor-pointer ${
+                        slected === idx
+                          ? " border-2 border-graidient_bottom"
+                          : idx % 2 === 1
+                          ? "bg-gray-100 border-pink-400"
+                          : ""
+                      }`}
+                      onClick={() => setSelected(idx)}
                     >
                       <td className="flex items-center justify-center h-16">
                         {formatFullDateTime(item.createdAt)}
@@ -218,50 +224,49 @@ const DashboardAnalytics = () => {
                       <td className="text-center text-gray-600">
                         {item.browser} <span>|</span> {item.os}
                       </td>
-
-                      <td
-                        ref={buttonRef}
-                        className="text-center text-gray-600 flex items-center justify-center relative"
-                      >
-                        <BsThreeDotsVertical
-                          onClick={() => {
-                            setSelected(idx);
-                          }}
-                        />
-                        {slected === idx && (
-                          <div
-                            ref={blockRef}
-                            className="w-60 max-h-64 pb-3 overflow-y-auto  absolute top-0 right-[50%] bg-white  shadow-lg shadow-gray-300 rounded-xl "
-                          >
-                            <table className="w-full table-auto  ">
-                              <thead className="sticky top-0 z-50 h-10 bg-gray-100  ">
-                                <tr>
-                                  <th>Section</th>
-                                  <th>Time</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {Object.entries(item.sectionWise).map(
-                                  ([key, value]) => {
-                                    return (
-                                      <tr className="h-10 text-gray-500 text-sm">
-                                        <td className="w-32 p-2">
-                                          <div className="max-w-28 overflow-hidden text-ellipsis whitespace-nowrap">
-                                            {key}
-                                          </div>
-                                        </td>
-                                        <td>{Math.floor(value)}sec</td>
-                                      </tr>
-                                    );
-                                  }
-                                )}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </td>
                     </tr>
                   )
+              )}
+              {/* Modal for section details */}
+              {slected !== null && proposal?.analytics[slected] && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30"
+                  onClick={() => setSelected(null)}
+                >
+                  <div
+                    className="bg-white rounded-xl shadow-lg max-w-sm relative"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <table className="w-full table-fixed">
+                      <thead className="sticky top-0 z-50 h-10 bg-gray-100 rounded-t-xl">
+                        <tr className="rounded-t-xl overflow-hidden">
+                          <th className="w-1/2 text-left pl-20 font-normal rounded-tl-xl bg-gray-100">
+                            Section
+                          </th>
+                          <th className="w-1/2 text-center font-normal rounded-tr-xl bg-gray-100">
+                            Time
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(
+                          proposal.analytics[slected].sectionWise
+                        ).map(([key, value]) => (
+                          <tr key={key} className="h-10 text-gray-500 text-sm">
+                            <td className="w-1/2 text-left pl-10">
+                              <div className="max-w-28 mx-auto overflow-hidden text-ellipsis whitespace-nowrap">
+                                {key}
+                              </div>
+                            </td>
+                            <td className="w-1/2 text-center">
+                              {value < 0.01 ? "00" : value.toFixed(2)} sec
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </tbody>
           </table>

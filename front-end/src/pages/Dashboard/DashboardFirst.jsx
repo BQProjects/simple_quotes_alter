@@ -163,8 +163,8 @@ const DashboardFirst = () => {
           workspace_id: id,
           name: name,
           settings: {
-            heading: "Arieal",
-            body: "Arieal",
+            heading: "roboto",
+            body: "roboto",
             header: false,
             footer: false,
             color: "#9b9b9b",

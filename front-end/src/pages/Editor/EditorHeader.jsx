@@ -160,7 +160,7 @@ const EditorHeader = ({
   };
 
   const handleGenerateWord = () => {
-    JsonToWord(rows);
+    JsonToWord(rows, settings);
   };
 
   const handleFavorate = async () => {

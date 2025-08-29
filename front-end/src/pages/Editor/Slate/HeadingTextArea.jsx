@@ -420,8 +420,8 @@ const MyRichTextEditor = ({
   const customStyles = {
     control: (base, state) => ({
       ...base,
-      minHeight: "28px", // reduce height of control
-      height: "28px",
+      minHeight: "38px", // reduce height of control
+      height: "38px",
       backgroundColor: "white", // active vs default
       boxShadow: "none",
       padding: "",
@@ -429,6 +429,9 @@ const MyRichTextEditor = ({
       border: "none",
       fontSize: "17px",
       fontWeight: "600",
+      "&:hover": {
+        backgroundColor: "#f0f0f0",
+      },
     }),
     singleValue: (base) => ({
       ...base,
@@ -482,6 +485,7 @@ const MyRichTextEditor = ({
       cursor: "pointer",
       "&:hover": {
         borderColor: "#6b7280",
+        backgroundColor: "#f0f0f0",
       },
     }),
     // singleValue: (base) => ({
@@ -621,7 +625,7 @@ const MyRichTextEditor = ({
                 e.preventDefault();
                 toggleMark(editor, "bold");
               }}
-              className="flex items-center justify-center  "
+              className="text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               active={isMarkActive(editor, "bold")}
             >
               <FaBold />
@@ -631,7 +635,7 @@ const MyRichTextEditor = ({
                 e.preventDefault();
                 toggleMark(editor, "italic");
               }}
-              className="flex items-center justify-center"
+              className="text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               active={isMarkActive(editor, "italic")}
             >
               <FaItalic />
@@ -641,7 +645,7 @@ const MyRichTextEditor = ({
                 e.preventDefault();
                 toggleMark(editor, "underline");
               }}
-              className="flex items-center justify-center pt-[3px]"
+              className="text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               active={isMarkActive(editor, "underline")}
             >
               <FaUnderline />
@@ -651,7 +655,7 @@ const MyRichTextEditor = ({
                 e.preventDefault();
                 toggleMark(editor, "strikethrough");
               }}
-              className="flex items-center justify-center"
+              className="text-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
               active={isMarkActive(editor, "strikethrough")}
             >
               <FaStrikethrough />
@@ -663,7 +667,7 @@ const MyRichTextEditor = ({
             >
               {/* Selected align icon */}
               <button
-                className="text-gray-700 text-xl"
+                className="text-gray-700 text-xltext-non_active_text hover:text-active_text hover:bg-highlight px-2 py-2 rounded-md"
                 onClick={() => setOpenA((prev) => !prev)}
               >
                 {alignments.find((a) => a.name === selectedAlign)?.icon}

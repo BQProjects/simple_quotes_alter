@@ -63,44 +63,123 @@ const fetchImageAsArrayBuffer = async (url) => {
   }
 };
 
-
-const JsonToWord = async (jsonData) => {
+const JsonToWord = async (jsonData, settings) => {
   const data = jsonData.data || jsonData;
-  const settings = jsonData.settings || {};
+  const documentSettings = jsonData.settings || settings || {};
   const allContent = [];
 
   // Document-level settings that match web typography
-  const defaultFont = "Arial";
-  const headingFont = "Arial";
-  const codeFont = "Arial";
-  const defaultColor = "#000000";
-  const theme = settings.theme || 0;
+  const defaultFont = documentSettings.body;
+  const headingFont = documentSettings.heading;
+  const codeFont = documentSettings.body;
+  const defaultColor = "#212529"; // Proper default text color
+  const theme = documentSettings.theme || 0;
+
+  // Define mapping objects for headings
+  const sizeMap = {
+    "heading-one": 48,
+    "heading-two": 36,
+    "heading-three": 30,
+    "heading-four": 26,
+    "heading-five": 22,
+    "heading-six": 20,
+  };
+
+  const headingMap = {
+    "heading-one": HeadingLevel.HEADING_1,
+    "heading-two": HeadingLevel.HEADING_2,
+    "heading-three": HeadingLevel.HEADING_3,
+    "heading-four": HeadingLevel.HEADING_4,
+    "heading-five": HeadingLevel.HEADING_5,
+    "heading-six": HeadingLevel.HEADING_6,
+  };
+
+  const alignmentMap = {
+    left: AlignmentType.LEFT,
+    center: AlignmentType.CENTER,
+    right: AlignmentType.RIGHT,
+  };
+
+  const spacingMap = {
+    "heading-one": { before: 60, after: 30 },
+    "heading-two": { before: 50, after: 25 },
+    "heading-three": { before: 40, after: 20 },
+    "heading-four": { before: 35, after: 18 },
+    "heading-five": { before: 30, after: 15 },
+    "heading-six": { before: 25, after: 12 },
+  };
+
+  // Helper function to lighten hex colors for Word export
+  const lightenHexForWord = (hex, percent) => {
+    // Remove # if present
+    const cleanHex = hex.replace("#", "");
+
+    // Validate hex
+    if (!/^[0-9A-Fa-f]{6}$/.test(cleanHex)) {
+      console.warn("Invalid hex color:", hex);
+      return "F5F5F5"; // fallback to light gray
+    }
+
+    const num = parseInt(cleanHex, 16);
+    const r = (num >> 16) & 0xff;
+    const g = (num >> 8) & 0xff;
+    const b = num & 0xff;
+
+    const newR = Math.min(255, Math.round(r + (255 - r) * (percent / 100)));
+    const newG = Math.min(255, Math.round(g + (255 - g) * (percent / 100)));
+    const newB = Math.min(255, Math.round(b + (255 - b) * (percent / 100)));
+
+    return `${newR.toString(16).padStart(2, "0")}${newG
+      .toString(16)
+      .padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`.toUpperCase();
+  };
+
+  // Helper function to get table header/highlight color based on theme
+  const getTableHighlightColor = () => {
+    if (documentSettings.theme === 0) {
+      return "F5F5F5"; // Default gray
+    } else if (documentSettings.color) {
+      // Use user's selected color, properly lightened
+      return lightenHexForWord(documentSettings.color, 85);
+    } else {
+      return "F5F5F5"; // fallback
+    }
+  };
 
   // Color conversion helper
   const convertToHex = (colorValue) => {
-    if (!colorValue) return "000000"; // DEFAULT TO BLACK instead of white
+    if (!colorValue) return "212529";
 
     // If it's already a valid hex without #, return as-is
     if (typeof colorValue === "string" && /^[0-9A-Fa-f]{6}$/.test(colorValue)) {
-      // Don't return white colors
-      if (colorValue.toUpperCase() === "FFFFFF") return "000000";
-      return colorValue;
+      const upperHex = colorValue.toUpperCase();
+      // Convert white to black
+      if (upperHex === "FFFFFF") {
+        return "000000";
+      }
+      return upperHex;
     }
 
-    // Remove # if present
+    // Remove # if present and validate
     if (typeof colorValue === "string" && colorValue.startsWith("#")) {
       const hex = colorValue.slice(1);
       if (/^[0-9A-Fa-f]{6}$/.test(hex)) {
-        // Don't return white colors
-        if (hex.toUpperCase() === "FFFFFF") return "000000";
-        return hex;
+        return hex.toUpperCase();
+      }
+      // Handle 3-digit hex
+      if (/^[0-9A-Fa-f]{3}$/.test(hex)) {
+        const expanded = hex
+          .split("")
+          .map((char) => char + char)
+          .join("");
+        return expanded.toUpperCase();
       }
     }
 
-    // Handle common color names
+    // Handle common color names (keep your existing colorMap but remove the white->black override)
     const colorMap = {
       black: "000000",
-      white: "000000", // CHANGED: white now maps to black
+      white: "000000",
       red: "FF0000",
       green: "008000",
       blue: "0000FF",
@@ -110,7 +189,7 @@ const JsonToWord = async (jsonData) => {
       gray: "808080",
       grey: "808080",
       dark: "333333",
-      light: "666666", // CHANGED: light now maps to gray instead of very light
+      light: "666666",
     };
 
     if (typeof colorValue === "string") {
@@ -121,33 +200,20 @@ const JsonToWord = async (jsonData) => {
       if (colorMap[lowerColor]) {
         return colorMap[lowerColor];
       }
-
-      // Try to extract hex from various formats
-      if (/^[0-9A-Fa-f]{3}$/.test(lowerColor)) {
-        // Convert 3-digit hex to 6-digit
-        const expanded = lowerColor
-          .split("")
-          .map((char) => char + char)
-          .join("");
-        // Don't return white colors
-        if (expanded.toUpperCase() === "FFFFFF") return "000000";
-        return expanded;
-      }
     }
 
-    // Fallback to black instead of default color
-    return "000000";
+    return "212529"; // Only fallback to theme-aware default if nothing else works
   };
 
   // Convert Tailwind CSS text color classes to hex values
   const convertTailwindTextColor = (textColor) => {
     if (!textColor || typeof textColor !== "string") {
-      return "000000"; // DEFAULT TO BLACK
+      return "212529"; // Default dark text color
     }
 
     const colorMap = {
       "text-black": "000000",
-      "text-white": "000000", // CHANGED: white text now maps to black
+      "text-white": "000000",
       "text-gray-700": "374151",
       "text-gray-600": "4B5563",
       "text-gray-500": "6B7280",
@@ -168,9 +234,7 @@ const JsonToWord = async (jsonData) => {
 
     // If it's already a hex color, process it
     if (textColor.startsWith("#")) {
-      const hex = convertToHex(textColor);
-      // Ensure we don't return white
-      return hex === "FFFFFF" ? "000000" : hex;
+      return convertToHex(textColor);
     }
 
     // Extract color from text-{color}-{shade} pattern
@@ -183,9 +247,8 @@ const JsonToWord = async (jsonData) => {
       }
     }
 
-    // Fallback to black
-    console.warn(`Unknown textColor: ${textColor}, using black`);
-    return "000000";
+    // Fallback to default dark text
+    return "212529";
   };
 
   // Web-matching typography function with ultra-tight spacing
@@ -777,19 +840,41 @@ const JsonToWord = async (jsonData) => {
       cellAlignAll = [],
     } = options;
 
-    // Helper for background color based on design
+    // Helper for background color based on design - now uses user's color selection
     const getCellShading = (colIndex, rowIndex) => {
-      switch (design) {
-        case "alternativerow":
-          return rowIndex % 2 === 0 ? "E5E7EB" : "F3F4F6";
-        case "alternativecol":
-          return colIndex % 2 === 0 ? "E5E7EB" : "F3F4F6";
-        case "toprow":
-          return rowIndex === 0 ? "E5E7EB" : "FFFFFF";
-        case "leftcol":
-          return colIndex === 0 ? "E5E7EB" : "FFFFFF";
-        default:
-          return "FFFFFF";
+      // If theme is 0 (default), use gray colors
+      if (documentSettings.theme === 0) {
+        switch (design) {
+          case "alternativerow":
+            return rowIndex % 2 === 0 ? "E5E7EB" : "F3F4F6";
+          case "alternativecol":
+            return colIndex % 2 === 0 ? "E5E7EB" : "F3F4F6";
+          case "toprow":
+            return rowIndex === 0 ? "E5E7EB" : "FFFFFF";
+          case "leftcol":
+            return colIndex === 0 ? "E5E7EB" : "FFFFFF";
+          default:
+            return "FFFFFF";
+        }
+      } else {
+        // Use user's selected color with different lightness levels
+        const userColor = documentSettings.color || defaultColor;
+        switch (design) {
+          case "alternativerow":
+            return rowIndex % 2 === 0
+              ? lightenHexForWord(userColor, 85)
+              : lightenHexForWord(userColor, 92);
+          case "alternativecol":
+            return colIndex % 2 === 0
+              ? lightenHexForWord(userColor, 85)
+              : lightenHexForWord(userColor, 92);
+          case "toprow":
+            return rowIndex === 0 ? lightenHexForWord(userColor, 85) : "FFFFFF";
+          case "leftcol":
+            return colIndex === 0 ? lightenHexForWord(userColor, 85) : "FFFFFF";
+          default:
+            return "FFFFFF";
+        }
       }
     };
 
@@ -1336,37 +1421,57 @@ const JsonToWord = async (jsonData) => {
               ) {
                 nextItem.content.forEach((block) => {
                   const children = block?.children;
-                  const text =
-                    Array.isArray(children) && children[0]?.text
-                      ? children[0].text
-                      : "";
-                  if (!text.trim()) return;
+                  if (!Array.isArray(children) || children.length === 0) return;
+
+                  // Extract all text from children (similar to heading processing)
+                  let blockText = "";
+                  children.forEach((child) => {
+                    if (child && child.text) {
+                      blockText += child.text;
+                    }
+                    // Handle nested children
+                    if (
+                      child &&
+                      child.children &&
+                      Array.isArray(child.children)
+                    ) {
+                      child.children.forEach((nestedChild) => {
+                        if (nestedChild && nestedChild.text) {
+                          blockText += nestedChild.text;
+                        }
+                      });
+                    }
+                  });
+
+                  if (!blockText.trim()) return;
 
                   // Determine style
                   let size = 44;
                   let heading = null;
                   let font = headingFont;
 
-                  // FIXED COLOR LOGIC:
-                  let color = "000000"; // Start with black as default
+                  // ENHANCED COLOR LOGIC:
+                  let color = "212529"; // Start with default dark color
 
-                  // Try to get color from nextItem
-                  if (nextItem.textColor) {
-                    color = convertTailwindTextColor(nextItem.textColor);
-                  }
-
-                  // Try to get color from block children
-                  if (children && children[0] && children[0].color) {
-                    color = convertToHex(children[0].color);
-                  }
-
-                  // Final safety check - never use white
+                  // Apply theme-based color logic similar to headings
                   if (
-                    !color ||
-                    color.toUpperCase() === "FFFFFF" ||
-                    color.toUpperCase() === "FFF"
+                    documentSettings.theme !== 0 &&
+                    documentSettings.color &&
+                    (nextItem.size === "heading-one" ||
+                      nextItem.size === "heading-two" ||
+                      nextItem.size === "heading-three")
                   ) {
-                    color = "000000";
+                    // For themes other than default and primary heading levels, use user's selected color
+                    color = convertToHex(documentSettings.color);
+                  } else if (nextItem.textColor) {
+                    // Otherwise use the textColor property with fallback
+                    color = convertTailwindTextColor(nextItem.textColor);
+                  } else if (documentSettings.color) {
+                    // Use settings color if available
+                    color = convertToHex(documentSettings.color);
+                  } else if (children && children[0] && children[0].color) {
+                    // Try to get color from block children
+                    color = convertToHex(children[0].color);
                   }
 
                   let bold =
@@ -1404,7 +1509,7 @@ const JsonToWord = async (jsonData) => {
                   }
 
                   coverParagraphs.push(
-                    createParagraph(text, {
+                    createParagraph(blockText, {
                       bold,
                       size,
                       heading,
@@ -1446,40 +1551,36 @@ const JsonToWord = async (jsonData) => {
             item.content.forEach((headingBlock, idx) => {
               try {
                 const children = headingBlock?.children;
-                const text =
-                  Array.isArray(children) && children[0]?.text
-                    ? children[0].text
-                    : "";
-                if (!text.trim()) return;
+                if (!Array.isArray(children) || children.length === 0) return;
 
                 const size = item.size || "heading-two";
                 const alignment = headingBlock?.align
                   ? headingBlock.align.toLowerCase()
                   : "left";
-                const isBold =
-                  children &&
-                  children[0] &&
-                  typeof children[0].bold === "boolean"
-                    ? children[0].bold
-                    : true;
-                const textColor = convertTailwindTextColor(item.textColor);
 
-                // Web-matching heading sizes - exact match to CSS
-                const sizeMap = {
-                  "heading-one": 40, // 2.5em exact
-                  "heading-two": 32, // 2em exact
-                  "heading-three": 28, // 1.75em exact
-                  "heading-four": 24, // 1.5em exact
-                  "heading-five": 20, // 1.25em exact
-                  "heading-six": 16, // 1em exact
-                };
+                // FIXED: Enhanced color handling to match web interface
+                let textColor;
+                if (
+                  documentSettings.theme !== 0 &&
+                  documentSettings.color &&
+                  (size === "heading-one" ||
+                    size === "heading-two" ||
+                    size === "heading-three")
+                ) {
+                  // For themes other than default and primary heading levels, use user's selected color
+                  textColor = convertToHex(documentSettings.color);
+                } else if (item.textColor) {
+                  // Otherwise use the textColor property
+                  textColor = convertTailwindTextColor(item.textColor);
+                } else if (documentSettings.color) {
+                  // Fallback to settings color if available
+                  textColor = convertToHex(documentSettings.color);
+                } else {
+                  // Final fallback
+                  textColor = "212529";
+                }
 
-                const alignmentMap = {
-                  left: AlignmentType.LEFT,
-                  center: AlignmentType.CENTER,
-                  right: AlignmentType.RIGHT,
-                };
-
+                // Define mapping objects for headings
                 const headingMap = {
                   "heading-one": HeadingLevel.HEADING_1,
                   "heading-two": HeadingLevel.HEADING_2,
@@ -1489,53 +1590,76 @@ const JsonToWord = async (jsonData) => {
                   "heading-six": HeadingLevel.HEADING_6,
                 };
 
-                // Check if next item is also a heading for ultra-tight spacing
-                const nextItem = data[index + 1];
-                const isNextHeading = nextItem && nextItem.type === "heading";
-
-                // Ultra-tight spacing to match web view exactly
-                const spacingMap = {
-                  "heading-one": isNextHeading
-                    ? { before: 160, after: 20 }
-                    : { before: 160, after: 80 },
-                  "heading-two": isNextHeading
-                    ? { before: 120, after: 15 }
-                    : { before: 120, after: 60 },
-                  "heading-three": isNextHeading
-                    ? { before: 100, after: 10 }
-                    : { before: 100, after: 50 },
-                  "heading-four": isNextHeading
-                    ? { before: 80, after: 8 }
-                    : { before: 80, after: 40 },
-                  "heading-five": isNextHeading
-                    ? { before: 60, after: 6 }
-                    : { before: 60, after: 30 },
-                  "heading-six": isNextHeading
-                    ? { before: 40, after: 4 }
-                    : { before: 40, after: 20 },
+                const alignmentMap = {
+                  left: AlignmentType.LEFT,
+                  center: AlignmentType.CENTER,
+                  right: AlignmentType.RIGHT,
                 };
 
+                const spacingMap = {
+                  "heading-one": { before: 60, after: 30 },
+                  "heading-two": { before: 50, after: 25 },
+                  "heading-three": { before: 40, after: 20 },
+                  "heading-four": { before: 35, after: 18 },
+                  "heading-five": { before: 30, after: 15 },
+                  "heading-six": { before: 25, after: 12 },
+                };
+
+                const textRuns = [];
+
+                children.forEach((child) => {
+                  if (!child) return;
+
+                  const text = child.text || "";
+                  if (!text && !child.children) return;
+
+                  // Handle nested content (similar to processSlateContent)
+                  if (child.children && Array.isArray(child.children)) {
+                    child.children.forEach((nestedChild) => {
+                      const nestedText = nestedChild.text || "";
+                      if (nestedText) {
+                        textRuns.push(
+                          new TextRun({
+                            text: nestedText,
+                            bold: !!nestedChild.bold,
+                            italics: !!nestedChild.italic,
+                            underline: !!nestedChild.underline,
+                            strike: !!nestedChild.strikethrough,
+                            size: sizeMap[size] || 32,
+                            font: headingFont,
+                            color: textColor,
+                          })
+                        );
+                      }
+                    });
+                  } else if (text) {
+                    // Handle direct text content
+                    textRuns.push(
+                      new TextRun({
+                        text: text,
+                        bold: !!child.bold,
+                        italics: !!child.italic,
+                        underline: !!child.underline,
+                        strike: !!child.strikethrough,
+                        size: sizeMap[size] || 32,
+                        font: headingFont,
+                        color: textColor,
+                      })
+                    );
+                  }
+                });
+
                 allContent.push(
-                  createParagraph(text, {
-                    bold: isBold,
-                    size: sizeMap[size] || 32,
-                    alignment: alignmentMap[alignment] || AlignmentType.LEFT,
+                  new Paragraph({
+                    children: textRuns,
                     heading: headingMap[size] || HeadingLevel.HEADING_2,
-                    color: textColor,
+                    alignment: alignmentMap[alignment] || AlignmentType.LEFT,
                     spacing: spacingMap[size] || { before: 40, after: 20 },
-                    font: headingFont,
-                    lineSpacing: 1.05, // Even tighter line spacing
+                    lineSpacing: 1.05,
                   })
                 );
               } catch (err) {
                 console.error("Error in heading block", headingBlock, err);
-                allContent.push(
-                  createParagraph(`[Error processing heading block ${idx}]`, {
-                    italic: true,
-                    color: "DC3545",
-                    size: 18,
-                  })
-                );
               }
             });
           }
@@ -1708,7 +1832,10 @@ const JsonToWord = async (jsonData) => {
                   heading: HeadingLevel.HEADING_2,
                   spacing: { before: 300, after: 120 },
                   font: headingFont,
-                  color: "1976D2",
+                  color:
+                    documentSettings.theme !== 0 && documentSettings.color
+                      ? convertToHex(documentSettings.color)
+                      : "1976D2",
                 })
               );
             }
@@ -2314,7 +2441,7 @@ const JsonToWord = async (jsonData) => {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: "─".repeat(60),
+                  text: " ".repeat(60),
                   size: 14,
                   color: "DEE2E6",
                 }),
@@ -2610,7 +2737,10 @@ const JsonToWord = async (jsonData) => {
             font: headingFont,
             size: 40, // Exact match to 2.5em
             bold: true,
-            color: "1976D2",
+            color:
+              documentSettings.theme !== 0 && documentSettings.color
+                ? convertToHex(documentSettings.color)
+                : "1976D2",
           },
           paragraph: {
             spacing: { line: 360 },
@@ -2625,7 +2755,10 @@ const JsonToWord = async (jsonData) => {
             font: headingFont,
             size: 32, // Exact match to 2em
             bold: true,
-            color: "1976D2",
+            color:
+              documentSettings.theme !== 0 && documentSettings.color
+                ? convertToHex(documentSettings.color)
+                : "1976D2",
           },
           paragraph: {
             spacing: { line: 360 },
@@ -2705,7 +2838,7 @@ const JsonToWord = async (jsonData) => {
             },
           },
         },
-        headers: settings.header
+        headers: documentSettings.header
           ? {
               default: new Header({
                 children: [
