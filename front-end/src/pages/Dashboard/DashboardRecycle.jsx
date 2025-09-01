@@ -12,16 +12,21 @@ import toast from "react-hot-toast";
 
 const DashboardRecycle = () => {
   const [proposals, setProposals] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { databaseUrl } = useContext(DatabaseContext);
   const { user } = useContext(UserContext);
   const getRecycle = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(`${databaseUrl}/api/workspace/recycle`, {
         params: { user_id: user.id },
       });
-      setProposals(res.data);
+      setProposals(res.data || []);
     } catch (error) {
       console.error("Error fetching workspaces:", error);
+      setProposals([]);
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
@@ -35,7 +40,7 @@ const DashboardRecycle = () => {
         { proposal_id: id }
       );
       setProposals(proposals.filter((item) => item._id !== id));
-      toast.success("Proposal has been deleted perminently");
+      toast.success("Proposal has been deleted permenantly");
     } catch (error) {
       console.error("Error fetching workspaces:", error);
     }
@@ -63,7 +68,24 @@ const DashboardRecycle = () => {
           <h1>Proposals</h1>
         </div>
         <div>
-          {proposals.length !== 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                <RiDeleteBin5Line className="text-4xl text-gray-400" />
+              </div>
+              <h2 className="text-xl font-medium text-gray-700 mb-2">
+                Loading...
+              </h2>
+              <p className="text-gray-500 text-center max-w-md">
+                Fetching your deleted proposals...
+              </p>
+            </div>
+          ) : proposals &&
+            proposals.length > 0 &&
+            proposals.some(
+              (item) =>
+                item?.proposals?.[0] && item?.proposals?.[0]?.workspaces?.[0]
+            ) ? (
             <table className="auto-table w-full ">
               <thead className="h-12 bg-gray-200 text-left text-gray-600 font-normal text-sm sticky top-0">
                 <tr>
@@ -110,7 +132,18 @@ const DashboardRecycle = () => {
               </tbody>
             </table>
           ) : (
-            <h1>No Deleted Proposals</h1>
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                <RiDeleteBin5Line className="text-4xl text-gray-400" />
+              </div>
+              <h2 className="text-xl font-medium text-gray-700 mb-2">
+                No Deleted Proposals
+              </h2>
+              <p className="text-gray-500 text-center max-w-md">
+                Your recycle bin is empty. Deleted proposals will appear here
+                and can be restored or permanently deleted.
+              </p>
+            </div>
           )}
         </div>
       </div>
