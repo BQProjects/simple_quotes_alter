@@ -288,7 +288,7 @@ const AllWorkspace = () => {
           <FaPlus />
         </button>
 
-        <div className="p-2 grid grid-cols-3  ">
+        <div className="p-2 grid grid-cols-3 h-[76vh] overflow-y-auto scrollbar-hide">
           {workspaces.map((workspace, index) => {
             return (
               <div
@@ -361,7 +361,7 @@ const AllWorkspace = () => {
                   </div>
                   <div
                     onClick={() => setThreeDots(index)}
-                    className="relative z-10"
+                    className="relative"
                     ref={buttonRef}
                   >
                     <BsThreeDotsVertical className="h-4 w-4" />

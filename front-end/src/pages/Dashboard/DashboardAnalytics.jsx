@@ -154,11 +154,14 @@ const DashboardAnalytics = () => {
     <>
       <div className="bg-white w-full h-[85vh] flex flex-col items-center overflow-y-auto relative">
         <div className="w-full pt-4 pb-4 px-6 flex gap-4  bg-white sticky top-0 z-50">
-          <button className="text-xl" onClick={() => navigate(-1)}>
-            <IoMdArrowRoundBack className="text-[#525252]" />
+          <button
+            className="text-xl hover:bg-gray-100 p-2 rounded-lg transition-colors duration-200"
+            onClick={() => navigate(-1)}
+          >
+            <IoMdArrowRoundBack className="text-[#525252] hover:text-pink-600 transition-colors duration-200" />
           </button>
-          <button className="p-2 px-3 shadow-md shadow-gray-300 rounded-lg text-lg">
-            <SiGoogleanalytics className="text-[#525252]" />
+          <button className="p-2 px-3 shadow-md shadow-gray-300 rounded-lg text-lg hover:shadow-lg hover:bg-pink-50 transition-all duration-200">
+            <SiGoogleanalytics className="text-[#525252] hover:text-pink-600 transition-colors duration-200" />
           </button>
           <div>
             <h2>Overview Analysis</h2>
@@ -166,20 +169,30 @@ const DashboardAnalytics = () => {
           </div>
         </div>
         <div className="w-[90%] grid grid-cols-4 mt-2">
-          <div className="flex flex-col h-20 items-start justify-start border-r border-gray-200 p-3 px-6  ">
-            <p className="text-gray-600">Last Viewed</p>
+          <div className="flex flex-col h-20 items-start justify-start border-r border-gray-200 p-3 px-6 hover:bg-gray-50 transition-colors duration-200 cursor-default">
+            <p className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+              Last Viewed
+            </p>
             {proposal?.lastSeen ? formatDateTime(proposal.lastSeen) : "-"}
           </div>
-          <div className="flex flex-col h-20 items-start justify-start border-r border-gray-200 p-3 px-6 ">
-            <p className="text-gray-600 ">Created</p>
+          <div className="flex flex-col h-20 items-start justify-start border-r border-gray-200 p-3 px-6 hover:bg-gray-50 transition-colors duration-200 cursor-default">
+            <p className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+              Created
+            </p>
             {proposal?.lastUpdate ? formatDateTime(proposal.createdAt) : "-"}
           </div>
-          <div className="flex flex-col h-20 items-start justify-start border-r border-gray-200 p-3 px-6">
-            <p className="text-gray-600">Views</p>
-            <h2 className="text-xl text-graidient_bottom">{proposal?.views}</h2>
+          <div className="flex flex-col h-20 items-start justify-start border-r border-gray-200 p-3 px-6 hover:bg-gray-50 transition-colors duration-200 cursor-default">
+            <p className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+              Views
+            </p>
+            <h2 className="text-xl text-graidient_bottom hover:scale-105 transition-transform duration-200">
+              {proposal?.views}
+            </h2>
           </div>
-          <div className="flex flex-col h-20 items-start justify-start  p-3  px-6">
-            <p className="text-gray-600">Total Engagement</p>
+          <div className="flex flex-col h-20 items-start justify-start p-3 px-6 hover:bg-gray-50 transition-colors duration-200 cursor-default">
+            <p className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+              Total Engagement
+            </p>
             {formatReadableTime(time)}
           </div>
         </div>
@@ -189,12 +202,20 @@ const DashboardAnalytics = () => {
         <div className="w-full py-4 px-8 mt-2">
           <h2 className="text-gray-500 text-lg ">Recent Views</h2>
           <table className="table-auto w-full mt-4 ">
-            <thead className="bg-gray-100 text-center h-12 rounded-full">
+            <thead className="bg-gray-100 text-center h-12 rounded-full hover:bg-gray-200 transition-colors duration-200">
               <tr>
-                <th>Opened At</th>
-                <th>Time Spent</th>
-                <th>Location</th>
-                <th>Browser</th>
+                <th className="hover:text-pink-600 transition-colors duration-200">
+                  Opened At
+                </th>
+                <th className="hover:text-pink-600 transition-colors duration-200">
+                  Time Spent
+                </th>
+                <th className="hover:text-pink-600 transition-colors duration-200">
+                  Location
+                </th>
+                <th className="hover:text-pink-600 transition-colors duration-200">
+                  Browser
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -203,16 +224,16 @@ const DashboardAnalytics = () => {
                   item.totalTime < 20000 && (
                     <tr
                       key={idx}
-                      className={`cursor-pointer ${
+                      className={`cursor-pointer transition-all duration-200 hover:bg-pink-50 hover:scale-[1.02] border-l-4 ${
                         slected === idx
-                          ? " border-2 border-graidient_bottom"
+                          ? "border-pink-500 bg-pink-100 shadow-md animate-pulse"
                           : idx % 2 === 1
-                          ? "bg-gray-100 border-pink-400"
-                          : ""
+                          ? "bg-gray-50 border-transparent hover:border-pink-300"
+                          : "bg-white border-transparent hover:border-pink-300"
                       }`}
                       onClick={() => setSelected(idx)}
                     >
-                      <td className="flex items-center justify-center h-16">
+                      <td className="flex items-center justify-center h-16 relative group">
                         {formatFullDateTime(item.createdAt)}
                       </td>
                       <td className="text-center text-gray-600">
