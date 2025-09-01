@@ -516,7 +516,7 @@ const deleteRecycle = async (req, res) => {
     );
     const deleted = await RecycleModel.findByIdAndDelete(proposal_id);
     return res.json({
-      message: "The proposal has been deletd Perminantly",
+      message: "The proposal has been deletd Permenantly",
     });
   } catch (error) {
     console.error(error);
