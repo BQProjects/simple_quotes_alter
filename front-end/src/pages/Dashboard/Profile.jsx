@@ -150,14 +150,15 @@ const Profile = () => {
 
   return (
     <>
-      <div className="w-full bg-white min-h-[90vh] px-16 pt-8 shadow-lg shadow-gray-300 pb-10 overflow-y-auto ">
-        <div className="flex items-center justify-start gap-3 text-xl ml-6  ">
-          <FaRegUser /> <h2>Personal Informatin</h2>
+      <div className="w-full bg-white min-h-[85vh] px-10 pt-10 shadow-lg shadow-gray-300">
+        <div className="flex items-center justify-start mb-6 gap-2 text-xl text-gray-600 px-6">
+          <FaRegUser className="text-gray-600" />
+          <h2>Personal Information</h2>
         </div>
-        <div className="w-full flex flex-col items-center justify-between">
-          <div className="w-[95%] flex items-start justify-between mt-7">
-            <div className="w-[75%] flex  flex-col">
-              <div className="w-full flex flex-col gap-1 ">
+        <div className="w-full h-[75vh] overflow-y-auto scrollbar-hide relative">
+          <div className="w-full flex items-start justify-between px-6 pb-8">
+            <div className="w-[75%] flex flex-col gap-6">
+              <div className="w-full flex flex-col gap-1">
                 <label className="text-gray-500 pl-2">Username</label>
                 <input
                   type="text"
@@ -166,12 +167,13 @@ const Profile = () => {
                     setUsername(e.target.value);
                     updateUsername(e.target.value);
                   }}
-                  className="w-full border border-gray-200 px-2 py-2 rounded-md outline-none"
+                  className="w-full border border-gray-200 px-4 py-2 rounded-md outline-none"
                 />
               </div>
-              <div className="flex justify-between mt-4 ">
-                <div className="w-[48%] flex flex-col gap-1 ">
-                  <label className="text-gray-500 pl-2">Country Code</label>
+
+              <div className="flex justify-between gap-4">
+                <div className="w-[48%] flex flex-col gap-1">
+                  <label className="text-gray-500 ">Country Code</label>
                   <select
                     value={country}
                     onChange={(e) => {
@@ -182,17 +184,17 @@ const Profile = () => {
                             focus:outline-none transition-all duration-150"
                   >
                     <option value="">Select Country Code</option>
-                    <option value="IST">IST [+91]</option>
-                    <option value="EST">GST [+971]</option>
-                    <option value="PST">PST [+1]</option>
-                    <option value="GMT">GMT [+44]</option>
-                    <option value="JST">JST [+81]</option>
-                    <option value="AEST">AEST [+61]</option>
-                    <option value="NST">NST [+1]</option>
+                    <option value="IST">IST | +91</option>
+                    <option value="EST">GST | +971</option>
+                    <option value="PST">PST | +1</option>
+                    <option value="GMT">GMT | +44</option>
+                    <option value="JST">JST | +81</option>
+                    <option value="AEST">AEST | +61</option>
+                    <option value="NST">NST | +1</option>
                   </select>
                 </div>
-                <div className="w-[48%] flex flex-col gap-1 ">
-                  <label className="text-gray-500 pl-2">Phone Number</label>
+                <div className="w-[48%] flex flex-col gap-1">
+                  <label className="text-gray-500 ">Phone Number</label>
                   <input
                     type="text"
                     value={phoneno}
@@ -201,21 +203,23 @@ const Profile = () => {
                       updatePhoneNo(e.target.value);
                     }}
                     placeholder="Phone Number"
-                    className="w-full border border-gray-200 px-2 py-2 rounded-md outline-none"
+                    className="w-full border border-gray-200 px-4 py-2 rounded-md outline-none"
                   />
                 </div>
               </div>
-              <div className="w-full flex flex-col gap-1 mt-4 ">
-                <label className="text-gray-500 pl-2">Email</label>
+
+              <div className="w-full flex flex-col gap-1">
+                <label className="text-gray-500 ">Email</label>
                 <input
                   type="text"
                   value={email}
-                  className="w-full border border-gray-200 px-2 py-2 rounded-md outline-none bg-gray-50"
+                  className="w-full border text-[#8C8C8C] px-4 py-2 rounded-md outline-none"
                   readOnly={true}
                 />
               </div>
-              <div className="w-full flex flex-col gap-1 mt-4 ">
-                <label className="text-gray-500 pl-2">Address</label>
+
+              <div className="w-full flex flex-col gap-1">
+                <label className="text-gray-500 ">Address</label>
                 <input
                   type="text"
                   placeholder="Address"
@@ -224,36 +228,49 @@ const Profile = () => {
                     setAddress(e.target.value);
                     updateAdress(e.target.value);
                   }}
-                  className="w-full border border-gray-200 px-2 py-2 rounded-md outline-none"
+                  className="w-full border border-gray-200 px-4 py-2 rounded-md outline-none"
                 />
               </div>
-              <div className="w-full flex flex-col gap-1 mt-4 ">
-                <label className="text-gray-500 pl-2">Signiture</label>
+              {/* todo - Ask designers for the owner and joined field as in database we do not have these fields */}
+              <div className="flex justify-start gap-x-36">
+                <div className="flex flex-col gap-1">
+                  <label className="text-gray-500 text-sm">Users</label>
+                  <div className="py-4 h-12 rounded-md bg-white text-[#1f1f1f] flex items-center">
+                    {username || "User"}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-gray-500 text-sm">Role</label>
+                  <div className="py-4 h-12 rounded-md bg-white text-[#1f1f1f] flex items-center">
+                    Owner
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-gray-500 text-sm">Joined</label>
+                  <div className="py-4 h-12 rounded-md bg-white text-[#1f1f1f] flex items-center">
+                    1 month ago
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full flex flex-col gap-1">
+                <label className="text-gray-500 ">Signature</label>
                 <h1 className="w-full border border-gray-200 px-2 py-4 rounded-md outline-none text-5xl text-center mt-1 signature-text font-bold">
                   {username}
                 </h1>
               </div>
-              <div className="w-full flex  items-center justify-between mt-7 ">
-                <button className="mt-2 text-graidient_bottom">
-                  Change Password
-                </button>
-                <button className="mt-2 text-graidient_bottom">Logout</button>
-                <button className="mt-2 text-graidient_bottom">
-                  Delete Profile
-                </button>
-              </div>
             </div>
-            <div className=" w-[30%] flex flex-col items-center justify-start pl-10">
+            <div className="w-[30%] flex flex-col items-center justify-start pl-10 gap-4">
               <div className="relative">
                 <img
                   src={imageUrl ? imageUrl : profile}
-                  alt="hsdv"
+                  alt="Profile"
                   className="w-32 h-32 rounded-[50%] relative"
                 />
                 {imageUrl && (
                   <div
                     onClick={() => handleDelete()}
-                    className="text-lg p-2 rounded-[50%] flex items-center justify-center text-graidient_bottom bg-white absolute top-1 right-1 cursor-pointer"
+                    className="text-lg p-2 rounded-[50%] flex items-center justify-center text-graidient_bottom bg-white absolute top-1 right-1 cursor-pointer shadow-md"
                   >
                     <RiDeleteBin5Line />
                   </div>
@@ -268,7 +285,7 @@ const Profile = () => {
                   onChange={handleUpload}
                 />
                 <button
-                  className="mt-1 text-graidient_bottom"
+                  className="text-graidient_bottom hover:text-pink-600 transition-colors"
                   onClick={handleClick}
                 >
                   Change Photo
@@ -276,8 +293,16 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          <div>
-            <h1></h1>
+          <div className="w-full flex items-center justify-around mb-10">
+            <button className="text-graidient_bottom hover:text-pink-600 transition-colors">
+              Change Password
+            </button>
+            <button className="text-graidient_bottom hover:text-pink-600 transition-colors">
+              Logout
+            </button>
+            <button className="text-graidient_bottom hover:text-pink-600 transition-colors">
+              Delete Profile
+            </button>
           </div>
         </div>
       </div>
