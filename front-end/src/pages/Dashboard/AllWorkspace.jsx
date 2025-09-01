@@ -361,7 +361,7 @@ const AllWorkspace = () => {
                   </div>
                   <div
                     onClick={() => setThreeDots(index)}
-                    className="relative z-10"
+                    className="relative"
                     ref={buttonRef}
                   >
                     <BsThreeDotsVertical className="h-4 w-4" />
