@@ -288,7 +288,7 @@ const AllWorkspace = () => {
           <FaPlus />
         </button>
 
-        <div className="p-2 grid grid-cols-3  ">
+        <div className="p-2 grid grid-cols-3 h-[76vh] overflow-y-auto scrollbar-hide">
           {workspaces.map((workspace, index) => {
             return (
               <div

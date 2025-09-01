@@ -403,7 +403,7 @@ const DashboardProposals = () => {
         </div>
         <div className="w-full h-[75vh] overflow-y-auto scrollbar-hide relative overflow-x-hidden">
           <table className="auto-table w-full ">
-            <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0">
+            <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0 z-10">
               <tr>
                 <th className="rounded-l-sm px-4 py-2 w-[35%]">
                   Proposal Name
