@@ -171,7 +171,6 @@ const DashboardHeader = () => {
       navigate(`/workspace/${item._id || item.id}`);
     }
 
-    // Save to recent searches (limit to 5)
     const searchItem = {
       id: item._id || item.id,
       title: item.title || item.name || item.workspaceName || item.proposalName,
@@ -180,17 +179,16 @@ const DashboardHeader = () => {
     };
 
     setRecentSearches((prev) => {
-      // Remove duplicates
+      // Remove duplicates by id
       const filtered = prev.filter((s) => s.id !== searchItem.id);
-      // Add to beginning, limit to 5 items
       return [searchItem, ...filtered].slice(0, 5);
     });
 
-    // Save to localStorage for persistence
-    localStorage.setItem(
-      "recentSearches",
-      JSON.stringify([searchItem, ...recentSearches].slice(0, 5))
-    );
+    // Save to localStorage for persistence, ensuring uniqueness
+    const stored = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+    const filteredStored = stored.filter((s) => s.id !== searchItem.id);
+    const newArr = [searchItem, ...filteredStored].slice(0, 5);
+    localStorage.setItem("recentSearches", JSON.stringify(newArr));
 
     setShowResults(false);
     setSearchQuery("");
@@ -201,7 +199,12 @@ const DashboardHeader = () => {
     const savedSearches = localStorage.getItem("recentSearches");
     if (savedSearches) {
       try {
-        setRecentSearches(JSON.parse(savedSearches));
+        // Remove duplicates by id using a Set
+        const arr = JSON.parse(savedSearches);
+        const uniqueArr = Array.from(
+          new Map(arr.map((item) => [item.id, item])).values()
+        );
+        setRecentSearches(uniqueArr);
       } catch (error) {
         console.error("Error parsing recent searches:", error);
       }
@@ -288,7 +291,7 @@ const DashboardHeader = () => {
                     <div className="flex-1 w-full">
                       <div className="flex justify-between ">
                         <div className="flex ">
-                          <p className="text-gray-700 font-medium text-sm w-[60%] whitespace-nowrap text-ellipsis overflow-hidden">
+                          <p className="text-gray-700 font-medium text-sm w-[60%] whitespace-nowrap text-ellipsis">
                             {item.title ||
                               item.name ||
                               item.workspaceName ||

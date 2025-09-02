@@ -132,7 +132,7 @@ const DashboardHome = () => {
                         workspace?._id &&
                         navigate(`/workspace/${workspace._id}`)
                       }
-                      className="mt-3 mr-3 placeholder:w-[100%] h-14 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer"
+                      className="mt-3 mr-3 placeholder:w-[100%] h-14 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer hover:border-gray-300"
                     >
                       <div
                         className={`h-10 w-12 p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300`}
@@ -145,7 +145,7 @@ const DashboardHome = () => {
                         />
                       </div>
                       <div className="text-sm flex flex-col w-[90%] ">
-                        <h2 className="text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-ellipsis flex items-center justify-start gap-1">
+                        <h2 className="text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-non-active-text flex items-center justify-start gap-1">
                           <span>{workspace?.workspaceName}</span>
                           <span>
                             {workspace?.favorate ? (
@@ -283,13 +283,13 @@ const DashboardHome = () => {
                       onClick={() =>
                         item?._id && navigate(`/editor/${item._id}`)
                       }
-                      className="mt-3 mr-3 w-[100%] h-16 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer"
+                      className="mt-3 mr-3 w-[100%] h-16 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer hover:border-gray-300"
                     >
                       <div className="h-10 w-12 p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300">
                         <FaRegFileLines className="h-5 w-5 text-gray-500" />
                       </div>
                       <div className="text-sm flex flex-col w-[90%] ml-2 ">
-                        <h2 className="text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-ellipsis flex items-center justify-start gap-1">
+                        <h2 className="text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-non-active-text flex items-center justify-start gap-1">
                           <span>{item?.proposalName}</span>
                           <span>
                             {item?.favorate ? (
