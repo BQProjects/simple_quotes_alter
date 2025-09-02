@@ -200,7 +200,9 @@ const DashboardHome = () => {
                       ) : (
                         <GoArrowUp />
                       )}
-                      {Math.abs(views?.dailyChange || 0).toFixed(1)}%
+                      {views?.dailyChange !== 0 && (
+                        <>{Math.abs(views?.dailyChange || 0).toFixed(1)}%</>
+                      )}
                     </span>
                     <span className="text-sm text-graidient_bottom ml-1 mb-0.5">
                       views

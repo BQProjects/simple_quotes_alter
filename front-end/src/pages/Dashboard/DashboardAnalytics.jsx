@@ -153,7 +153,7 @@ const DashboardAnalytics = () => {
   return (
     <>
       <div className="bg-white w-full h-[85vh] flex flex-col items-center overflow-y-auto relative">
-        <div className="w-full pt-4 pb-4 px-6 flex gap-4  bg-white sticky top-0 z-50">
+        <div className="w-full pt-4 pb-4 px-6 flex gap-4  bg-white sticky top-0 z-30">
           <button
             className="text-xl hover:bg-gray-100 p-2 rounded-lg transition-colors duration-200"
             onClick={() => navigate(-1)}

@@ -67,11 +67,11 @@ const DashboardRecycle = () => {
             <table className="auto-table w-full ">
               <thead className="h-12 bg-gray-200 text-left text-gray-600 font-normal text-sm sticky top-0">
                 <tr>
-                  <th className="rounded-l-xl px-4 py-2 w-[40%]">
+                  <th className="rounded-l-xl px-4 py-2 w-[70%]">
                     Proposal Name
                   </th>
-                  <th>Workspace Name</th>
-                  <th className="rounded-r-xl pl-10 py-2 w-[25%]">
+                  <th className="w-[15%]">Workspace Name</th>
+                  <th className="rounded-r-xl pl-10 py-2 w-[15%]">
                     Quick Action
                   </th>
                 </tr>
@@ -89,11 +89,11 @@ const DashboardRecycle = () => {
                       key={index}
                     >
                       <td className="px-4 flex flex-col items-start justify-start py-3 text-left">
-                        <span className="w-[90%] overflow-hidden whitespace-nowrap text-ellipsis block ">
+                        <span className="w-[90%] overflow-hidden text-ellipsis block ">
                           {proposal.proposalName}
                         </span>
                       </td>
-                      <td className=" pr-3">{workspace.workspaceName}</td>
+                      <td className="px-1">{workspace.workspaceName}</td>
                       <td>
                         <div className="flex flex-row gap-2 text-md text-gray-500 ml-14 text-lg">
                           <MdRestorePage

@@ -22,6 +22,8 @@ const Profile = () => {
   const [phoneno, setPhoneno] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [company, setCompany] = useState("");
+  const [subscription, setSubscription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -80,6 +82,8 @@ const Profile = () => {
       setPhoneno(res.data.phoneNo ? res.data.phoneNo : "");
       setEmail(res.data.email);
       setAddress(res.data.adress ? res.data.adress : "");
+      setCompany(res.data.companyName ? res.data.companyName : "");
+      setSubscription(res.data.subscription ? res.data.subscription : "");
       setImageUrl(res.data.avatar ? res.data.avatar : "");
     } catch (error) {
       console.error("Error fetching workspaces:", error);
@@ -240,15 +244,15 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-gray-500 text-sm">Role</label>
+                  <label className="text-gray-500 text-sm">Company</label>
                   <div className="py-4 h-12 rounded-md bg-white text-[#1f1f1f] flex items-center">
-                    Owner
+                    {company || "Owner"}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-gray-500 text-sm">Joined</label>
+                  <label className="text-gray-500 text-sm">Subscription</label>
                   <div className="py-4 h-12 rounded-md bg-white text-[#1f1f1f] flex items-center">
-                    1 month ago
+                    {subscription || "1 month ago"}
                   </div>
                 </div>
               </div>

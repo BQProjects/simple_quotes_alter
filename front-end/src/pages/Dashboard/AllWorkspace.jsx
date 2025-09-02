@@ -288,12 +288,12 @@ const AllWorkspace = () => {
           <FaPlus />
         </button>
 
-        <div className="p-2 grid grid-cols-3 h-[76vh] overflow-y-auto scrollbar-hide">
+        <div className="p-2 grid grid-cols-3 gap-4 h-[76vh] overflow-y-auto scrollbar-hide auto-rows-max">
           {workspaces.map((workspace, index) => {
             return (
               <div
                 key={index}
-                className=" mt-4 mr-4 placeholder:w-[95%] h-16 px-3 py-2 border border-gray-200 rounded-md flex items-center justify-start gap-2 cursor-pointer "
+                className="w-full h-20 px-3 py-2 border border-gray-200 rounded-md flex items-center justify-start cursor-pointer hover:shadow-md hover:border-pink-300 transition-all duration-200 gap-2"
               >
                 <div
                   onClick={() => navigate(`/workspace/${workspace._id}`)}
@@ -399,10 +399,26 @@ const AllWorkspace = () => {
               </div>
             );
           })}
+          {workspaces.length > 0 && workspaces.length < 9 && (
+            <>
+              {Array.from({ length: Math.max(0, 9 - workspaces.length) }).map(
+                (_, index) => (
+                  <div
+                    key={`placeholder-${index}`}
+                    className="w-full h-20 px-3 py-2 border border-transparent rounded-md opacity-0 pointer-events-none"
+                    aria-hidden="true"
+                  >
+                    {/* Invisible placeholder to maintain grid structure */}
+                  </div>
+                )
+              )}
+            </>
+          )}
+
           {newW && (
             <div
               ref={addRef}
-              className=" relative w-[95%] h-16 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer mt-4 "
+              className="w-full h-20 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer"
             >
               <div
                 className={`h-10 w-12  p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300 `}
