@@ -53,6 +53,7 @@ const ProposalsAreaChart = ({ proposals }) => {
   ).length;
 
   return (
+   // h-[400px]
     <div className="w-full h-80 bg-white p-4 rounded-2xl shadow">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">
