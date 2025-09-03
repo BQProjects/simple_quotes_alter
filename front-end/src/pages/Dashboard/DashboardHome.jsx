@@ -247,17 +247,17 @@ const DashboardHome = () => {
               </div>
             </div>
           </div>
-          <div className="mt-6 mb-6">
+          {/* <div className="mt-6 mb-6">
             <ProposalsLineChart proposals={proposals} />
-          </div>
-          {/* <div className="mt-6 mb-6 flex gap-6">
-            <div className="flex-1" style={{ flex: "0 0 70%" }}>
+          </div> */}
+          <div className="mt-6 mb-6 flex flex-col lg:flex-row gap-6">
+            <div className="w-full lg:flex-1 lg:w-auto">
               <ProposalsLineChart proposals={proposals} />
             </div>
-            <div className="flex-1" style={{ flex: "0 0 30%" }}>
-              <TrafficPieChart />
+            <div className="w-full lg:w-auto lg:max-w-sm h-full">
+              <TrafficPieChart width={320} height={350} />
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     </>

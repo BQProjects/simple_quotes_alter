@@ -4,8 +4,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 const TrafficPieChart = ({
   data,
   title = "Traffic by Location",
-  width = 350,
-  height = 400,
 }) => {
   // Default data if none provided
   const defaultData = [
@@ -51,8 +49,6 @@ const TrafficPieChart = ({
     <div
       className="flex flex-col justify-start items-center gap-3 pt-4 pb-4 pl-4 pr-4 rounded-2xl bg-white"
       style={{
-        width: `${width}px`,
-        height: `${height}px`,
         boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.10)",
       }}
     >
