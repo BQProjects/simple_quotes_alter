@@ -2,11 +2,18 @@ import React, { useContext } from "react";
 import { FaEdit } from "react-icons/fa";
 import { StateManageContext } from "../../context/StateManageContext";
 
-const SignRow = ({ index, rows, content, onChange, selected }) => {
+const SignRow = ({
+  index,
+  rows,
+  content,
+  onChange,
+  selected,
+  preview
+}) => {
   const { setSignEdit, setSign } = useContext(StateManageContext);
   return (
     <div className="w-full h-[150px] grid grid-cols-3 gap-0 items-center text-center p-3  rounded-lg mt-10 relative ">
-      {selected !== null && (
+      {(selected !== null || preview) && (
         <button
           onClick={() => {
             setSign(true);

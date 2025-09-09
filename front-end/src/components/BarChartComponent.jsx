@@ -10,12 +10,23 @@ import {
 } from "recharts";
 
 const BarChartComponent = ({ rawData }) => {
-  const chartData = rawData
+  const hasData =
+    rawData && typeof rawData === "object" && Object.keys(rawData).length > 0;
+  const chartData = hasData
     ? Object.entries(rawData).map(([key, value]) => ({
         name: key,
         value: Math.floor(value),
       }))
-    : {};
+    : [];
+
+  if (!hasData || chartData.length === 0) {
+    return (
+      <div className="mt-6 flex justify-center items-center h-[210px] border border-gray-200 rounded-lg">
+        <p className="text-gray-500">No analytics data available</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6 ">
       <BarChart width={900} height={210} data={chartData} barCategoryGap="10%">

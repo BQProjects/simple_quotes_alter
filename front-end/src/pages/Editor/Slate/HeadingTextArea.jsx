@@ -711,6 +711,7 @@ const MyRichTextEditor = ({
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           placeholder="Click to add heading"
+          readOnly={preview}
           style={{
             color:
               settings.theme === 2 && size === "heading-one"
