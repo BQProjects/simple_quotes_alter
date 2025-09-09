@@ -67,10 +67,11 @@ const Preview = () => {
   };
 
   const addSign = (data) => {
-    setRows((prevRows) => [
-      ...prevRows,
+    const newRows = [
+      ...rows,
       { id: uuidv4(), type: "sign", content: data, bookmark: false },
-    ]);
+    ];
+    setRows(newRows);
     setSign(false);
 
     // Update database with the new signature
