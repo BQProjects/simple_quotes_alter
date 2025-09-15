@@ -1,19 +1,26 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { StateManageContext } from "../../context/StateManageContext";
 
-const SignRow = ({
-  index,
-  rows,
-  content,
-  onChange,
-  selected,
-  preview
-}) => {
+const SignRow = ({ index, rows, content, onChange, selected, preview }) => {
   const { setSignEdit, setSign } = useContext(StateManageContext);
+  const [showSignModal, setShowSignModal] = useState(false);
+  const [clientName, setClientName] = useState("");
+
+  const handleSignClient = () => {
+    if (clientName.trim()) {
+      const updatedData = [...content];
+      updatedData[1].acceptedName = clientName;
+      updatedData[1].signed = true;
+      onChange(updatedData);
+      setShowSignModal(false);
+      setClientName("");
+    }
+  };
+
   return (
     <div className="w-full h-[150px] grid grid-cols-3 gap-0 items-center text-center p-3  rounded-lg mt-10 relative ">
-      {(selected !== null || preview) && (
+      {(selected !== null || preview) && !(preview && content[1].signed) && (
         <button
           onClick={() => {
             setSign(true);
@@ -31,7 +38,11 @@ const SignRow = ({
       </div>
 
       {/* Middle Column */}
-      <div className="border-l border-y border-border_clr h-32 flex flex-col items-center justify-center">
+      <div
+        className={`border-l border-y border-border_clr h-32 flex flex-col items-center justify-center ${
+          preview && content[1].signed ? "opacity-50 pointer-events-none" : ""
+        }`}
+      >
         <div className="h-20 flex items-end pb-4 justify-center">
           {content[0].signed ? (
             <p className="text-lg  text-active_text h-20 flex items-end pb-4 justify-center">
@@ -40,11 +51,18 @@ const SignRow = ({
           ) : (
             <button
               onClick={() => {
-                const updatedData = [...content];
-                updatedData[0].signed = true;
-                onChange(updatedData);
+                if (!(preview && content[1].signed)) {
+                  const updatedData = [...content];
+                  updatedData[0].signed = true;
+                  onChange(updatedData);
+                }
               }}
-              className="px-6 py-2  text-white rounded-md bg-graidient_bottom "
+              disabled={preview && content[1].signed}
+              className={`px-6 py-2  text-white rounded-md bg-graidient_bottom ${
+                preview && content[1].signed
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
             >
               Sign Proposal
             </button>
@@ -57,13 +75,29 @@ const SignRow = ({
       </div>
 
       {/* Right Column */}
-      <div className="border border-border_clr h-32 flex flex-col items-center justify-center">
+      <div
+        className={`border border-border_clr h-32 flex flex-col items-center justify-center ${
+          preview && content[1].signed ? "opacity-50" : ""
+        }`}
+      >
         <div className="h-20 flex items-end pb-4 justify-center">
-          {content[1].signed ? (
-            <p className="text-lg  text-active_text h-20 flex items-end pb-4 justify-center">
-              {content[1]?.acceptedName}
-            </p>
-          ) : (
+          {content[1].signed && content[1].acceptedName ? (
+            <div className="flex flex-col items-center">
+              <p className="text-lg  text-active_text h-20 flex items-end pb-4 justify-center">
+                {content[1]?.acceptedName}
+              </p>
+              {preview && (
+                <p className="text-xs text-green-600 font-semibold">✓ Signed</p>
+              )}
+            </div>
+          ) : preview && !content[1].acceptedName && !content[1].signed ? (
+            <button
+              onClick={() => setShowSignModal(true)}
+              className="px-6 py-2  text-white rounded-md bg-graidient_bottom  "
+            >
+              Sign
+            </button>
+          ) : !content[1].signed ? (
             <button
               onClick={() => {
                 const updatedData = [...content];
@@ -74,13 +108,67 @@ const SignRow = ({
             >
               Sign Proposal
             </button>
+          ) : (
+            <p className="text-sm text-gray-500">
+              {preview ? "Signed" : content[1]?.acceptedName}
+            </p>
           )}
         </div>
         <div className="border-t border-border_clr w-full  "></div>
         <h3 className="text-non_active_text h-12 flex items-center justify-center">
-          {content[1]?.acceptedName}
+          {content[1]?.acceptedName ||
+            (preview ? "Client Name" : content[1]?.acceptedName)}
         </h3>
       </div>
+
+      {/* Sign Modal - Only shows in preview mode and when not signed */}
+      {showSignModal && preview && !content[1].signed && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[1000]">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div className="mb-6 text-center">
+              <h2 className="text-lg font-bold text-active_text mb-2">
+                Do you want to sign this?
+              </h2>
+              <p className="text-sm text-non_active_text">
+                Please enter your name to electronically sign this proposal.
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-active_text mb-2">
+                Your Name
+              </label>
+              <input
+                type="text"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-active_text shadow-sm outline-none text-sm hover:border-active_text focus:border-active_text"
+                placeholder="Enter your full name"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setShowSignModal(false);
+                  setClientName("");
+                }}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-300 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSignClient}
+                disabled={!clientName.trim()}
+                className="px-4 py-2 bg-graidient_bottom text-white rounded-md hover:bg-gradient_darker text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Sign
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

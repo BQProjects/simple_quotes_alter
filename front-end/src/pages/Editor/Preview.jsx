@@ -159,7 +159,7 @@ const Preview = () => {
             />
           </div>
         </div>
-        <button
+        {/* <button
           className="fixed bottom-5 left-4 text-white shadow-sm bg-emerald-600 rounded-md p-1"
           onClick={handleGeneratePdf}
         >
@@ -170,7 +170,7 @@ const Preview = () => {
           onClick={handleGenerateWord}
         >
           Generate Word
-        </button>
+        </button> */}
       </DndProvider>
       {sign && (
         <Signiture
@@ -182,6 +182,7 @@ const Preview = () => {
           }}
           signEdit={signEdit}
           setSignEdit={setSignEdit}
+          preview={true}
         />
       )}
     </div>

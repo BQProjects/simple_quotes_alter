@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { StateManageContext } from "../../context/StateManageContext";
 import { UserContext } from "../../context/UserContext";
 
-const Signature = ({ addSign, rows, setRows }) => {
+const Signature = ({ addSign, rows, setRows, preview }) => {
   const { setSign, signEdit, setSignEdit } = useContext(StateManageContext);
   const { user } = useContext(UserContext);
   const [temp, setTemp] = useState(
@@ -56,7 +56,12 @@ const Signature = ({ addSign, rows, setRows }) => {
               onChange={(e) =>
                 handleInputChange(0, "proposedName", e.target.value)
               }
-              className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg text-active_text shadow-sm outline-none text-sm hover:border-active_text focus:border-active_text"
+              readOnly={preview}
+              className={`mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg text-active_text shadow-sm outline-none text-sm ${
+                preview
+                  ? "bg-gray-100 cursor-not-allowed"
+                  : "hover:border-active_text focus:border-active_text"
+              }`}
               placeholder="E.g: Jhon"
             />
             <p className="text-[11px] p-2 text-active_text">

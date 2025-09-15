@@ -8,8 +8,8 @@ const ViewsOverviewCard = ({ views }) => {
     historicalData = null
   ) => {
     const points = 8;
-    const width = 96;
-    const height = 20;
+    const width = 100;
+    const height = 25;
     const padding = 2;
 
     // If no historical data, simulate realistic daily pattern
@@ -20,7 +20,7 @@ const ViewsOverviewCard = ({ views }) => {
       );
       const targetValue = dailyViews;
 
-      let path = `M${padding} ${height}`;
+      let path = `M${padding} ${height - 2}`;
 
       for (let i = 1; i <= points; i++) {
         const progress = i / points;
@@ -34,9 +34,9 @@ const ViewsOverviewCard = ({ views }) => {
 
         // Convert to SVG y coordinate (higher values = lower y)
         const maxValue = Math.max(baseValue, targetValue) * 1.2;
-        const y = height - (currentValue / maxValue) * (height - 4) + 2;
+        const y = height - 2 - (currentValue / maxValue) * (height - 6);
 
-        path += `L${x} ${Math.max(2, Math.min(height, y))}`;
+        path += `L${x} ${Math.max(2, Math.min(height - 2, y))}`;
       }
 
       return path;
@@ -52,8 +52,8 @@ const ViewsOverviewCard = ({ views }) => {
     historicalData = null
   ) => {
     const points = 10; // More points for weekly data
-    const width = 96;
-    const height = 20;
+    const width = 100;
+    const height = 25;
     const padding = 2;
 
     if (!historicalData) {
@@ -64,7 +64,7 @@ const ViewsOverviewCard = ({ views }) => {
         avgDailyViews * (1 - weekChange / 100)
       );
 
-      let path = `M${padding} ${height}`;
+      let path = `M${padding} ${height - 2}`;
 
       for (let i = 1; i <= points; i++) {
         const progress = i / points;
@@ -81,9 +81,9 @@ const ViewsOverviewCard = ({ views }) => {
         const currentValue = Math.max(0, dailyValue + variation);
 
         const maxValue = avgDailyViews * 1.5;
-        const y = height - (currentValue / maxValue) * (height - 4) + 2;
+        const y = height - 2 - (currentValue / maxValue) * (height - 6);
 
-        path += `L${x} ${Math.max(2, Math.min(height, y))}`;
+        path += `L${x} ${Math.max(2, Math.min(height - 2, y))}`;
       }
 
       return path;
@@ -94,15 +94,15 @@ const ViewsOverviewCard = ({ views }) => {
 
   const generateTotalViewsPath = (totalViews, growthData = null) => {
     const points = 12;
-    const width = 96;
-    const height = 20;
+    const width = 100;
+    const height = 25;
     const padding = 2;
 
     if (!growthData) {
       // Simulate growth curve - starts low and grows to current total
       const startValue = Math.max(1, totalViews * 0.1);
 
-      let path = `M${padding} ${height}`;
+      let path = `M${padding} ${height - 2}`;
 
       for (let i = 1; i <= points; i++) {
         const progress = i / points;
@@ -116,9 +116,9 @@ const ViewsOverviewCard = ({ views }) => {
         const adjustedValue = Math.max(startValue, currentValue + variation);
 
         const y =
-          height - (adjustedValue / (totalViews * 1.1)) * (height - 4) + 2;
+          height - 2 - (adjustedValue / (totalViews * 1.1)) * (height - 6);
 
-        path += `L${x} ${Math.max(2, Math.min(height, y))}`;
+        path += `L${x} ${Math.max(2, Math.min(height - 2, y))}`;
       }
 
       return path;
@@ -129,8 +129,8 @@ const ViewsOverviewCard = ({ views }) => {
 
   const generateTimeSpentPath = (timeSpent, sessionData = null) => {
     const points = 8;
-    const width = 96;
-    const height = 20;
+    const width = 100;
+    const height = 25;
     const padding = 2;
 
     if (!sessionData) {
@@ -139,7 +139,7 @@ const ViewsOverviewCard = ({ views }) => {
       const minTime = Math.max(0, avgTime * 0.3);
       const maxTime = avgTime * 1.8;
 
-      let path = `M${padding} ${height}`;
+      let path = `M${padding} ${height - 2}`;
 
       for (let i = 1; i <= points; i++) {
         const progress = i / points;
@@ -154,9 +154,9 @@ const ViewsOverviewCard = ({ views }) => {
           minTime,
           Math.min(maxTime, avgTime * sessionMultiplier)
         );
-        const y = height - (currentTime / maxTime) * (height - 4) + 2;
+        const y = height - 2 - (currentTime / maxTime) * (height - 6);
 
-        path += `L${x} ${Math.max(2, Math.min(height, y))}`;
+        path += `L${x} ${Math.max(2, Math.min(height - 2, y))}`;
       }
 
       return path;
@@ -167,18 +167,18 @@ const ViewsOverviewCard = ({ views }) => {
 
   // Helper function to generate path from actual data arrays
   const generatePathFromData = (data, width, height, padding) => {
-    if (!data || data.length === 0) return `M${padding} ${height}`;
+    if (!data || data.length === 0) return `M${padding} ${height - 2}`;
 
     const maxValue = Math.max(...data);
     const minValue = Math.min(...data);
     const range = maxValue - minValue || 1;
 
-    let path = `M${padding} ${height}`;
+    let path = `M${padding} ${height - 2}`;
 
     data.forEach((value, index) => {
-      const x = padding + (index / (data.length - 1)) * width;
+      const x = padding + (index / (data.length - 1)) * (width - 2 * padding);
       const normalizedValue = (value - minValue) / range;
-      const y = height - normalizedValue * (height - 4) + 2;
+      const y = height - 2 - normalizedValue * (height - 6);
 
       if (index === 0) {
         path = `M${x} ${y}`;
