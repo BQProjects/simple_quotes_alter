@@ -265,7 +265,7 @@ const DashboardHeader = () => {
 
         {/* Search Results Dropdown */}
         {showResults && (
-          <div className="absolute top-full left-[5%] w-[90%] mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-[400px] overflow-y-auto">
+          <div className="absolute top-full left-[5%] w-[90%] mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-40 max-h-[400px] overflow-y-auto">
             {loading ? (
               <div className="p-3 text-center text-gray-500">Searching...</div>
             ) : searchQuery.length > 0 && searchResults.length > 0 ? (

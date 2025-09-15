@@ -28,15 +28,23 @@ const DashboardAnalytics = () => {
       let totalTime = 0;
       let tempData = {};
 
-      res.data.analytics.forEach((item) => {
-        if (item.totalTime < 20000) {
-          totalTime += item.totalTime;
-        }
+      // Check if analytics exists and is an array
+      if (res.data.analytics && Array.isArray(res.data.analytics)) {
+        res.data.analytics.forEach((item) => {
+          if (item.totalTime < 20000) {
+            totalTime += item.totalTime;
+          }
 
-        Object.entries(item.sectionWise).forEach(([key, value]) => {
-          tempData[key] = (tempData[key] || 0) + value;
+          // Check if sectionWise exists before trying to iterate over it
+          if (item.sectionWise && typeof item.sectionWise === "object") {
+            Object.entries(item.sectionWise).forEach(([key, value]) => {
+              tempData[key] = (tempData[key] || 0) + value;
+            });
+          }
         });
-      });
+      } else {
+        console.warn("No analytics data found or invalid data structure");
+      }
 
       setTime(totalTime);
       setData(tempData);
@@ -153,7 +161,7 @@ const DashboardAnalytics = () => {
   return (
     <>
       <div className="bg-white w-full h-[85vh] flex flex-col items-center overflow-y-auto relative">
-        <div className="w-full pt-4 pb-4 px-6 flex gap-4  bg-white sticky top-0 z-50">
+        <div className="w-full pt-4 pb-4 px-6 flex gap-4  bg-white sticky top-0 z-30">
           <button
             className="text-xl hover:bg-gray-100 p-2 rounded-lg transition-colors duration-200"
             onClick={() => navigate(-1)}
@@ -249,46 +257,52 @@ const DashboardAnalytics = () => {
                   )
               )}
               {/* Modal for section details */}
-              {slected !== null && proposal?.analytics[slected] && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30"
-                  onClick={() => setSelected(null)}
-                >
+              {slected !== null &&
+                proposal?.analytics &&
+                proposal.analytics[slected] &&
+                proposal.analytics[slected].sectionWise && (
                   <div
-                    className="bg-white rounded-xl shadow-lg max-w-sm relative"
-                    onClick={(e) => e.stopPropagation()}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30"
+                    onClick={() => setSelected(null)}
                   >
-                    <table className="w-full table-fixed">
-                      <thead className="sticky top-0 z-50 h-10 bg-gray-100 rounded-t-xl">
-                        <tr className="rounded-t-xl overflow-hidden">
-                          <th className="w-1/2 text-left pl-20 font-normal rounded-tl-xl bg-gray-100">
-                            Section
-                          </th>
-                          <th className="w-1/2 text-center font-normal rounded-tr-xl bg-gray-100">
-                            Time
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(
-                          proposal.analytics[slected].sectionWise
-                        ).map(([key, value]) => (
-                          <tr key={key} className="h-10 text-gray-500 text-sm">
-                            <td className="w-1/2 text-left pl-10">
-                              <div className="max-w-28 mx-auto overflow-hidden text-ellipsis whitespace-nowrap">
-                                {key}
-                              </div>
-                            </td>
-                            <td className="w-1/2 text-center">
-                              {value < 0.01 ? "00" : value.toFixed(2)} sec
-                            </td>
+                    <div
+                      className="bg-white rounded-xl shadow-lg max-w-sm relative"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <table className="w-full table-fixed">
+                        <thead className="sticky top-0 z-50 h-10 bg-gray-100 rounded-t-xl">
+                          <tr className="rounded-t-xl overflow-hidden">
+                            <th className="w-1/2 text-left pl-20 font-normal rounded-tl-xl bg-gray-100">
+                              Section
+                            </th>
+                            <th className="w-1/2 text-center font-normal rounded-tr-xl bg-gray-100">
+                              Time
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {Object.entries(
+                            proposal.analytics[slected].sectionWise
+                          ).map(([key, value]) => (
+                            <tr
+                              key={key}
+                              className="h-10 text-gray-500 text-sm"
+                            >
+                              <td className="w-1/2 text-left pl-10">
+                                <div className="max-w-28 mx-auto overflow-hidden text-ellipsis whitespace-nowrap">
+                                  {key}
+                                </div>
+                              </td>
+                              <td className="w-1/2 text-center">
+                                {value < 0.01 ? "00" : value.toFixed(2)} sec
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </tbody>
           </table>
         </div>

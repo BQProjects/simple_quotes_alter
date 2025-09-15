@@ -110,8 +110,25 @@ const updateProposal = async (req, res) => {
       }
     }
 
-    await proposal.save();
-    return res.status(201).json(proposal);
+    try {
+      await proposal.save();
+      return res.status(201).json(proposal);
+    } catch (saveError) {
+      if (saveError.name === "VersionError") {
+        // Refetch the latest version and retry the update
+        const latestProposal = await ProposalModel.findById(id);
+        if (!latestProposal) {
+          return res.status(404).json({ message: "Proposal not found" });
+        }
+        latestProposal.data = rows;
+        latestProposal.settings = settings;
+        // Re-apply history logic if needed, but for simplicity, just update data and settings
+        await latestProposal.save();
+        return res.status(201).json(latestProposal);
+      } else {
+        throw saveError;
+      }
+    }
   } catch (error) {
     console.error("Error updating proposal:", error);
     return res.status(500).json({ message: "Internal Server Error" });

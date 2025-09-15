@@ -9,6 +9,9 @@ import GeneratePDF from "./GeneratePDF";
 import JsonToWord from "./GenerateWord";
 import { useRouteTracker } from "../../components/useRouteTracker";
 import ScrollSectionTracker from "../../components/ScrollSectionTracker";
+import { StateManageContext } from "../../context/StateManageContext";
+import Signiture from "./Signiture";
+import { v4 as uuidv4 } from "uuid";
 
 const Preview = () => {
   const { databaseUrl } = useContext(DatabaseContext);
@@ -22,6 +25,8 @@ const Preview = () => {
   const [country, setCountry] = useState("");
   const [sta, setSta] = useState("");
   const [totalTime, setTotalTime] = useState(0);
+  const { sign, setSign, signEdit, setSignEdit } =
+    useContext(StateManageContext);
   useRouteTracker(
     `/view/${id}`,
     timeStore,
@@ -59,6 +64,35 @@ const Preview = () => {
 
   const handleGenerateWord = () => {
     JsonToWord(rows, settings);
+  };
+
+  const addSign = (data) => {
+    const newRows = [
+      ...rows,
+      { id: uuidv4(), type: "sign", content: data, bookmark: false },
+    ];
+    setRows(newRows);
+    setSign(false);
+
+    // Update database with the new signature
+    updateProposal(newRows);
+  };
+
+  const updateProposal = async (updatedRows) => {
+    try {
+      const rowsToUpdate = updatedRows || rows;
+      if (rowsToUpdate.length !== 0) {
+        const sanitizedRows = JSON.parse(JSON.stringify(rowsToUpdate));
+        await axios.put(`${databaseUrl}/api/editor/updateProposal`, {
+          id: id,
+          rows: sanitizedRows,
+          settings: settings,
+        });
+        console.log("Proposal updated successfully");
+      }
+    } catch (error) {
+      console.error("Error updating proposal:", error);
+    }
   };
 
   const getProposal = async () => {
@@ -138,6 +172,19 @@ const Preview = () => {
           Generate Word
         </button> */}
       </DndProvider>
+      {sign && (
+        <Signiture
+          addSign={addSign}
+          rows={rows}
+          setRows={(updatedRows) => {
+            setRows(updatedRows);
+            updateProposal(updatedRows);
+          }}
+          signEdit={signEdit}
+          setSignEdit={setSignEdit}
+          preview={true}
+        />
+      )}
     </div>
   );
 };

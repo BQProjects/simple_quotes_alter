@@ -9,8 +9,9 @@ import { FaRegFolder } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa6";
 import { FaRegFileLines } from "react-icons/fa6";
 import { StateManageContext } from "../../context/StateManageContext";
-import { GoArrowUp, GoArrowDown, GoDash } from "react-icons/go";
 import ProposalsLineChart from "../../components/ProposalsLineChart";
+import ViewsOverviewCard from "../../components/ViewsOverviewCard";
+import TrafficPieChart from "../../components/TrafficPieChart";
 
 const DashboardHome = () => {
   const { user } = useContext(UserContext);
@@ -174,88 +175,7 @@ const DashboardHome = () => {
             </div>
 
             {/* Views Overview */}
-            <div className="bg-white h-[310px] w-full rounded-lg px-8 py-3">
-              <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 pt-2">
-                <h1>Views Overview</h1>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {/* Today */}
-                <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
-                  <h3 className="text-xs text-gray-400">Today</h3>
-                  <p className="text-2xl text-gray-600 pl-2 flex items-end">
-                    {views?.dailyViews || 0}
-                    <span
-                      className={`text-[10px] flex items-center mx-1 ${
-                        views?.dailyChange === 0
-                          ? "text-gray-600"
-                          : views?.dailyChange < 0
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {views?.dailyChange === 0 ? (
-                        <GoDash />
-                      ) : views?.dailyChange < 0 ? (
-                        <GoArrowDown />
-                      ) : (
-                        <GoArrowUp />
-                      )}
-                      {Math.abs(views?.dailyChange || 0).toFixed(1)}%
-                    </span>
-                    <span className="text-sm text-graidient_bottom ml-1 mb-0.5">
-                      views
-                    </span>
-                  </p>
-                </div>
-
-                {/* This Week */}
-                <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
-                  <h3 className="text-xs text-gray-400">This Week</h3>
-                  <p className="text-2xl text-gray-600 pl-2 flex items-end">
-                    {views?.weekViews || 0}
-                    <span
-                      className={`text-[10px] flex items-center mx-1 ${
-                        views?.weekChange === 0
-                          ? "text-gray-600"
-                          : views?.weekChange < 0
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {views?.weekChange === 0 ? (
-                        <GoDash />
-                      ) : views?.weekChange < 0 ? (
-                        <GoArrowDown />
-                      ) : (
-                        <GoArrowUp />
-                      )}
-                      {Math.abs(views?.weekChange || 0).toFixed(1)}%
-                    </span>
-                    <span className="text-sm text-graidient_bottom ml-1 mb-0.5">
-                      views
-                    </span>
-                  </p>
-                </div>
-
-                {/* Total Views */}
-                <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
-                  <h3 className="text-xs text-gray-400">Total Views</h3>
-                  <p className="text-2xl text-gray-600 pl-2">
-                    {views?.totalViews || 0}{" "}
-                    <span className="text-sm text-graidient_bottom">views</span>
-                  </p>
-                </div>
-
-                {/* Avg Time Spent */}
-                <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
-                  <h3 className="text-xs text-gray-400">Avg Time Spent</h3>
-                  <p className="text-2xl text-gray-600 pl-2">
-                    {Math.floor(views?.timespent || 0)}{" "}
-                    <span className="text-sm text-graidient_bottom">sec</span>
-                  </p>
-                </div>
-              </div>
-            </div>
+            <ViewsOverviewCard views={views} />
 
             {/* Proposals */}
             <div className="bg-white h-[530px] w-full rounded-lg -mt-[10vh] px-6 py-4 relative">
@@ -327,8 +247,16 @@ const DashboardHome = () => {
               </div>
             </div>
           </div>
-          <div className="mt-6 mb-6">
+          {/* <div className="mt-6 mb-6">
             <ProposalsLineChart proposals={proposals} />
+          </div> */}
+          <div className="mt-6 mb-6 flex flex-col lg:flex-row gap-6">
+            <div className="w-full lg:flex-1 lg:w-auto">
+              <ProposalsLineChart proposals={proposals} />
+            </div>
+            <div className="w-full lg:w-auto lg:max-w-sm h-full">
+              <TrafficPieChart width={320} height={350} />
+            </div>
           </div>
         </div>
       </div>
