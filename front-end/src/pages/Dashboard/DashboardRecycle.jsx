@@ -60,7 +60,7 @@ const DashboardRecycle = () => {
   return (
     <>
       <div className="w-[100%] bg-gray-100 min-h-[90vh]">
-        <div className="relative w-full h-[88vh] bg-white px-10 pt-10">
+        <div className="relative w-full h-[88vh] bg-white px-10 pt-10 flex flex-col ">
           <div className="text-xl text-gray-500 flex items-center justify-start gap-3">
             <RiDeleteBin5Line />
             <h1>Recycle Bin</h1>
