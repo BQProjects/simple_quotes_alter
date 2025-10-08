@@ -2,15 +2,15 @@ import React, { useContext, useState } from "react";
 import { StateManageContext } from "../../context/StateManageContext";
 import { UserContext } from "../../context/UserContext";
 
-const Signature = ({ addSign, rows, setRows, preview }) => {
+const Signature = ({ addSign, rows, setRows, preview, user }) => {
   const { setSign, signEdit, setSignEdit } = useContext(StateManageContext);
-  const { user } = useContext(UserContext);
+  const { user: currentUser } = useContext(UserContext);
   const [temp, setTemp] = useState(
     signEdit !== null
       ? rows[signEdit].content
       : [
           {
-            proposedName: user.username,
+            proposedName: currentUser.username,
             signed: true,
           },
           {
@@ -107,8 +107,12 @@ const Signature = ({ addSign, rows, setRows, preview }) => {
             onClick={() => {
               if (signEdit !== null) {
                 const updated = [...rows];
-                updated[signEdit].content = temp;
-                setRows(updated);
+                const tempToSave = [...temp];
+                if (preview) {
+                  tempToSave[1].signed = true;
+                }
+                updated[signEdit].content = tempToSave;
+                setRows(updated, preview ? currentUser?._id : null);
                 setSignEdit(null);
               } else {
                 addSign(temp);

@@ -12,6 +12,7 @@ import ScrollSectionTracker from "../../components/ScrollSectionTracker";
 import { StateManageContext } from "../../context/StateManageContext";
 import Signiture from "./Signiture";
 import { v4 as uuidv4 } from "uuid";
+import { UserContext } from "../../context/UserContext";
 
 const Preview = () => {
   const { databaseUrl } = useContext(DatabaseContext);
@@ -27,6 +28,11 @@ const Preview = () => {
   const [totalTime, setTotalTime] = useState(0);
   const { sign, setSign, signEdit, setSignEdit } =
     useContext(StateManageContext);
+  const { user } = useContext(UserContext);
+  const handleSetRows = (newRows, signedUserId = null) => {
+    setRows(newRows);
+    updateProposal(newRows, signedUserId);
+  };
   useRouteTracker(
     `/view/${id}`,
     timeStore,
@@ -71,14 +77,11 @@ const Preview = () => {
       ...rows,
       { id: uuidv4(), type: "sign", content: data, bookmark: false },
     ];
-    setRows(newRows);
+    handleSetRows(newRows);
     setSign(false);
-
-    // Update database with the new signature
-    updateProposal(newRows);
   };
 
-  const updateProposal = async (updatedRows) => {
+  const updateProposal = async (updatedRows, signedUserId = null) => {
     try {
       const rowsToUpdate = updatedRows || rows;
       if (rowsToUpdate.length !== 0) {
@@ -87,6 +90,7 @@ const Preview = () => {
           id: id,
           rows: sanitizedRows,
           settings: settings,
+          signedUserId: signedUserId,
         });
         console.log("Proposal updated successfully");
       }
@@ -105,6 +109,28 @@ const Preview = () => {
           setRows(res.data.data);
           setData(res.data.data);
           setSettings(res.data.settings);
+          // Add a signature row if not present
+          if (!res.data.data.some((row) => row.type === "sign")) {
+            const newRows = [
+              ...res.data.data,
+              {
+                id: uuidv4(),
+                type: "sign",
+                content: [
+                  {
+                    proposedName: user?.username || "",
+                    signed: true,
+                  },
+                  {
+                    acceptedName: "",
+                    signed: false,
+                  },
+                ],
+                bookmark: false,
+              },
+            ];
+            handleSetRows(newRows);
+          }
         });
     } catch (error) {
       console.log(error);
@@ -144,7 +170,7 @@ const Preview = () => {
             preview={true}
             rows={rows}
             settings={settings}
-            setRows={setRows}
+            setRows={handleSetRows}
           />
           <div style={{ position: "relative", height: "100%" }}>
             <ScrollSectionTracker
@@ -176,13 +202,11 @@ const Preview = () => {
         <Signiture
           addSign={addSign}
           rows={rows}
-          setRows={(updatedRows) => {
-            setRows(updatedRows);
-            updateProposal(updatedRows);
-          }}
+          setRows={handleSetRows}
           signEdit={signEdit}
           setSignEdit={setSignEdit}
           preview={true}
+          user={user}
         />
       )}
     </div>
