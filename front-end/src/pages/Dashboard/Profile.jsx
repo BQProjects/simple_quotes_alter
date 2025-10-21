@@ -13,6 +13,7 @@ import { UserContext } from "../../context/UserContext";
 import { DatabaseContext } from "../../context/DatabaseContext";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import toast from "react-hot-toast";
+import Select from "react-select"; // Add this import for React Select
 
 const Profile = () => {
   const { user } = useContext(UserContext);
@@ -28,6 +29,64 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef(null);
+
+  // Define country options for React Select
+  const countryOptions = [
+    { value: "", label: "Select Country Code" },
+    { value: "IST", label: "IST | +91" },
+    { value: "EST", label: "GST | +971" }, // Note: Kept as in original, assuming "EST" is intentional
+    { value: "PST", label: "PST | +1" },
+    { value: "GMT", label: "GMT | +44" },
+    { value: "JST", label: "JST | +81" },
+    { value: "AEST", label: "AEST | +61" },
+    { value: "NST", label: "NST | +1" },
+  ];
+
+  // Custom styles for React Select (copied from your prompt)
+  const customStyles = {
+    control: (base, state) => ({
+      ...base,
+
+      backgroundColor: "white",
+      borderColor: state.isFocused ? "#6b7280" : "#d1d5db", // active vs default
+      boxShadow: "none",
+      borderRadius: "4px",
+      padding: "",
+      fontSize: "12px",
+      cursor: "pointer",
+      "&:hover": {
+        borderColor: "#6b7280",
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#e5e7eb" : "white", // grey on hover
+      color: "#111827",
+      fontSize: "12px",
+      cursor: "pointer",
+    }),
+    menu: (base) => ({
+      ...base,
+      zIndex: 20,
+      marginTop: 0,
+    }),
+    menuList: (base) => ({
+      ...base,
+      paddingTop: 0, // optional: tighter top padding
+      paddingBottom: 0, // optional: tighter bottom padding
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 4,
+      svg: {
+        width: 13, // reduce width of arrow
+        height: 13, // reduce height of arrow
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+  };
 
   const handleClick = () => {
     fileInputRef.current.click(); // Trigger file input
@@ -178,24 +237,18 @@ const Profile = () => {
               <div className="flex justify-between gap-4">
                 <div className="w-[48%] flex flex-col gap-1">
                   <label className="text-gray-500 ">Country Code</label>
-                  <select
-                    value={country}
-                    onChange={(e) => {
-                      setCuntry(e.target.value);
-                      updateCountry(e.target.value);
+                  {/* Replaced native select with React Select */}
+                  <Select
+                    options={countryOptions}
+                    value={countryOptions.find((opt) => opt.value === country)}
+                    onChange={(selectedOption) => {
+                      setCuntry(selectedOption.value);
+                      updateCountry(selectedOption.value);
                     }}
-                    className="w-full cursor-pointer border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 
-                            focus:outline-none transition-all duration-150"
-                  >
-                    <option value="">Select Country Code</option>
-                    <option value="IST">IST | +91</option>
-                    <option value="EST">GST | +971</option>
-                    <option value="PST">PST | +1</option>
-                    <option value="GMT">GMT | +44</option>
-                    <option value="JST">JST | +81</option>
-                    <option value="AEST">AEST | +61</option>
-                    <option value="NST">NST | +1</option>
-                  </select>
+                    styles={customStyles}
+                    className="text-xs"
+                    isSearchable={false}
+                  />
                 </div>
                 <div className="w-[48%] flex flex-col gap-1">
                   <label className="text-gray-500 ">Phone Number</label>

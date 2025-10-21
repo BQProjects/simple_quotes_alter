@@ -2,7 +2,8 @@ import React from "react";
 import { GoArrowUp, GoArrowDown, GoDash } from "react-icons/go";
 
 const ViewsOverviewCard = ({ views }) => {
-  const generateDailyViewsPath = (
+  {
+    /* const generateDailyViewsPath = (
     dailyViews,
     dailyChange,
     historicalData = null
@@ -188,16 +189,17 @@ const ViewsOverviewCard = ({ views }) => {
     });
 
     return path;
-  };
+  }; */
+  }
 
   return (
     <div className="bg-white h-[310px] w-full rounded-lg px-8 py-3">
       <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 pt-2">
         <h1>Views Overview</h1>
       </div>
-      <div className="grid grid-cols-2 gap-3 mt-4">
+      <div className="grid grid-cols-2 gap-3">
         {/* Today */}
-        <div className="h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start cursor-pointer">
+        <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
           <h3 className="text-xs text-gray-400">Today</h3>
           <p className="text-2xl text-gray-600 pl-2 flex items-end">
             {views?.dailyViews || 0}
@@ -225,30 +227,10 @@ const ViewsOverviewCard = ({ views }) => {
               views
             </span>
           </p>
-          <div className="mt-auto w-full">
-            <svg
-              width="100%"
-              height="25"
-              viewBox="0 0 100 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d={generateDailyViewsPath(
-                  views?.dailyViews,
-                  views?.dailyChange
-                )}
-                stroke={views?.dailyChange >= 0 ? "#008500" : "#DF064E"}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-              />
-            </svg>
-          </div>
         </div>
 
         {/* This Week */}
-        <div className="h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start cursor-pointer">
+        <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
           <h3 className="text-xs text-gray-400">This Week</h3>
           <p className="text-2xl text-gray-600 pl-2 flex items-end">
             {views?.weekViews || 0}
@@ -274,75 +256,36 @@ const ViewsOverviewCard = ({ views }) => {
               views
             </span>
           </p>
-          <div className="mt-auto w-full">
-            <svg
-              width="100%"
-              height="25"
-              viewBox="0 0 100 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d={generateWeeklyViewsPath(views?.weekViews, views?.weekChange)}
-                stroke={views?.weekChange >= 0 ? "#008500" : "#DF064E"}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-              />
-            </svg>
-          </div>
         </div>
 
         {/* Total Views */}
-        <div className="h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start cursor-pointer">
+        <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
           <h3 className="text-xs text-gray-400">Total Views</h3>
           <p className="text-2xl text-gray-600 pl-2">
             {views?.totalViews || 0}{" "}
             <span className="text-sm text-graidient_bottom">views</span>
           </p>
-          <div className="mt-auto w-full">
-            <svg
-              width="100%"
-              height="25"
-              viewBox="0 0 100 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d={generateTotalViewsPath(views?.totalViews)}
-                stroke="#008500"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-              />
-            </svg>
-          </div>
         </div>
 
         {/* Avg Time Spent */}
-        <div className="h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start cursor-pointer">
+        <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
           <h3 className="text-xs text-gray-400">Avg Time Spent</h3>
-          <p className="text-2xl text-gray-600 pl-2">
+          {/* <p className="text-2xl text-gray-600 pl-2">
             {Math.floor(views?.timespent || 0)}{" "}
             <span className="text-sm text-graidient_bottom">sec</span>
+          </p> */}
+          <p className="text-2xl text-gray-600 pl-2">
+            {(() => {
+              const time = views?.timespent || 0;
+              if (time < 60) {
+                return `${Math.floor(time)} sec`;
+              } else if (time < 3600) {
+                return `${Math.floor(time / 60)} min`;
+              } else {
+                return `${Math.floor(time / 3600)} hr`;
+              }
+            })()}
           </p>
-          <div className="mt-auto w-full">
-            <svg
-              width="100%"
-              height="25"
-              viewBox="0 0 100 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d={generateTimeSpentPath(views?.timespent)}
-                stroke="#DF064E"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-              />
-            </svg>
-          </div>
         </div>
       </div>
     </div>

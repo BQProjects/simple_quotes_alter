@@ -5,13 +5,14 @@ import { Switch, FormControlLabel } from "@mui/material";
 import { UserContext } from "../../context/UserContext";
 import { DatabaseContext } from "../../context/DatabaseContext";
 import axios from "axios";
+import Select from "react-select"; // Add this import for React Select
 
 const GeneralSettings = () => {
   const [setting, setSetting] = useState("general");
   const { user } = useContext(UserContext);
   const { databaseUrl } = useContext(DatabaseContext);
   const [time, setTime] = useState("IST");
-  const [curency, setCurency] = useState("$ USD");
+  const [curency, setCurency] = useState("USD"); // Changed default to match option value
   const [dataP, setDataP] = useState(false);
   const [dataA, setDataA] = useState(false);
   const [dataT, setDataT] = useState(false);
@@ -20,13 +21,85 @@ const GeneralSettings = () => {
   const [workspaceN, setWorkspaceN] = useState(false);
   const [proposalN, setProposalN] = useState(false);
 
+  // Define Time Zone options for React Select
+  const timeZoneOptions = [
+    { value: "", label: "Select Time Zone" },
+    { value: "IST", label: "IST (India Standard Time)" },
+    { value: "EST", label: "EST (Eastern Standard Time)" },
+    { value: "PST", label: "PST (Pacific Standard Time)" },
+    { value: "CST", label: "CST (Central Standard Time)" },
+    { value: "GMT", label: "GMT (Greenwich Mean Time)" },
+    { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+    { value: "JST", label: "JST (Japan Standard Time)" },
+    { value: "AEST", label: "AEST (Australia Eastern Standard Time)" },
+    { value: "NST", label: "NST (Newfoundland Standard Time)" },
+  ];
+
+  // Define Currency options for React Select
+  const currencyOptions = [
+    { value: "", label: "Select Currency" },
+    { value: "USD", label: "USD $ US Dollar" },
+    { value: "EUR", label: "EUR € Euro" },
+    { value: "INR", label: "INR ₹ Indian Rupee" },
+    { value: "GBP", label: "GBP £ British Pound" },
+    { value: "JPY", label: "JPY ¥ Japanese Yen" },
+    { value: "AUD", label: "AUD $ Australian Dollar" },
+    { value: "CAD", label: "CAD $ Canadian Dollar" },
+    { value: "CNY", label: "CNY ¥ Chinese Yuan" },
+  ];
+
+  // Custom styles for React Select (same as in Profile.jsx)
+  const customStyles = {
+    control: (base, state) => ({
+      ...base,
+      backgroundColor: "white",
+      borderColor: state.isFocused ? "#6b7280" : "#d1d5db", // active vs default
+      boxShadow: "none",
+      borderRadius: "4px",
+      padding: "",
+      fontSize: "12px",
+      cursor: "pointer",
+      "&:hover": {
+        borderColor: "#6b7280",
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#e5e7eb" : "white", // grey on hover
+      color: "#111827",
+      fontSize: "12px",
+      cursor: "pointer",
+    }),
+    menu: (base) => ({
+      ...base,
+      zIndex: 20,
+      marginTop: 0,
+    }),
+    menuList: (base) => ({
+      ...base,
+      paddingTop: 0, // optional: tighter top padding
+      paddingBottom: 0, // optional: tighter bottom padding
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 4,
+      svg: {
+        width: 13, // reduce width of arrow
+        height: 13, // reduce height of arrow
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+  };
+
   const getProfile = async () => {
     try {
       const res = await axios.get(`${databaseUrl}/api/workspace/profile`, {
         params: { user_id: user.id },
       });
       setTime(res.data.Time ? res.data.Time : "IST");
-      setCurency(res.data.Curency ? res.data.Curency : "$ USD");
+      setCurency(res.data.Curency ? res.data.Curency : "USD"); // Updated default to "USD"
       setDataA(res.data.DataA ? res.data.DataA : false);
       setDataP(res.data.DataP ? res.data.DataP : false);
       setDataT(res.data.DataT ? res.data.DataT : false);
@@ -191,51 +264,34 @@ const GeneralSettings = () => {
             <div className="flex justify-between mt-4 w-[70%]">
               <div className="w-[48%] flex flex-col gap-1">
                 <label className="text-gray-500 pl-2">Time Zone</label>
-                <select
-                  value={time}
-                  onChange={(e) => {
-                    updateTime(e.target.value);
-                    setTime(e.target.value);
+                {/* Replaced native select with React Select */}
+                <Select
+                  options={timeZoneOptions}
+                  value={timeZoneOptions.find((opt) => opt.value === time)}
+                  onChange={(selectedOption) => {
+                    updateTime(selectedOption.value);
+                    setTime(selectedOption.value);
                   }}
-                  className="w-full cursor-pointer border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 
-                            focus:outline-none transition-all duration-150"
-                >
-                  <option value="">Select Time Zone</option>
-                  <option value="IST">IST (India Standard Time)</option>
-                  <option value="EST">EST (Eastern Standard Time)</option>
-                  <option value="PST">PST (Pacific Standard Time)</option>
-                  <option value="CST">CST (Central Standard Time)</option>
-                  <option value="GMT">GMT (Greenwich Mean Time)</option>
-                  <option value="UTC">UTC (Coordinated Universal Time)</option>
-                  <option value="JST">JST (Japan Standard Time)</option>
-                  <option value="AEST">
-                    AEST (Australia Eastern Standard Time)
-                  </option>
-                  <option value="NST">NST (Newfoundland Standard Time)</option>
-                </select>
+                  styles={customStyles}
+                  className="text-xs"
+                  isSearchable={false}
+                />
               </div>
 
               <div className="w-[48%] flex flex-col gap-1">
                 <label className="text-gray-500 pl-2">Currency</label>
-                <select
-                  value={curency}
-                  onChange={(e) => {
-                    updateCurency(e.target.value);
-                    setCurency(e.target.value);
+                {/* Replaced native select with React Select */}
+                <Select
+                  options={currencyOptions}
+                  value={currencyOptions.find((opt) => opt.value === curency)}
+                  onChange={(selectedOption) => {
+                    updateCurency(selectedOption.value);
+                    setCurency(selectedOption.value);
                   }}
-                  className="w-full cursor-pointer border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 
-                            focus:outline-none transition-all duration-150"
-                >
-                  <option value="">Select Currency</option>
-                  <option value="USD">USD – US Dollar</option>
-                  <option value="EUR">EUR – Euro</option>
-                  <option value="INR">INR – Indian Rupee</option>
-                  <option value="GBP">GBP – British Pound</option>
-                  <option value="JPY">JPY – Japanese Yen</option>
-                  <option value="AUD">AUD – Australian Dollar</option>
-                  <option value="CAD">CAD – Canadian Dollar</option>
-                  <option value="CNY">AED – United Arab Emirates Dirham</option>
-                </select>
+                  styles={customStyles}
+                  className="text-xs"
+                  isSearchable={false}
+                />
               </div>
             </div>
             <div className="w-[70%] flex flex-col gap-1 mt-4 ">
@@ -292,6 +348,14 @@ const GeneralSettings = () => {
                 onChange={(e) => {
                   updateDataP(e.target.checked);
                 }}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: "#DF064E",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: "#DF064E",
+                  },
+                }}
               />
             </div>
             <div className="w-full py-4 px-2 flex items-center justify-between border border-gray-200 rounded-md mt-4">
@@ -306,6 +370,14 @@ const GeneralSettings = () => {
                 checked={dataA}
                 onChange={(e) => {
                   updateDataA(e.target.checked);
+                }}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: "#DF064E",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: "#DF064E",
+                  },
                 }}
               />
             </div>
@@ -322,6 +394,14 @@ const GeneralSettings = () => {
                   updateDataT(e.target.checked);
                 }}
                 checked={dataT}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: "#DF064E",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: "#DF064E",
+                  },
+                }}
               />
             </div>
           </div>
@@ -336,6 +416,14 @@ const GeneralSettings = () => {
                   updateEmailN(e.target.checked);
                 }}
                 checked={emailN}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: "#DF064E",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: "#DF064E",
+                  },
+                }}
               />
             </div>
             <div className="w-full py-1 px-2 flex items-center justify-between border border-gray-200 rounded-md mt-4">
@@ -347,6 +435,14 @@ const GeneralSettings = () => {
                   updatePushN(e.target.checked);
                 }}
                 checked={pushN}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: "#DF064E",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: "#DF064E",
+                  },
+                }}
               />
             </div>
             <div className="w-full py-1 px-2 flex items-center justify-between border border-gray-200 rounded-md mt-4">
@@ -358,6 +454,14 @@ const GeneralSettings = () => {
                   updateWorkspaceN(e.target.checked);
                 }}
                 checked={workspaceN}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: "#DF064E",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: "#DF064E",
+                  },
+                }}
               />
             </div>
             <div className="w-full py-1 px-2 flex items-center justify-between border border-gray-200 rounded-md mt-4">
@@ -368,6 +472,14 @@ const GeneralSettings = () => {
                 checked={proposalN}
                 onChange={(e) => {
                   updateProposalN(e.target.checked);
+                }}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: "#DF064E",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: "#DF064E",
+                  },
                 }}
               />
             </div>

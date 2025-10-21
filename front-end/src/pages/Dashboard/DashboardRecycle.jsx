@@ -59,92 +59,94 @@ const DashboardRecycle = () => {
 
   return (
     <>
-      <div className="w-full bg-white min-h-[85vh] px-10 pt-6 shadow-lg shadow-gray-300 ">
-        <div className="text-xl text-gray-500 flex items-center justify-start gap-3">
-          <RiDeleteBin5Line />
-          <h1>Recycle Bin</h1>
-        </div>
-        <div className="mt-3 text-gray-500 text-lg mb-2">
-          <h1>Proposals</h1>
-        </div>
-        <div className="h-[74vh] overflow-y-auto scrollbar-hide">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-16 px-4">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                <RiDeleteBin5Line className="text-4xl text-gray-400" />
+      <div className="w-[100%] bg-gray-100 min-h-[90vh]">
+        <div className="relative w-full h-[88vh] bg-white px-10 pt-10 flex flex-col ">
+          <div className="text-xl text-gray-500 flex items-center justify-start gap-3">
+            <RiDeleteBin5Line />
+            <h1>Recycle Bin</h1>
+          </div>
+          <div className="mt-3 text-gray-500 text-lg mb-2">
+            <h1>Proposals</h1>
+          </div>
+          <div className="h-[74vh] overflow-y-auto scrollbar-hide">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-16 px-4">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                  <RiDeleteBin5Line className="text-4xl text-gray-400" />
+                </div>
+                <h2 className="text-xl font-medium text-gray-700 mb-2">
+                  Loading...
+                </h2>
+                <p className="text-gray-500 text-center max-w-md">
+                  Fetching your deleted proposals...
+                </p>
               </div>
-              <h2 className="text-xl font-medium text-gray-700 mb-2">
-                Loading...
-              </h2>
-              <p className="text-gray-500 text-center max-w-md">
-                Fetching your deleted proposals...
-              </p>
-            </div>
-          ) : proposals &&
-            proposals.length > 0 &&
-            proposals.some(
-              (item) =>
-                item?.proposals?.[0] && item?.proposals?.[0]?.workspaces?.[0]
-            ) ? (
-            <table className="w-full table-auto">
-              <thead className="h-12 bg-gray-100 text-left text-gray-600 font-normal text-sm sticky top-0 z-10">
-                <tr>
-                  <th className="px-4 py-2 w-[70%]">Proposal Name</th>
-                  <th className="w-[15%]">Workspace Name</th>
-                  <th className="pl-10 py-2 w-[15%]">Quick Action</th>
-                </tr>
-              </thead>
-              <tbody className="">
-                {proposals?.map((item, index) => {
-                  const proposal = item?.proposals?.[0];
-                  const workspace = proposal?.workspaces?.[0];
+            ) : proposals &&
+              proposals.length > 0 &&
+              proposals.some(
+                (item) =>
+                  item?.proposals?.[0] && item?.proposals?.[0]?.workspaces?.[0]
+              ) ? (
+              <table className="w-full table-auto">
+                <thead className="h-12 bg-gray-100 text-left text-gray-600 font-normal text-sm sticky top-0 z-10">
+                  <tr>
+                    <th className="px-4 py-2 w-[70%]">Proposal Name</th>
+                    <th className="w-[15%]">Workspace Name</th>
+                    <th className="pl-10 py-2 w-[15%]">Quick Action</th>
+                  </tr>
+                </thead>
+                <tbody className="">
+                  {proposals?.map((item, index) => {
+                    const proposal = item?.proposals?.[0];
+                    const workspace = proposal?.workspaces?.[0];
 
-                  if (!proposal || !workspace) return null;
+                    if (!proposal || !workspace) return null;
 
-                  return (
-                    <tr
-                      className="border-b border-gray-200 mt-1 text-gray-600 hover:bg-gray-50 cursor-pointer h-12"
-                      key={index}
-                    >
-                      <td className="px-4 flex flex-col items-start justify-start py-3 text-left">
-                        <span className="w-[90%] overflow-hidden text-ellipsis block ">
-                          {proposal.proposalName}
-                        </span>
-                      </td>
-                      <td className="px-1">{workspace.workspaceName}</td>
-                      <td>
-                        <div className="flex flex-row gap-2 text-md text-gray-500 ml-14 text-lg">
-                          <MdRestorePage
-                            onClick={() => handleRestore(item._id)}
-                            className="cursor-pointer hover:text-green-600 transition-colors"
-                            title="Restore Proposal"
-                          />
-                          <RiDeleteBin5Line
-                            onClick={() => DeletePermently(item._id)}
-                            className="cursor-pointer hover:text-red-600 transition-colors"
-                            title="Delete Permanently"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 px-4">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                <RiDeleteBin5Line className="text-4xl text-gray-400" />
+                    return (
+                      <tr
+                        className="border-b border-gray-200 mt-1 text-gray-600 hover:bg-gray-50 cursor-pointer h-12"
+                        key={index}
+                      >
+                        <td className="px-4 flex flex-col items-start justify-start py-3 text-left">
+                          <span className="w-[90%] overflow-hidden text-ellipsis block ">
+                            {proposal.proposalName}
+                          </span>
+                        </td>
+                        <td className="px-1">{workspace.workspaceName}</td>
+                        <td>
+                          <div className="flex flex-row gap-2 text-md text-gray-500 ml-14 text-lg">
+                            <MdRestorePage
+                              onClick={() => handleRestore(item._id)}
+                              className="cursor-pointer hover:text-green-600 transition-colors"
+                              title="Restore Proposal"
+                            />
+                            <RiDeleteBin5Line
+                              onClick={() => DeletePermently(item._id)}
+                              className="cursor-pointer hover:text-red-600 transition-colors"
+                              title="Delete Permanently"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 px-4">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                  <RiDeleteBin5Line className="text-4xl text-gray-400" />
+                </div>
+                <h2 className="text-xl font-medium text-gray-700 mb-2">
+                  No Deleted Proposals
+                </h2>
+                <p className="text-gray-500 text-center max-w-md">
+                  Your recycle bin is empty. Deleted proposals will appear here
+                  and can be restored or permanently deleted.
+                </p>
               </div>
-              <h2 className="text-xl font-medium text-gray-700 mb-2">
-                No Deleted Proposals
-              </h2>
-              <p className="text-gray-500 text-center max-w-md">
-                Your recycle bin is empty. Deleted proposals will appear here
-                and can be restored or permanently deleted.
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </>
