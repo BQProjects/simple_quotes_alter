@@ -9,6 +9,7 @@ const session = require("express-session");
 const passport = require("passport");
 const UserModel = require("./models/tempModel");
 const OAuth2Strategy = require("passport-google-oauth2").Strategy;
+const TemplateRouter = require("./Routes/TemplateRoutes");
 
 const google_client_id =
   "757799082640-u9plre6ms011ncm0g20bjpn0h0bfg7f7.apps.googleusercontent.com";
@@ -114,5 +115,10 @@ app.get(
 app.use("/api/auth", authRouter);
 app.use("/api/workspace", workspace);
 app.use("/api/editor", editor);
+app.use("/api/template", TemplateRouter)
+
+app.get("/", (req, res) => {
+  res.send("Server is started")
+})
 
 app.listen(9000, () => console.log("Server is started"));
