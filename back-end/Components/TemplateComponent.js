@@ -22,3 +22,23 @@ exports.StoreTemplateData = async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 }
+
+exports.AllTemplates = async (req, res) => {
+    try {
+        const templates = await TemplateModel.find();
+        res.status(200).json(templates);
+
+    } catch (err) {
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
+exports.CreateProposalforTemplate = async (req, res) => {
+    const { email, template_id } = req.body;
+
+    try {
+
+    } catch (err) {
+        res.status(500).json({ message: "Server Error" });
+    }
+}
