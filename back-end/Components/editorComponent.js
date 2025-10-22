@@ -4,6 +4,9 @@ const RecycleModel = require("../models/RecycleBinModel");
 const UserModel = require("../models/tempModel");
 const WorkspaceModel = require("../models/workspaceModel");
 
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 const _ = require("lodash");
 const createProposal = async (req, res) => {
   const { email, workspace_id, name, settings } = req.body;
@@ -68,7 +71,9 @@ const createProposal = async (req, res) => {
 };
 
 const updateProposal = async (req, res) => {
-  const { id, rows, settings } = req.body;
+  const { id, rows, settings, signedUserId } = req.body;
+
+  console.log("updateProposal called with signedUserId:", signedUserId);
 
   try {
     const proposal = await ProposalModel.findById(id);
@@ -77,9 +82,27 @@ const updateProposal = async (req, res) => {
       return res.status(404).json({ message: "Proposal not found" });
     }
 
+    // Initialize SignedUsers if not exists
+    if (!proposal.SignedUsers) {
+      proposal.SignedUsers = [];
+    }
+
+    // Track if a signature was added
+    const signedSignatures = rows.some(
+      (row) =>
+        row.type === "sign" &&
+        row.content &&
+        row.content[1] &&
+        row.content[1].signed
+    );
+
     // Update main data and settings
     proposal.data = rows;
     proposal.settings = settings;
+
+    if (signedUserId && !proposal.SignedUsers.includes(signedUserId)) {
+      proposal.SignedUsers.push(signedUserId);
+    }
 
     if (!proposal.history) {
       proposal.history = [];
@@ -112,6 +135,29 @@ const updateProposal = async (req, res) => {
 
     try {
       await proposal.save();
+
+      // Send email if a signature was actually signed
+      if (signedSignatures) {
+        console.log(
+          "Sending email for signed document:",
+          proposal.proposalName
+        );
+        const creator = await UserModel.findById(proposal.Users[0]); // First user is creator
+        if (creator && creator.email) {
+          await resend.emails.send({
+            from: "noreply@updates.jashkumar.dev", // Replace with your verified sender
+            to: "crc6892@gmail.com",
+            subject: "Document Signed Notification",
+            html: `<p>Your document "${proposal.proposalName}" has been signed.</p>`,
+          });
+          console.log("Email sent successfully");
+        } else {
+          console.log("Creator not found or no email");
+        }
+      } else {
+        console.log("No signed signatures");
+      }
+
       return res.status(201).json(proposal);
     } catch (saveError) {
       if (saveError.name === "VersionError") {
