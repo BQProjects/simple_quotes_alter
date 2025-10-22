@@ -3,6 +3,7 @@ const ProposalModel = require("../models/proposeModel");
 const RecycleModel = require("../models/RecycleBinModel");
 const UserModel = require("../models/tempModel");
 const WorkspaceModel = require("../models/workspaceModel");
+const TemplateModel = require("../models/TemplateModel");
 
 const { Resend } = require("resend");
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -63,9 +64,120 @@ const createProposal = async (req, res) => {
     workspace.proposals.push(proposal._id);
     await workspace.save();
 
+    // Send email notification if enabled
+    if (user.EmailN) {
+      const { Resend } = require("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      try {
+        await resend.emails.send({
+          from: "noreply@updates.jashkumar.dev",
+          to: user.email,
+          subject: "New Proposal Created",
+          html: `<p>Hi ${user.fullName},</p><p>You have successfully created a new proposal titled "${name}".</p><p>You can review the details and track its progress in your dashboard.</p>`,
+        });
+        console.log("Proposal creation email sent successfully");
+      } catch (emailError) {
+        console.error("Error sending proposal creation email:", emailError);
+      }
+    }
+
     return res.status(201).json(proposal);
   } catch (error) {
     console.error("Error creating proposal:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const createProposalFromTemplate = async (req, res) => {
+  const { templateId, workspaceId, email } = req.body;
+
+  try {
+    // Find the user by email
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find the template
+    const template = await TemplateModel.findById(templateId);
+    if (!template) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+
+    // Find the workspace
+    const workspace = await WorkspaceModel.findById(workspaceId);
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    // Create new proposal with template data
+    const proposal = new ProposalModel({
+      proposalName: `${template.TemplateName} - Copy`,
+      Users: [user._id],
+      workspaces: workspaceId,
+      data: template.data || [],
+      settings: template.settings || {},
+      favorate: false,
+      locked: false,
+      status: "Draft",
+      views: 0,
+      lastUpdate: new Date(),
+    });
+
+    await proposal.save();
+
+    // Add proposal to user's proposals
+    if (!user.proposals) {
+      user.proposals = [];
+    }
+    user.proposals.push(proposal._id);
+
+    // Add notification
+    if (user.notifications === undefined) {
+      user.notifications = [];
+    }
+    const temp = `${user.fullName} has successfully created a new proposal from template "${template.TemplateName}". You can review the details and track its progress in your dashboard.`;
+
+    user.notifications.push({
+      title: "Proposal created from template!",
+      discription: temp,
+      createdAt: new Date(),
+    });
+
+    await user.save();
+
+    // Add proposal to workspace
+    if (!workspace.proposals) {
+      workspace.proposals = [];
+    }
+    workspace.proposals.push(proposal._id);
+    await workspace.save();
+
+    // Send email notification if enabled
+    if (user.EmailN) {
+      const { Resend } = require("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      try {
+        await resend.emails.send({
+          from: "noreply@updates.jashkumar.dev",
+          to: user.email,
+          subject: "New Proposal Created from Template",
+          html: `<p>Hi ${user.fullName},</p><p>You have successfully created a new proposal titled "${proposal.proposalName}" from the template "${template.TemplateName}".</p><p>You can review the details and track its progress in your dashboard.</p>`,
+        });
+        console.log("Proposal from template creation email sent successfully");
+      } catch (emailError) {
+        console.error(
+          "Error sending proposal from template creation email:",
+          emailError
+        );
+      }
+    }
+
+    return res.status(201).json(proposal);
+  } catch (error) {
+    console.error("Error creating proposal from template:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -143,16 +255,18 @@ const updateProposal = async (req, res) => {
           proposal.proposalName
         );
         const creator = await UserModel.findById(proposal.Users[0]); // First user is creator
-        if (creator && creator.email) {
+        if (creator && creator.email && creator.EmailN) {
           await resend.emails.send({
             from: "noreply@updates.jashkumar.dev", // Replace with your verified sender
-            to: "crc6892@gmail.com",
+            to: creator.email,
             subject: "Document Signed Notification",
             html: `<p>Your document "${proposal.proposalName}" has been signed.</p>`,
           });
           console.log("Email sent successfully");
         } else {
-          console.log("Creator not found or no email");
+          console.log(
+            "Creator not found, no email, or email notifications disabled"
+          );
         }
       } else {
         console.log("No signed signatures");
@@ -443,6 +557,7 @@ const getDetails = async (req, res) => {
 module.exports = {
   createGoal,
   createProposal,
+  createProposalFromTemplate,
   getAllProposal,
   getGoal,
   getProposal,

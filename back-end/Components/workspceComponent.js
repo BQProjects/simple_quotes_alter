@@ -134,6 +134,24 @@ const workspaceCreate = async (req, res) => {
       }
     }
 
+    // Send email notification if enabled
+    if (profile.EmailN) {
+      const { Resend } = require("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      try {
+        await resend.emails.send({
+          from: "noreply@updates.jashkumar.dev",
+          to: profile.email,
+          subject: "New Workspace Created",
+          html: `<p>Hi ${profile.fullName},</p><p>You have successfully created a new workspace titled "${workspaceName}".</p><p>You can review the details and track its progress in your dashboard.</p>`,
+        });
+        console.log("Workspace creation email sent successfully");
+      } catch (emailError) {
+        console.error("Error sending workspace creation email:", emailError);
+      }
+    }
+
     return res.status(201).json(workspace);
   } catch (error) {
     console.error("Error creating workspace:", error);

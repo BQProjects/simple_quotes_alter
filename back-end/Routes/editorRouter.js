@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const {
   createProposal,
+  createProposalFromTemplate,
   updateProposal,
   getAllProposal,
   createGoal,
@@ -23,6 +24,7 @@ const editor = express.Router();
 editor.use(cors());
 
 editor.post("/newproposal", createProposal);
+editor.post("/create-from-template", createProposalFromTemplate);
 editor.put("/updateProposal", updateProposal);
 editor.put("/locked", updateLocked);
 editor.put("/favorate", updateFavorate);

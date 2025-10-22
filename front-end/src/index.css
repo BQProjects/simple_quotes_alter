@@ -23,6 +23,16 @@
 html, body, #root {
   height: 100%;
 }
+
+/* Mobile scaling to simulate desktop view */
+@media (max-width: 768px) {
+  #root {
+    transform: scale(0.5);
+    transform-origin: top left;
+    width: 200%;
+    height: 200%;
+  }
+}
 .signature-text {
   font-family: "Monsieur La Doulaise", serif;
 }
@@ -101,6 +111,7 @@ html, body, #root {
   }
 
   .no-spinner {
+    appearance: textfield;
     -moz-appearance: textfield; /* Firefox */
   }
 }

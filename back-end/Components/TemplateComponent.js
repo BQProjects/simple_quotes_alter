@@ -102,3 +102,31 @@ exports.getTemplateById = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+//only for updating template image not accesible to user only developer
+exports.updateTemplateImage = async (req, res) => {
+    const { id, TemplateImage } = req.body;
+
+    try {
+        if (!id) {
+            return res.status(400).json({ message: "Template ID is required" });
+        }
+
+        if (!TemplateImage) {
+            return res.status(400).json({ message: "Template Image URL is required" });
+        }
+
+        const template = await TemplateModel.findById(id);
+        if (!template) {
+            return res.status(404).json({ message: "Template not found" });
+        }
+
+        template.TemplateImage = TemplateImage;
+        await template.save();
+
+        res.status(200).json({ message: "Template image updated successfully", template });
+    } catch (err) {
+        console.error("Error updating template image:", err);
+        res.status(500).json({ message: "Server Error" });
+    }
+}
