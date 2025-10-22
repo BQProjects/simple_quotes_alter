@@ -86,3 +86,19 @@ exports.CreateProposalforTemplate = async (req, res) => {
         return res.status(500).json({ message: "Server Error" });
     }
 };
+
+exports.getTemplateById = async (req, res) => {
+    const id = req.query.id;
+
+    try {
+        const tempalate = await TemplateModel.findById(id);
+        if (!tempalate) {
+            return res.status(404).json({ message: "Template not found" });
+        }
+        return res.status(201).json(tempalate);
+    }
+    catch (err) {
+        console.error("Error fetching template:", err);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}

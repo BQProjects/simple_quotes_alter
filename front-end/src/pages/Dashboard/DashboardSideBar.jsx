@@ -14,6 +14,7 @@ import { RiBillFill } from "react-icons/ri";
 import { IoMdInformationCircle } from "react-icons/io";
 import { IoLogOut } from "react-icons/io5";
 import { FiPlusCircle } from "react-icons/fi";
+import { HiTemplate } from "react-icons/hi";
 
 const DashboardSideBar = ({ setBody }) => {
   const location = useLocation();
@@ -98,6 +99,18 @@ const DashboardSideBar = ({ setBody }) => {
         </button>
 
         <button
+          onClick={() => navigate("/templates")}
+          className={`flex items-center justify-start py-2 px-3 rounded-md gap-3 text-start w-full
+          hover:bg-gray-200 hover:text-active_text 
+          ${isActive("/proposals") ? "bg-gray-200 text-active_text" : ""}`}
+        >
+          <span className="w-8 h-8 flex items-center justify-center shadow-md shadow-gray-300 rounded-lg bg-white">
+            <HiTemplate className="w-4 h-4" />
+          </span>
+          Templates
+        </button>
+
+        <button
           onClick={() => navigate("/recycle")}
           className={`flex items-center justify-start py-2 px-3 rounded-md gap-3 text-start w-full
           hover:bg-gray-200 hover:text-active_text 
@@ -114,9 +127,8 @@ const DashboardSideBar = ({ setBody }) => {
         <button
           ref={buttonRef}
           onClick={() => setSettings(true)}
-          className={`flex items-center justify-start py-2   gap-4 text-start w-[85%] hover:bg-gray-200 px-3 rounded-md ${
-            settings === true ? "bg-gray-200" : "none"
-          }`}
+          className={`flex items-center justify-start py-2   gap-4 text-start w-[85%] hover:bg-gray-200 px-3 rounded-md ${settings === true ? "bg-gray-200" : "none"
+            }`}
         >
           <span className="w-8 h-8 flex items-center justify-center  shadow-md shadow-gray-300 rounded-lg bg-white">
             <IoSettingsOutline className="w-4 h-5 " />

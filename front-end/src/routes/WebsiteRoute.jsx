@@ -16,6 +16,7 @@ import Redirect from "../pages/website/Redirect.jsx";
 import Terms from "../pages/website/Terms.jsx";
 import ChangePassword from "../pages/website/ChangePassword.jsx";
 import ForgotPassWord from "../pages/website/ForgotPassWord.jsx";
+import DashboardTemplates from "../pages/Dashboard/DashboardTemplates.jsx";
 const Home = React.lazy(() => import("../pages/website/Home"));
 const Signup = React.lazy(() => import("../pages/website/Signup"));
 const Pricing = React.lazy(() => import("../pages/website/Pricing"));
@@ -87,6 +88,15 @@ const WebsiteRoute = () => {
             </Dashboard>
           }
         />
+
+        <Route path="/templates"
+          element={
+            <Dashboard>
+              <DashboardTemplates />
+            </Dashboard>
+          }
+        />
+
         <Route path="/view/:id" element={<Preview />} />
         <Route
           path="/workspaces"
