@@ -13,13 +13,13 @@ const GeneralSettings = () => {
   const { databaseUrl } = useContext(DatabaseContext);
   const [time, setTime] = useState("IST");
   const [curency, setCurency] = useState("USD"); // Changed default to match option value
-  const [dataP, setDataP] = useState(false);
-  const [dataA, setDataA] = useState(false);
-  const [dataT, setDataT] = useState(false);
-  const [emailN, setEmailN] = useState(false);
-  const [pushN, setPushN] = useState(false);
-  const [workspaceN, setWorkspaceN] = useState(false);
-  const [proposalN, setProposalN] = useState(false);
+  const [dataP, setDataP] = useState(true);
+  const [dataA, setDataA] = useState(true);
+  const [dataT, setDataT] = useState(true);
+  const [emailN, setEmailN] = useState(true);
+  const [pushN, setPushN] = useState(true);
+  const [workspaceN, setWorkspaceN] = useState(true);
+  const [proposalN, setProposalN] = useState(true);
 
   // Define Time Zone options for React Select
   const timeZoneOptions = [
@@ -100,13 +100,17 @@ const GeneralSettings = () => {
       });
       setTime(res.data.Time ? res.data.Time : "IST");
       setCurency(res.data.Curency ? res.data.Curency : "USD"); // Updated default to "USD"
-      setDataA(res.data.DataA ? res.data.DataA : false);
-      setDataP(res.data.DataP ? res.data.DataP : false);
-      setDataT(res.data.DataT ? res.data.DataT : false);
-      setEmailN(res.data.EmailN ? res.data.EmailN : false);
-      setPushN(res.data.PushN ? res.data.PushN : false);
-      setWorkspaceN(res.data.WorkspaceN ? res.data.WorkspaceN : false);
-      setProposalN(res.data.ProposalN ? res.data.ProposalN : false);
+      setDataA(res.data.DataA !== undefined ? res.data.DataA : true);
+      setDataP(res.data.DataP !== undefined ? res.data.DataP : true);
+      setDataT(res.data.DataT !== undefined ? res.data.DataT : true);
+      setEmailN(res.data.EmailN !== undefined ? res.data.EmailN : true);
+      setPushN(res.data.PushN !== undefined ? res.data.PushN : true);
+      setWorkspaceN(
+        res.data.WorkspaceN !== undefined ? res.data.WorkspaceN : true
+      );
+      setProposalN(
+        res.data.ProposalN !== undefined ? res.data.ProposalN : true
+      );
     } catch (error) {
       console.error("Error fetching workspaces:", error);
     }
@@ -315,7 +319,7 @@ const GeneralSettings = () => {
                 Update Password
               </button>
             </div>
-            <div className="w-full py-4 px-2 flex items-center justify-between border border-gray-200 rounded-md mt-4">
+            {/* <div className="w-full py-4 px-2 flex items-center justify-between border border-gray-200 rounded-md mt-4">
               <div className="flex flex-col px-4">
                 <h1 className="text-gray-600">Enable 2FA</h1>
                 <p className="text-xs text-gray-400">
@@ -325,7 +329,7 @@ const GeneralSettings = () => {
               <button className="text-graidient_bottom text-sm">
                 Enable 2FA
               </button>
-            </div>
+            </div> */}
             <div className="w-full py-4 px-5 flex items-center justify-between rounded-md mt-4">
               <button className="text-graidient_bottom text-sm">log out</button>
               <button className="text-graidient_bottom text-sm">

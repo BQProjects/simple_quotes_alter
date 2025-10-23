@@ -289,6 +289,46 @@ const Subscription = () => {
             </p>
           </div>
         </div>
+        {user.subscription !== "shared" && (
+          <div className="w-[87%] flex flex-col items-center mt-5  rounded-md py-4   ">
+            <div className="flex items-center justify-end w-[97%]">
+              {user.subscription !== "monthly" &&
+                user.subscription !== "yearly" && (
+                  <button
+                    onClick={() => setPopUp(true)}
+                    className="px-4 py-1 border border-graidient_bottom rounded-md text-graidient_bottom"
+                  >
+                    Add Member
+                  </button>
+                )}
+            </div>
+            <table className="auto-table w-full mt-5 mb-20  ">
+              <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0 rounded-md">
+                <tr>
+                  <th className="text-center">Username</th>
+                  <th className=" text-center">Gmail</th>
+                  <th className=" text-center">Quick Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.map((item, index) => {
+                  return (
+                    <tr key={item._id}>
+                      <td className="pl-10">{item.fullName}</td>
+                      <td className="text-center">{item.email}</td>
+                      <td className="text-center flex justify-center">
+                        <RiDeleteBinLine
+                          onClick={() => deleteMember(item._id)}
+                          className="text-gray-600 text-lg hover:text-graidient_bottom cursor-pointer"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
         <div className="w-[87%] flex flex-col items-center mt-7 border border-gray-200 rounded-md p-6    ">
           <div className="text-lg flex items-center gap-4 text-gray-700 w-full justify-start">
             <CiCreditCard1 className="text-3xl text-graidient_bottom" /> Current
@@ -369,7 +409,7 @@ const Subscription = () => {
             </p>
           </div>
         </div>
-        <div className="w-[87%] flex flex-col items-center mt-7 border border-gray-200 rounded-md p-6    ">
+        <div className="w-[87%] flex flex-col items-center mt-7 border border-gray-200 rounded-md p-6 mb-10">
           <div className="text-lg flex items-center gap-4 text-gray-700 w-full justify-start">
             <CiCreditCard1 className="text-3xl text-graidient_bottom" />
             Invoices
@@ -391,46 +431,6 @@ const Subscription = () => {
             </button>
           </div>
         </div>
-        {user.subscription !== "shared" && (
-          <div className="w-[87%] flex flex-col items-center mt-5  rounded-md py-4   ">
-            <div className="flex items-center justify-end w-[97%]">
-              {user.subscription !== "monthly" &&
-                user.subscription !== "yearly" && (
-                  <button
-                    onClick={() => setPopUp(true)}
-                    className="px-4 py-1 border border-graidient_bottom rounded-md text-graidient_bottom"
-                  >
-                    Add Member
-                  </button>
-                )}
-            </div>
-            <table className="auto-table w-full mt-5 mb-20  ">
-              <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0 rounded-md">
-                <tr>
-                  <th className="text-center">Username</th>
-                  <th className=" text-center">Gmail</th>
-                  <th className=" text-center">Quick Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {members.map((item, index) => {
-                  return (
-                    <tr key={item._id}>
-                      <td className="pl-10">{item.fullName}</td>
-                      <td className="text-center">{item.email}</td>
-                      <td className="text-center flex justify-center">
-                        <RiDeleteBinLine
-                          onClick={() => deleteMember(item._id)}
-                          className="text-gray-600 text-lg hover:text-graidient_bottom cursor-pointer"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
     </>
   );

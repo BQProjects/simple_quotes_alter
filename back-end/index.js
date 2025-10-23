@@ -17,6 +17,36 @@ const google_client_secret = "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";
 
 const app = express();
 
+// MongoDB connection caching for serverless
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedDb && mongoose.connection.readyState === 1) {
+    return cachedDb;
+  }
+
+  try {
+    cachedDb = await mongoose.connect(
+      "mongodb+srv://teja29204:jgdwfvejgwfv@simplequotes.wx6ss.mongodb.net/test?retryWrites=true&w=majority"
+    );
+    console.log("Database is connected");
+    return cachedDb;
+  } catch (error) {
+    console.error("Database connection error:", error);
+    throw error;
+  }
+}
+
+// Middleware to ensure DB connection
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    res.status(500).send("Database connection failed");
+  }
+});
+
 app.use(express.json());
 app.use(
   cors({
@@ -30,17 +60,6 @@ app.use(
   })
 );
 app.use(express.urlencoded({ extended: false }));
-
-mongoose
-  .connect(
-    "mongodb+srv://teja29204:jgdwfvejgwfv@simplequotes.wx6ss.mongodb.net/test?retryWrites=true&w=majority"
-  )
-  .then(() => {
-    console.log("Database is connected");
-  })
-  .catch(() => {
-    console.log("Database is not Connected");
-  });
 
 app.use(
   session({
@@ -115,10 +134,22 @@ app.get(
 app.use("/api/auth", authRouter);
 app.use("/api/workspace", workspace);
 app.use("/api/editor", editor);
-app.use("/api/template", TemplateRouter)
+app.use("/api/template", TemplateRouter);
 
 app.get("/", (req, res) => {
-  res.send("Server is started")
-})
+  res.send("Server is started");
+});
 
-app.listen(9000, () => console.log("Server is started"));
+// Export for Vercel serverless
+module.exports = app;
+
+// For local development
+if (require.main === module) {
+  connectToDatabase()
+    .then(() => {
+      app.listen(9000, () => console.log("Server is started"));
+    })
+    .catch((err) => {
+      console.error("Failed to connect to database:", err);
+    });
+}
