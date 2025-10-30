@@ -247,26 +247,25 @@ const Sidebar = ({
     }
   };
 
- const fontOptions = [
-   { value: "arial", label: "Arial" },
-   { value: "georgia", label: "Georgia" },
-   { value: "ibm-plex-sans", label: "IBM Plex Sans" },
-   { value: "lato", label: "Lato" },
-   { value: "libre-baskerville", label: "Libre Baskerville" },
-   { value: "lora", label: "Lora" },
-   { value: "merriweather", label: "Merriweather" },
-   { value: "montserrat", label: "Montserrat" },
-   { value: "nunito", label: "Nunito" },
-   { value: "open-sans", label: "Open Sans" },
-   { value: "poppins", label: "Poppins" },
-   { value: "pt-sans", label: "PT Sans" },
-   { value: "raleway", label: "Raleway" },
-   { value: "roboto", label: "Roboto" },
-   { value: "source-sans-pro", label: "Source Sans Pro" },
-   { value: "times-new-roman", label: "Times New Roman" },
-   { value: "work-sans", label: "Work Sans" },
- ];
-
+  const fontOptions = [
+    { value: "arial", label: "Arial" },
+    { value: "georgia", label: "Georgia" },
+    { value: "ibm-plex-sans", label: "IBM Plex Sans" },
+    { value: "lato", label: "Lato" },
+    { value: "libre-baskerville", label: "Libre Baskerville" },
+    { value: "lora", label: "Lora" },
+    { value: "merriweather", label: "Merriweather" },
+    { value: "montserrat", label: "Montserrat" },
+    { value: "nunito", label: "Nunito" },
+    { value: "open-sans", label: "Open Sans" },
+    { value: "poppins", label: "Poppins" },
+    { value: "pt-sans", label: "PT Sans" },
+    { value: "raleway", label: "Raleway" },
+    { value: "roboto", label: "Roboto" },
+    { value: "source-sans-pro", label: "Source Sans Pro" },
+    { value: "times-new-roman", label: "Times New Roman" },
+    { value: "work-sans", label: "Work Sans" },
+  ];
 
   const customStyles = {
     control: (base, state) => ({
@@ -1539,7 +1538,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
             },
           ],
         },
@@ -1784,7 +1783,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared For: John Wick",
+              text: "Prepared For: [Client Name]",
             },
           ],
         },
@@ -1792,7 +1791,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared By: Simple Quotes",
+              text: "Prepared By: [Your Company Name]",
             },
           ],
         },
@@ -1806,7 +1805,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1750313419/ocwocu3grfgpfqz7gh8t.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -2047,7 +2046,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -2073,7 +2072,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared For: John Wick",
+              text: "Prepared For: [Client Name]",
             },
           ],
         },
@@ -2247,7 +2246,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1750314722/namwstjqzsxobc90jqfi.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -2462,7 +2461,7 @@ const Sidebar = ({
           children: [
             {
               bold: true,
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
             },
           ],
         },
@@ -2488,7 +2487,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared For: John Wick",
+              text: "Prepared For: [Client Name]",
             },
           ],
         },
@@ -2496,7 +2495,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared By: Brain Quest",
+              text: "Prepared By: [Your Company Name]",
             },
           ],
         },
@@ -2703,7 +2702,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1750314722/namwstjqzsxobc90jqfi.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -3043,7 +3042,7 @@ const Sidebar = ({
           children: [
             {
               bold: true,
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
             },
           ],
         },
@@ -3059,7 +3058,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "Prepared For: John Wick",
+              text: "Prepared For: [Client Name]",
             },
           ],
         },
@@ -3067,7 +3066,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "Prepared By: Brain Quest",
+              text: "Prepared By: [Your Company Name]",
             },
           ],
         },
@@ -3674,7 +3673,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751873614/mpbhp70vndylnky8aji0.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -3899,7 +3898,7 @@ const Sidebar = ({
           children: [
             {
               bold: true,
-              text: "24-06-2025",
+              text: "24-06-[dd-mm-yyyy]",
             },
           ],
         },
@@ -4296,7 +4295,7 @@ const Sidebar = ({
           align: "right",
           children: [
             {
-              text: "June 13, 2025",
+              text: "June 13, [dd-mm-yyyy]",
             },
           ],
         },
@@ -5586,7 +5585,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
         },
@@ -5594,7 +5593,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -5999,7 +5998,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -6008,7 +6007,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -6625,7 +6624,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
           align: "left",
@@ -6634,7 +6633,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -6728,7 +6727,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1748856446/kanvds2uo6owbpw0wlec.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "50",
       align: "left",
@@ -6976,7 +6975,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -6985,7 +6984,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -8000,7 +7999,7 @@ const Sidebar = ({
           children: [
             {
               bold: true,
-              text: "24-06-2025",
+              text: "24-06-[dd-mm-yyyy]",
             },
           ],
         },
@@ -8455,7 +8454,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
         },
@@ -8463,7 +8462,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -8607,7 +8606,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1748856446/kanvds2uo6owbpw0wlec.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "50",
       align: "left",
@@ -8687,7 +8686,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1748856446/kanvds2uo6owbpw0wlec.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "50",
       align: "left",
@@ -9068,7 +9067,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
         },
@@ -9076,7 +9075,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -9138,7 +9137,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
         },
@@ -9146,14 +9145,14 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751881348/un1rw5v1fhsrz0itdpl5.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -9539,7 +9538,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1748856446/kanvds2uo6owbpw0wlec.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "50",
       align: "left",
@@ -9548,7 +9547,7 @@ const Sidebar = ({
       textColor: "text-black",
     },
     {
-      id: "1fabca18-03f0-492e-862e-122a12312025",
+      id: "1fabca18-03f0-492e-862e-122a1231[dd-mm-yyyy]",
       type: "line",
     },
   ];
@@ -9568,7 +9567,7 @@ const Sidebar = ({
       id: "d1b7d054-f8d2-4b20-935c-51addb322950",
       type: "image",
       content:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751881662/weiqcvsnmq4dccpsv3vp.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "200",
       width: "25",
       aliegn: "left",
@@ -10022,7 +10021,7 @@ const Sidebar = ({
       id: "d1b7d054-f8d2-4b20-935c-51addb322950",
       type: "image",
       content:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751881662/weiqcvsnmq4dccpsv3vp.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "200",
       width: "25",
       aliegn: "center",
@@ -10457,7 +10456,7 @@ const Sidebar = ({
       id: "6c8006db-4963-4a91-aaaa-02ebdd93c512",
       type: "image",
       content:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751882746/o719phze17j7nvlhtkdq.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "200",
       width: "25",
       aliegn: "left",
@@ -10860,7 +10859,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -10869,7 +10868,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -10995,7 +10994,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
             },
           ],
         },
@@ -11079,7 +11078,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared For: John Wick",
+              text: "Prepared For: [Client Name]",
             },
           ],
         },
@@ -11087,7 +11086,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared By: Simple Quotes",
+              text: "Prepared By: [Your Company Name]",
             },
           ],
         },
@@ -11101,7 +11100,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1750313419/ocwocu3grfgpfqz7gh8t.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -11215,7 +11214,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -11241,7 +11240,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared For: John Wick",
+              text: "Prepared For: [Client Name]",
             },
           ],
         },
@@ -11249,7 +11248,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared By: Simple Quotes",
+              text: "Prepared By: [Your Company Name]",
             },
           ],
         },
@@ -11350,7 +11349,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1750314722/namwstjqzsxobc90jqfi.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -11454,7 +11453,7 @@ const Sidebar = ({
           children: [
             {
               bold: true,
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
             },
           ],
         },
@@ -11480,7 +11479,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared For: John Wick",
+              text: "Prepared For: [Client Name]",
             },
           ],
         },
@@ -11488,7 +11487,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Prepared By: Brain Quest",
+              text: "Prepared By: [Your Company Name]",
             },
           ],
         },
@@ -11574,7 +11573,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1750314722/namwstjqzsxobc90jqfi.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -11732,7 +11731,7 @@ const Sidebar = ({
           children: [
             {
               bold: true,
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
             },
           ],
         },
@@ -11748,7 +11747,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "Prepared For: John Wick",
+              text: "Prepared For: [Client Name]",
             },
           ],
         },
@@ -11756,7 +11755,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "Prepared By: Brain Quest",
+              text: "Prepared By: [Your Company Name]",
             },
           ],
         },
@@ -12040,7 +12039,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751873614/mpbhp70vndylnky8aji0.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -12187,7 +12186,7 @@ const Sidebar = ({
           children: [
             {
               bold: true,
-              text: "June 24, 2025",
+              text: "June 24, [dd-mm-yyyy]",
             },
           ],
         },
@@ -12433,7 +12432,7 @@ const Sidebar = ({
           align: "right",
           children: [
             {
-              text: "June 13, 2025",
+              text: "June 13, [dd-mm-yyyy]",
             },
           ],
         },
@@ -12981,7 +12980,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
         },
@@ -12989,7 +12988,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -13176,7 +13175,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -13185,7 +13184,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -13415,7 +13414,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -13424,7 +13423,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -13498,7 +13497,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1748856446/kanvds2uo6owbpw0wlec.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "50",
       align: "left",
@@ -13655,7 +13654,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -13664,7 +13663,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -14078,7 +14077,7 @@ const Sidebar = ({
           children: [
             {
               bold: true,
-              text: "24-06-2025",
+              text: "24-06-[dd-mm-yyyy]",
             },
           ],
         },
@@ -14306,7 +14305,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
         },
@@ -14314,7 +14313,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -14386,7 +14385,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1748856446/kanvds2uo6owbpw0wlec.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "50",
       align: "left",
@@ -14466,7 +14465,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1748856446/kanvds2uo6owbpw0wlec.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "50",
       align: "left",
@@ -14611,7 +14610,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
         },
@@ -14619,7 +14618,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
@@ -14666,7 +14665,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
         },
@@ -14674,14 +14673,14 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751881348/un1rw5v1fhsrz0itdpl5.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "",
       align: "left",
@@ -14847,7 +14846,7 @@ const Sidebar = ({
         },
       ],
       ImageLink:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1748856446/kanvds2uo6owbpw0wlec.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "",
       width: "50",
       align: "left",
@@ -14856,7 +14855,7 @@ const Sidebar = ({
       textColor: "text-black",
     },
     {
-      id: "1fabca18-03f0-492e-862e-122a12312025as",
+      id: "1fabca18-03f0-492e-862e-122a1231[dd-mm-yyyy]as",
       type: "line",
     },
   ];
@@ -14877,7 +14876,7 @@ const Sidebar = ({
       id: "d1b7d054-f8d2-4b20-935c-51addb322950asdcd",
       type: "image",
       content:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751881662/weiqcvsnmq4dccpsv3vp.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "200",
       width: "25",
       aliegn: "left",
@@ -15112,7 +15111,7 @@ const Sidebar = ({
       id: "d1b7d054-f8d2-4b20-935c-51addb32dsaca2950",
       type: "image",
       content:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751881662/weiqcvsnmq4dccpsv3vp.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "200",
       width: "25",
       aliegn: "center",
@@ -15322,7 +15321,7 @@ const Sidebar = ({
       id: "6c8006db-4963-4a91-aaaa-02ebdd9casdc3c512",
       type: "image",
       content:
-        "https://res.cloudinary.com/dojwaepbj/image/upload/v1751882746/o719phze17j7nvlhtkdq.png",
+        "https://res.cloudinary.com/dojwaepbj/image/upload/v1756098922/qvk32lpvvd0w0wexv4hp.png",
       height: "200",
       width: "25",
       aliegn: "left",
@@ -15487,7 +15486,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "MRUNAL",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -15496,7 +15495,7 @@ const Sidebar = ({
           type: "heading-two",
           children: [
             {
-              text: "2025",
+              text: "[dd-mm-yyyy]",
               bold: true,
             },
           ],

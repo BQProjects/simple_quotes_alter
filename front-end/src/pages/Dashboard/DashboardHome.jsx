@@ -492,13 +492,13 @@ const DashboardHome = () => {
                           <div className="flex flex-col justify-center items-center gap-2">
                             <button
                               onClick={() => handlePreviewTemplate(template)}
-                              className="px-3 py-2 bg-white text-gray-800 rounded-md hover:bg-gray-100 text-sm font-medium transition-colors"
+                              className="w-full px-3 py-2 bg-white text-gray-800 rounded-md hover:bg-gray-100 text-sm font-medium transition-colors"
                             >
                               Preview
                             </button>
                             <button
                               onClick={() => handleUseTemplate(template)}
-                              className="px-3 py-2 bg-graidient_bottom text-white rounded-md hover:bg-hover_dark_btn text-sm font-medium transition-colors"
+                              className="w-full px-3 py-2 bg-graidient_bottom text-white rounded-md hover:bg-hover_dark_btn text-sm font-medium transition-colors"
                             >
                               Use this template
                             </button>

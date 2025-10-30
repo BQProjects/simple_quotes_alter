@@ -72,7 +72,8 @@ const PriceTermSlate = ({ index, rows, selected, settings, preview }) => {
                   )}
                   {rows.options.value && (
                     <th className="border border-gray-300 py-2 font-normal text-right px-3">
-                      ${row.value}
+                      {rows.options.currency ? rows.options.currency : "$"}
+                      {row.value}
                     </th>
                   )}
                 </tr>
@@ -91,7 +92,8 @@ const PriceTermSlate = ({ index, rows, selected, settings, preview }) => {
               )}
               {rows.options.value && (
                 <th className="border border-gray-200 py-2 font-normal  text-right px-3">
-                  ${calculateTotalValue()}
+                  {rows.options.currency ? rows.options.currency : "$"}
+                  {calculateTotalValue()}
                 </th>
               )}
             </tr>
