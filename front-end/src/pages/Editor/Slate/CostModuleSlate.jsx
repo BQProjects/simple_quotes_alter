@@ -68,7 +68,7 @@ const CostModuleSlate = ({ index, rows, selected, settings, preview }) => {
               <td className="border px-2 text-left  py-1">{row.deliverable}</td>
               {rows.options.quantity && (
                 <td className="border px-2 py-1">
-                  {rows.options.currency}
+                  {rows.options.currency ? rows.options.currency : "$"}
                   {row.price}
                 </td>
               )}
@@ -77,7 +77,7 @@ const CostModuleSlate = ({ index, rows, selected, settings, preview }) => {
               )}
 
               <td className="border px-2 py-1 text-right">
-                {rows.options.currency}
+                {rows.options.currency ? rows.options.currency : "$"}
                 {row.amount}
               </td>
             </tr>

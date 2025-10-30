@@ -9,8 +9,6 @@ const PriceTerms = ({ rows, addPriceTerms, setRows }) => {
   const { setPriceTerms, priceTermsEdit, setPriceTermsEdit } =
     useContext(StateManageContext);
 
-  const [total, setTotal] = useState(null);
-
   const [temp, setTemp] = useState(
     priceTermsEdit !== null
       ? rows[priceTermsEdit].content
@@ -30,6 +28,15 @@ const PriceTerms = ({ rows, addPriceTerms, setRows }) => {
   );
   const [currency, setCurrency] = useState(
     priceTermsEdit !== null ? rows[priceTermsEdit].options.currency : "$"
+  );
+
+  const [total, setTotal] = useState(
+    priceTermsEdit !== null && value
+      ? rows[priceTermsEdit].content.reduce(
+          (acc, row) => acc + (row.value || 0),
+          0
+        )
+      : null
   );
 
   const handleAddRow = () => {
