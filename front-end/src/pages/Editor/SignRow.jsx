@@ -2,7 +2,15 @@ import React, { useContext, useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { StateManageContext } from "../../context/StateManageContext";
 
-const SignRow = ({ index, rows, content, onChange, selected, preview }) => {
+const SignRow = ({
+  index,
+  rows,
+  content,
+  onChange,
+  selected,
+  preview,
+  view,
+}) => {
   const { setSignEdit, setSign } = useContext(StateManageContext);
   const [showSignModal, setShowSignModal] = useState(false);
   const [clientName, setClientName] = useState("");
@@ -19,8 +27,12 @@ const SignRow = ({ index, rows, content, onChange, selected, preview }) => {
   };
 
   return (
-    <div className="w-full h-[150px] grid grid-cols-3 gap-0 items-center text-center p-3  rounded-lg mt-10 relative ">
-      {(selected !== null || preview) && !(preview && content[1].signed) && (
+    <div
+      className={`w-full ${view === false ? "h-auto" : "h-[150px]"} ${
+        view === false ? "grid-cols-1" : "grid-cols-3"
+      } grid gap-0 items-center text-center p-3 rounded-lg mt-10 relative`}
+    >
+      {selected !== null && preview !== true && (
         <button
           onClick={() => {
             setSign(true);
@@ -33,19 +45,46 @@ const SignRow = ({ index, rows, content, onChange, selected, preview }) => {
       )}
 
       {/* Left Column */}
-      <div>
-        <h3 className="text-lg  text-active_text text-left px-3">Signatures</h3>
-      </div>
+      {view !== false && (
+        <div>
+          <h3 className="text-lg  text-active_text text-left px-3">
+            Signatures
+          </h3>
+        </div>
+      )}
+
+      {/* Mobile: Title at top */}
+      {view === false && (
+        <div className="mb-2">
+          <h3 className="text-sm font-semibold text-active_text text-left px-3">
+            Signatures
+          </h3>
+        </div>
+      )}
 
       {/* Middle Column */}
       <div
-        className={`border-l border-y border-border_clr h-32 flex flex-col items-center justify-center ${
+        className={`border ${
+          view === false ? "border" : "border-l border-y"
+        } border-border_clr ${
+          view === false ? "h-auto py-4 mb-3" : "h-32"
+        } flex flex-col items-center justify-center ${
           preview && content[1].signed ? "opacity-50 pointer-events-none" : ""
         }`}
       >
-        <div className="h-20 flex items-end pb-4 justify-center">
+        <div
+          className={`${
+            view === false ? "h-auto py-2" : "h-20 pb-4"
+          } flex items-end justify-center`}
+        >
           {content[0].signed ? (
-            <p className="text-lg  text-active_text h-20 flex items-end pb-4 justify-center">
+            <p
+              className={`${
+                view === false ? "text-sm" : "text-lg"
+              } text-active_text ${
+                view === false ? "h-auto py-2" : "h-20 pb-4"
+              } flex items-end justify-center`}
+            >
               {content[0]?.proposedName}
             </p>
           ) : (
@@ -58,7 +97,9 @@ const SignRow = ({ index, rows, content, onChange, selected, preview }) => {
                 }
               }}
               disabled={preview && content[1].signed}
-              className={`px-6 py-2  text-white rounded-md bg-graidient_bottom ${
+              className={`${
+                view === false ? "px-4 py-1.5 text-xs" : "px-6 py-2"
+              } text-white rounded-md bg-graidient_bottom ${
                 preview && content[1].signed
                   ? "opacity-50 cursor-not-allowed"
                   : ""
@@ -69,31 +110,55 @@ const SignRow = ({ index, rows, content, onChange, selected, preview }) => {
           )}
         </div>
         <div className="border-t border-border_clr w-full  "></div>
-        <h3 className="text-non_active_text h-12 flex items-center justify-center">
+        <h3
+          className={`text-non_active_text ${
+            view === false ? "h-8 text-xs" : "h-12"
+          } flex items-center justify-center`}
+        >
           {content[0]?.proposedName}
         </h3>
       </div>
 
       {/* Right Column */}
       <div
-        className={`border border-border_clr h-32 flex flex-col items-center justify-center ${
+        className={`border border-border_clr ${
+          view === false ? "h-auto py-4" : "h-32"
+        } flex flex-col items-center justify-center ${
           preview && content[1].signed ? "opacity-50" : ""
         }`}
       >
-        <div className="h-20 flex items-end pb-4 justify-center">
+        <div
+          className={`${
+            view === false ? "h-auto py-2" : "h-20 pb-4"
+          } flex items-end justify-center`}
+        >
           {content[1].signed && content[1].acceptedName ? (
             <div className="flex flex-col items-center">
-              <p className="text-lg  text-active_text h-20 flex items-end pb-4 justify-center">
+              <p
+                className={`${
+                  view === false ? "text-sm" : "text-lg"
+                } text-active_text ${
+                  view === false ? "h-auto py-2" : "h-20 pb-4"
+                } flex items-end justify-center`}
+              >
                 {content[1]?.acceptedName}
               </p>
               {preview && (
-                <p className="text-xs text-green-600 font-semibold">✓ Signed</p>
+                <p
+                  className={`${
+                    view === false ? "text-[10px]" : "text-xs"
+                  } text-green-600 font-semibold`}
+                >
+                  ✓ Signed
+                </p>
               )}
             </div>
           ) : preview && !content[1].acceptedName && !content[1].signed ? (
             <button
               onClick={() => setShowSignModal(true)}
-              className="px-6 py-2  text-white rounded-md bg-graidient_bottom  "
+              className={`${
+                view === false ? "px-4 py-1.5 text-xs" : "px-6 py-2"
+              } text-white rounded-md bg-graidient_bottom`}
             >
               Sign
             </button>
@@ -104,18 +169,28 @@ const SignRow = ({ index, rows, content, onChange, selected, preview }) => {
                 updatedData[1].signed = true;
                 onChange(updatedData);
               }}
-              className="px-6 py-2  text-white rounded-md bg-graidient_bottom  "
+              className={`${
+                view === false ? "px-4 py-1.5 text-xs" : "px-6 py-2"
+              } text-white rounded-md bg-graidient_bottom`}
             >
               Sign Proposal
             </button>
           ) : (
-            <p className="text-sm text-gray-500">
+            <p
+              className={`${
+                view === false ? "text-xs" : "text-sm"
+              } text-gray-500`}
+            >
               {preview ? "Signed" : content[1]?.acceptedName}
             </p>
           )}
         </div>
         <div className="border-t border-border_clr w-full  "></div>
-        <h3 className="text-non_active_text h-12 flex items-center justify-center">
+        <h3
+          className={`text-non_active_text ${
+            view === false ? "h-8 text-xs" : "h-12"
+          } flex items-center justify-center`}
+        >
           {content[1]?.acceptedName ||
             (preview ? "Client Name" : content[1]?.acceptedName)}
         </h3>

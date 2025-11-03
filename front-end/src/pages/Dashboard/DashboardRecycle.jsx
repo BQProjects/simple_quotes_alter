@@ -61,26 +61,45 @@ const DashboardRecycle = () => {
     <>
       <div className="w-[100%] bg-gray-100 min-h-[90vh]">
         <div className="relative w-full h-[88vh] bg-white px-10 pt-10 flex flex-col ">
-          <div className="text-xl text-gray-500 flex items-center justify-start gap-3">
+          <div className="text-xl text-gray-600 mb-6 flex items-center justify-start gap-3">
             <RiDeleteBin5Line />
             <h1>Recycle Bin</h1>
           </div>
-          <div className="mt-3 text-gray-500 text-lg mb-2">
+          {/* <div className="mt-3 text-gray-500 text-lg mb-2">
             <h1>Proposals</h1>
-          </div>
+          </div> */}
           <div className="h-[74vh] overflow-y-auto scrollbar-hide">
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 px-4">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                  <RiDeleteBin5Line className="text-4xl text-gray-400" />
-                </div>
-                <h2 className="text-xl font-medium text-gray-700 mb-2">
-                  Loading...
-                </h2>
-                <p className="text-gray-500 text-center max-w-md">
-                  Fetching your deleted proposals...
-                </p>
-              </div>
+              <table className="w-full table-auto">
+                <thead className="h-12 bg-gray-100 text-left text-gray-600 font-normal text-sm sticky top-0 z-10">
+                  <tr>
+                    <th className="px-4 py-2 w-[70%]">Proposal Name</th>
+                    <th className="w-[15%]">Workspace Name</th>
+                    <th className="pl-10 py-2 w-[15%]">Quick Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-200 mt-1 h-12"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                      </td>
+                      <td className="px-1">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                      </td>
+                      <td>
+                        <div className="flex gap-2 ml-14">
+                          <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             ) : proposals &&
               proposals.length > 0 &&
               proposals.some(

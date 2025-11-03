@@ -6,11 +6,11 @@ import Arrow from "../assets/arraw.png";
 const WebHeader = () => {
   const navigate = useNavigate();
   return (
-    <div className=" py-3 w-[95%] rounded-md border border-gray-200 flex h-fit  items-center justify-between fixed top-10 bg-white z-[5000]  ">
+    <div className=" py-3 w-full px-20 border border-[#ee0e0e0] flex h-fit  items-center justify-between fixed top-0 bg-gray-50 z-[5000] ">
       <div className=" w-[20%]  ">
         <img className="w-[80%] ml-7" src={Logo} alt="Logo" />
       </div>
-      <div className="w-[60%] items-center justify-center flex gap-6 text-gray-500  ">
+      <div className="w-[60%] items-center flex gap-6 text-gray-500  ">
         <NavLink className="hover:font-bold" to="/">
           Home
         </NavLink>
@@ -28,14 +28,13 @@ const WebHeader = () => {
       <div className="flex gap-4 w-[20%] items-center justify-end  mr-10">
         <button
           onClick={() => navigate("/login")}
-          className="pl-3 pr-3 hidden lg:block pt-2 pb-2 bg-white text-botton_white_text border-[1px] border-botton_white_text rounded-md"
+          className="pl-3 pr-3 hidden lg:block pt-2 pb-2 text-gray-500 hover:font-bold"
         >
           Login
         </button>
         <Link to="/signup">
-          <button className="pl-3 pr-3 pt-2 pb-2 bg-botton_white_text border-[1px] border-botton_white_text rounded-md flex text-white">
-            Try it free
-            <img src={Arrow} alt="no" className="w-5 m-[2px]" />
+          <button className=" bg-white text-botton_white_text border-[1px] border-botton_white_text flex text-center py-3 px-4 items-center justify-center gap-2 rounded-md hover:bg-graidient_bottom hover:text-white">
+            Start for free
           </button>
         </Link>
       </div>

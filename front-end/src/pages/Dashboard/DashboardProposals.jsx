@@ -44,6 +44,7 @@ const DashboardProposals = () => {
   const [move, setMove] = useState(null);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const handleMove = async () => {
     try {
@@ -234,6 +235,11 @@ const DashboardProposals = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // ConfirmProposalDeletion modal component
   const ConfirmProposalDeletion = ({
     open,
@@ -417,225 +423,266 @@ const DashboardProposals = () => {
                 </tr>
               </thead>
               <tbody className="">
-                {proposals.map((proposal, index) => {
-                  return (
-                    <tr
-                      className="border-b border-gray-100 mt-1 text-gray-600 hover:bg-gray-50 cursor-pointer h-14 pl-10 pr-10 "
-                      key={index}
-                    >
-                      <td
-                        key={proposal._id}
-                        className="px-2 flex flex-col items-start justify-center text-left pt-1 pl-4"
+                {loading
+                  ? Array.from({ length: 8 }).map((_, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-gray-100 mt-1 h-14 pl-10 pr-10"
                       >
-                        <span className="flex items-center gap-2 w-full">
-                          {proposal.favorate ? (
-                            <FaStar
-                              onClick={() => {
-                                handleFavorate(false, proposal._id);
-                                const temp = [...proposals];
-                                temp[index].favorate = false;
-                                setProposals(temp);
-                              }}
-                              className="text-graidient_bottom"
-                            />
-                          ) : (
-                            <FaRegStar
-                              onClick={() => {
-                                handleFavorate(true, proposal._id);
-                                const temp = [...proposals];
-                                temp[index].favorate = true;
-                                setProposals(temp);
-                              }}
-                              className="text-gray-500"
-                            />
-                          )}
-                          <input
-                            onClick={() => {
-                              if (rename === null) {
-                                navigate(`/editor/${proposal._id}`);
-                              }
-                            }}
-                            value={
-                              rename === proposal._id
-                                ? renameV
-                                : proposal.proposalName
-                            }
-                            className={`w-[70%] overflow-hidden whitespace-nowrap text-ellipsis outline-none ${
-                              rename === proposal._id
-                                ? "border-b border-gray-800 bg-gray-50 cursor-text"
-                                : "bg-transparent border-none cursor-pointer"
-                            }`}
-                            onChange={(e) => setRenameV(e.target.value)}
-                            readOnly={rename === proposal._id ? false : true}
-                          />
-                          {rename === proposal._id && (
-                            <button
-                              onClick={() => handleRename(proposal._id, index)}
-                            >
-                              <FaCheck />
-                            </button>
-                          )}
-                        </span>
-                        <span className="text-xs text-gray-500 ml-7 ">
-                          Created on {formatDate(proposal.createdAt)}
-                        </span>
-                      </td>
-                      <td className="pl-5 pr-3">
-                        <span className="text-gray-700">
-                          {
-                            // Find the workspace object by ID and show its name
-                            (() => {
-                              if (
-                                proposal.workspaces &&
-                                proposal.workspaces.length > 0 &&
-                                workspaces &&
-                                workspaces.length > 0
-                              ) {
-                                const ws = workspaces.find(
-                                  (w) => w._id === proposal.workspaces[0]
-                                );
-                                return ws
-                                  ? ws.workspaceName
-                                  : "No workspaceName";
-                              }
-                              return "No workspaceName";
-                            })()
-                          }
-                        </span>
-                      </td>
-                      <td className="pl-5 pr-3">
-                        {proposal.views ? (
-                          <span className="flex flex-col  items-start justify-center">
-                            <span className="flex items-center justify-start gap-2">
-                              <FiEye />
-                              {proposal.views}
-                            </span>
-                            <span className=" text-xs text-gray-500">
-                              Last vist {getLastSeen(proposal.lastUpdate)}
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="flex flex-row gap-1 items-center justify-start">
-                            <FiEye />0
-                          </span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="flex flex-row gap-4  ml-8 pr-4">
-                          <span className="group relative flex items-center">
-                            <GoLink
-                              onClick={() => {
-                                copyToClipboard(proposal._id);
-                              }}
-                              className="w-4 h-4 text-gray-600 hover:text-graidient_bottom cursor-pointer"
-                            />
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
-                              Copy Link
-                            </span>
-                          </span>
-                          <span className="group relative flex items-center">
-                            <SiSimpleanalytics
-                              onClick={() =>
-                                navigate(`/analytics/${proposal._id}`)
-                              }
-                              className="w-4 h-4 text-gray-600 hover:text-graidient_bottom cursor-pointer"
-                            />
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
-                              Analytics
-                            </span>
-                          </span>
-                          <span className="group relative flex items-center">
-                            <IoMdLock
-                              className={
-                                proposal.locked ||
-                                selLocked.includes(proposal._id)
-                                  ? "w-5 h-4 text-graidient_bottom"
-                                  : "w-5 h-4 text-gray-500 hover:text-graidient_bottom"
-                              }
-                              onClick={() => {
-                                handleLocked(!proposal.locked, proposal._id);
-                                const temp = [...proposals];
-                                temp[index].locked = !proposal.locked;
-                                setProposals(temp);
-                              }}
-                            />
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
-                              {proposal.locked ||
-                              selLocked.includes(proposal._id)
-                                ? "Unlock"
-                                : "Lock"}
-                            </span>
-                          </span>
-
-                          <span className="group relative flex items-center">
-                            <FaRegCopy
-                              className="text-gray-600 hover:text-graidient_bottom cursor-pointer"
-                              onClick={() => handleDuplicate(proposal._id)}
-                            />
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
-                              Duplicate
-                            </span>
-                          </span>
-                          <div className="relative" ref={popRef}>
-                            <BsThreeDotsVertical
-                              onClick={() => {
-                                if (threeDots !== null) {
-                                  setThreeDots(null);
-                                } else {
-                                  setThreeDots(index);
-                                }
-                              }}
-                              className={`${
-                                threeDots === index
-                                  ? "text-graidient_bottom"
-                                  : "text-gray-600"
-                              }`}
-                            />
-                            {threeDots !== null && threeDots === index && (
-                              <div
-                                ref={popUpRef}
-                                className="absolute top-5 -left-20 flex flex-col z-50 bg-white px-2 py-2 w-40 items-center justify-center shadow-md shadow-gray-300"
-                              >
-                                <p
-                                  onClick={() => {
-                                    setRename(proposal._id);
-                                    setRenameV(proposal.proposalName);
-                                    setThreeDots(null);
-                                  }}
-                                  className="py-1 px-1 w-full hover:bg-gray-100"
-                                >
-                                  Rename
-                                </p>
-                                <p
-                                  onClick={() => {
-                                    setMove(proposal._id);
-                                    setThreeDots(null);
-                                  }}
-                                  className="py-1 px-1 w-full hover:bg-gray-100"
-                                >
-                                  Move To
-                                </p>
-                                <p
-                                  onClick={() => {
-                                    setDeleteModal({
-                                      open: true,
-                                      id: proposal._id,
-                                      name: proposal.proposalName,
-                                    });
-                                    setThreeDots(null);
-                                  }}
-                                  className="py-1 px-1 w-full hover:bg-gray-100"
-                                >
-                                  Delete
-                                </p>
-                              </div>
-                            )}
+                        <td className="px-2 flex flex-col items-start justify-center text-left pt-1 pl-4">
+                          <div className="flex items-center gap-2 w-full">
+                            <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2 mt-1 ml-7"></div>
+                        </td>
+                        <td className="pl-5 pr-3">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
+                        </td>
+                        <td className="pl-5 pr-3">
+                          <div className="flex flex-col gap-1">
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div>
+                            <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3"></div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex gap-4 ml-8 pr-4">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <div
+                                key={i}
+                                className="w-4 h-4 bg-gray-200 rounded animate-pulse"
+                              ></div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  : proposals.map((proposal, index) => {
+                      return (
+                        <tr
+                          className="border-b border-gray-100 mt-1 text-gray-600 hover:bg-gray-50 cursor-pointer h-14 pl-10 pr-10 "
+                          key={index}
+                        >
+                          <td
+                            key={proposal._id}
+                            className="px-2 flex flex-col items-start justify-center text-left pt-1 pl-4"
+                          >
+                            <span className="flex items-center gap-2 w-full">
+                              {proposal.favorate ? (
+                                <FaStar
+                                  onClick={() => {
+                                    handleFavorate(false, proposal._id);
+                                    const temp = [...proposals];
+                                    temp[index].favorate = false;
+                                    setProposals(temp);
+                                  }}
+                                  className="text-graidient_bottom"
+                                />
+                              ) : (
+                                <FaRegStar
+                                  onClick={() => {
+                                    handleFavorate(true, proposal._id);
+                                    const temp = [...proposals];
+                                    temp[index].favorate = true;
+                                    setProposals(temp);
+                                  }}
+                                  className="text-gray-500"
+                                />
+                              )}
+                              <input
+                                onClick={() => {
+                                  if (rename === null) {
+                                    navigate(`/editor/${proposal._id}`);
+                                  }
+                                }}
+                                value={
+                                  rename === proposal._id
+                                    ? renameV
+                                    : proposal.proposalName
+                                }
+                                className={`w-[70%] overflow-hidden whitespace-nowrap text-ellipsis outline-none ${
+                                  rename === proposal._id
+                                    ? "border-b border-gray-800 bg-gray-50 cursor-text"
+                                    : "bg-transparent border-none cursor-pointer"
+                                }`}
+                                onChange={(e) => setRenameV(e.target.value)}
+                                readOnly={
+                                  rename === proposal._id ? false : true
+                                }
+                              />
+                              {rename === proposal._id && (
+                                <button
+                                  onClick={() =>
+                                    handleRename(proposal._id, index)
+                                  }
+                                >
+                                  <FaCheck />
+                                </button>
+                              )}
+                            </span>
+                            <span className="text-xs text-gray-500 ml-7 ">
+                              Created on {formatDate(proposal.createdAt)}
+                            </span>
+                          </td>
+                          <td className="pl-5 pr-3">
+                            <span className="text-gray-700">
+                              {
+                                // Find the workspace object by ID and show its name
+                                (() => {
+                                  if (
+                                    proposal.workspaces &&
+                                    proposal.workspaces.length > 0 &&
+                                    workspaces &&
+                                    workspaces.length > 0
+                                  ) {
+                                    const ws = workspaces.find(
+                                      (w) => w._id === proposal.workspaces[0]
+                                    );
+                                    return ws
+                                      ? ws.workspaceName
+                                      : "No workspaceName";
+                                  }
+                                  return "No workspaceName";
+                                })()
+                              }
+                            </span>
+                          </td>
+                          <td className="pl-5 pr-3">
+                            {proposal.views ? (
+                              <span className="flex flex-col  items-start justify-center">
+                                <span className="flex items-center justify-start gap-2">
+                                  <FiEye />
+                                  {proposal.views}
+                                </span>
+                                <span className=" text-xs text-gray-500">
+                                  Last vist {getLastSeen(proposal.lastUpdate)}
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="flex flex-row gap-1 items-center justify-start">
+                                <FiEye />0
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            <div className="flex flex-row gap-4  ml-8 pr-4">
+                              <span className="group relative flex items-center">
+                                <GoLink
+                                  onClick={() => {
+                                    copyToClipboard(proposal._id);
+                                  }}
+                                  className="w-4 h-4 text-gray-600 hover:text-graidient_bottom cursor-pointer"
+                                />
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
+                                  Copy Link
+                                </span>
+                              </span>
+                              <span className="group relative flex items-center">
+                                <SiSimpleanalytics
+                                  onClick={() =>
+                                    navigate(`/analytics/${proposal._id}`)
+                                  }
+                                  className="w-4 h-4 text-gray-600 hover:text-graidient_bottom cursor-pointer"
+                                />
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
+                                  Analytics
+                                </span>
+                              </span>
+                              <span className="group relative flex items-center">
+                                <IoMdLock
+                                  className={
+                                    proposal.locked ||
+                                    selLocked.includes(proposal._id)
+                                      ? "w-5 h-4 text-graidient_bottom"
+                                      : "w-5 h-4 text-gray-500 hover:text-graidient_bottom"
+                                  }
+                                  onClick={() => {
+                                    handleLocked(
+                                      !proposal.locked,
+                                      proposal._id
+                                    );
+                                    const temp = [...proposals];
+                                    temp[index].locked = !proposal.locked;
+                                    setProposals(temp);
+                                  }}
+                                />
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
+                                  {proposal.locked ||
+                                  selLocked.includes(proposal._id)
+                                    ? "Unlock"
+                                    : "Lock"}
+                                </span>
+                              </span>
+
+                              <span className="group relative flex items-center">
+                                <FaRegCopy
+                                  className="text-gray-600 hover:text-graidient_bottom cursor-pointer"
+                                  onClick={() => handleDuplicate(proposal._id)}
+                                />
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-50">
+                                  Duplicate
+                                </span>
+                              </span>
+                              <div className="relative" ref={popRef}>
+                                <BsThreeDotsVertical
+                                  onClick={() => {
+                                    if (threeDots !== null) {
+                                      setThreeDots(null);
+                                    } else {
+                                      setThreeDots(index);
+                                    }
+                                  }}
+                                  className={`${
+                                    threeDots === index
+                                      ? "text-graidient_bottom"
+                                      : "text-gray-600"
+                                  }`}
+                                />
+                                {threeDots !== null && threeDots === index && (
+                                  <div
+                                    ref={popUpRef}
+                                    className="absolute top-5 -left-20 flex flex-col z-50 bg-white px-2 py-2 w-40 items-center justify-center shadow-md shadow-gray-300"
+                                  >
+                                    <p
+                                      onClick={() => {
+                                        setRename(proposal._id);
+                                        setRenameV(proposal.proposalName);
+                                        setThreeDots(null);
+                                      }}
+                                      className="py-1 px-1 w-full hover:bg-gray-100"
+                                    >
+                                      Rename
+                                    </p>
+                                    <p
+                                      onClick={() => {
+                                        setMove(proposal._id);
+                                        setThreeDots(null);
+                                      }}
+                                      className="py-1 px-1 w-full hover:bg-gray-100"
+                                    >
+                                      Move To
+                                    </p>
+                                    <p
+                                      onClick={() => {
+                                        setDeleteModal({
+                                          open: true,
+                                          id: proposal._id,
+                                          name: proposal.proposalName,
+                                        });
+                                        setThreeDots(null);
+                                      }}
+                                      className="py-1 px-1 w-full hover:bg-gray-100"
+                                    >
+                                      Delete
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
               </tbody>
             </table>
           </div>

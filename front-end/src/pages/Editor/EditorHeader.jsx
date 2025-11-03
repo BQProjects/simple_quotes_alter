@@ -65,6 +65,8 @@ const EditorHeader = ({
   settings,
   createdAt,
   dropCanvasRef,
+  view,
+  setView,
 }) => {
   const [saving, setSaving] = useState(false);
   const [isDisabledL, setIsDisabledL] = useState(false);
@@ -83,7 +85,6 @@ const EditorHeader = ({
   const [name, setName] = useState("");
   const [created, setCreated] = useState("");
   const [changing, setChanging] = useState(false);
-  const [view, setView] = useState(true);
   const [tool, setTool] = useState(null);
   const { que, setQue, count, setCount, notifications, notifi, setNotifi } =
     useContext(StateManageContext);

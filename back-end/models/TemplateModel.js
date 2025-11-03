@@ -1,17 +1,19 @@
 const mongoose = require("mongoose");
 
 const TemplateModel = new mongoose.Schema({
-    TemplateName: {
-        type:String,
-        required: true,
-    },
-    TemplateImage: {
-        type:String,
-        required:true,
-    },
-    data: {
-        type:Object
-    }
+  TemplateName: {
+    type: String,
+    required: true,
+    index: true,
+  },
+  TemplateImage: {
+    type: String,
+    required: true,
+    index: true,
+  },
+  data: {
+    type: Object,
+  },
 });
 
 module.exports = mongoose.model("TemplateModel", TemplateModel);
