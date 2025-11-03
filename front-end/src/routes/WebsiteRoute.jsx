@@ -17,6 +17,7 @@ import Terms from "../pages/website/Terms.jsx";
 import ChangePassword from "../pages/website/ChangePassword.jsx";
 import ForgotPassWord from "../pages/website/ForgotPassWord.jsx";
 import DashboardTemplates from "../pages/Dashboard/DashboardTemplates.jsx";
+import DashboardSettings from "../pages/Dashboard/DashboardSettings.jsx";
 const Home = React.lazy(() => import("../pages/website/Home"));
 const Signup = React.lazy(() => import("../pages/website/Signup"));
 const Pricing = React.lazy(() => import("../pages/website/Pricing"));
@@ -89,7 +90,8 @@ const WebsiteRoute = () => {
           }
         />
 
-        <Route path="/templates"
+        <Route
+          path="/templates"
           element={
             <Dashboard>
               <DashboardTemplates />
@@ -140,13 +142,21 @@ const WebsiteRoute = () => {
           }
         />
         <Route
-          path="settings"
+          path="Settings"
+          element={
+            <Dashboard>
+              <DashboardSettings />
+            </Dashboard>
+          }
+        />
+        {/* <Route
+          path="generalSettings"
           element={
             <Dashboard>
               <GeneralSettings />
             </Dashboard>
           }
-        />
+        /> */}
         <Route
           path="manage"
           element={
