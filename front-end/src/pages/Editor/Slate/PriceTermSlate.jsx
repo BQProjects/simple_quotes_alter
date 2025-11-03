@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { StateManageContext } from "../../../context/StateManageContext";
 import { FaEdit } from "react-icons/fa";
 
-const PriceTermSlate = ({ index, rows, selected, settings, preview }) => {
+const PriceTermSlate = ({ index, rows, selected, settings, preview, view }) => {
   const calculateTotalPercentage = () => {
     let value = 0;
     rows.content.forEach((element) => {
@@ -39,20 +39,36 @@ const PriceTermSlate = ({ index, rows, selected, settings, preview }) => {
           <FaEdit />
         </button>
       )}
-      <div className="w-full flex items-center justify-center">
-        <table className="w-full">
+      <div
+        className={`w-full flex items-center justify-center ${
+          view === false ? "overflow-x-auto" : ""
+        }`}
+      >
+        <table className={view === false ? "min-w-[650px]" : "w-full"}>
           <thead className="text-active_text">
             <tr>
-              <th className="w-[70%] bg-backgrounds py-2 font-normal text-left pl-4 border border-gray-300">
+              <th
+                className={`bg-backgrounds py-2 font-normal text-left pl-4 border border-gray-300 ${
+                  view === false ? "text-xs w-[60%]" : "w-[70%]"
+                }`}
+              >
                 Deliverables
               </th>
               {rows.options.percentage && (
-                <th className="bg-backgrounds font-normal border border-gray-300 py-2">
+                <th
+                  className={`bg-backgrounds font-normal border border-gray-300 py-2 ${
+                    view === false ? "text-xs" : ""
+                  }`}
+                >
                   Percentage
                 </th>
               )}
               {rows.options.value && (
-                <th className=" bg-backgrounds font-normal border border-gray-300 py-2 text-right px-3">
+                <th
+                  className={`bg-backgrounds font-normal border border-gray-300 py-2 text-right px-3 ${
+                    view === false ? "text-xs" : ""
+                  }`}
+                >
                   Value
                 </th>
               )}
@@ -62,16 +78,28 @@ const PriceTermSlate = ({ index, rows, selected, settings, preview }) => {
             {rows.content.map((row, index) => {
               return (
                 <tr key={row.id || index} className="text-heightlet_text">
-                  <td className="w-[70%] border border-gray-300 py-2 bg-backgrounds_2 text-left pl-4  ">
+                  <td
+                    className={`border border-gray-300 py-2 bg-backgrounds_2 text-left pl-4 ${
+                      view === false ? "text-xs w-[60%]" : "w-[70%]"
+                    }`}
+                  >
                     {row.deliverable}
                   </td>
                   {rows.options.percentage && (
-                    <td className="border border-gray-300 py-2">
+                    <td
+                      className={`border border-gray-300 py-2 ${
+                        view === false ? "text-xs" : ""
+                      }`}
+                    >
                       {row.percentage}%
                     </td>
                   )}
                   {rows.options.value && (
-                    <th className="border border-gray-300 py-2 font-normal text-right px-3">
+                    <th
+                      className={`border border-gray-300 py-2 font-normal text-right px-3 ${
+                        view === false ? "text-xs" : ""
+                      }`}
+                    >
                       {rows.options.currency ? rows.options.currency : "$"}
                       {row.value}
                     </th>
@@ -81,17 +109,29 @@ const PriceTermSlate = ({ index, rows, selected, settings, preview }) => {
             })}
 
             <tr className="text-active_text">
-              <td className=" border border-gray-300 py-2 bg-backgrounds_2 text-left pl-4  ">
+              <td
+                className={`border border-gray-300 py-2 bg-backgrounds_2 text-left pl-4 ${
+                  view === false ? "text-xs" : ""
+                }`}
+              >
                 Total
               </td>
 
               {rows.options.percentage && (
-                <td className="border border-gray-200 py-2 ">
+                <td
+                  className={`border border-gray-200 py-2 ${
+                    view === false ? "text-xs" : ""
+                  }`}
+                >
                   {calculateTotalPercentage()}%
                 </td>
               )}
               {rows.options.value && (
-                <th className="border border-gray-200 py-2 font-normal  text-right px-3">
+                <th
+                  className={`border border-gray-200 py-2 font-normal  text-right px-3 ${
+                    view === false ? "text-xs" : ""
+                  }`}
+                >
                   {rows.options.currency ? rows.options.currency : "$"}
                   {calculateTotalValue()}
                 </th>

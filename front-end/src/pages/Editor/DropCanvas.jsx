@@ -24,6 +24,7 @@ const DropCanvas = ({
   addLineSpace,
   addDoubleImage,
   height,
+  view,
 }) => {
   const [bookmark, setBookmark] = useState(null);
   const [snapshotLink, setSnapshotLink] = useState("");
@@ -124,7 +125,11 @@ const DropCanvas = ({
       className={`canvas ${
         height === true ? "mt-1" : " mt-10"
       } my mb-20 bg-white shadow-lg shadow-gray-300 h-fit py-10 px-12`}
-      style={{ width: "1000px", minHeight: "230vh", position: "relative" }}
+      style={{
+        width: view === false ? "375px" : "1000px",
+        minHeight: "230vh",
+        position: "relative",
+      }}
     >
       {/* Render rows */}
       {rows.map((row, index) => (
@@ -158,6 +163,7 @@ const DropCanvas = ({
             addCodeBlock={addCodeBlock}
             addLineSpace={addLineSpace}
             addDoubleImage={addDoubleImage}
+            view={view}
           />
         </div>
       ))}

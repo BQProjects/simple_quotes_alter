@@ -58,6 +58,7 @@ const EditorDnD = () => {
     theme: 0,
   });
   const [active, setActive] = useState("elements");
+  const [view, setView] = useState(true); // true = desktop, false = mobile
   const {
     sign,
     setSign,
@@ -520,6 +521,8 @@ const EditorDnD = () => {
           settings={settings}
           createdAt={createdAt}
           dropCanvasRef={dropCanvasRef}
+          view={view}
+          setView={setView}
         />
       </div>
 
@@ -717,7 +720,7 @@ const EditorDnD = () => {
             rows={rows}
             settings={settings}
             setRows={setRows}
-            preview={preview}
+            preview={view === false ? true : preview}
             setSignEdit={setSignEdit}
             dropCanvasRef={dropCanvasRef}
             addEmptyRow={addEmptyRow}
@@ -732,6 +735,7 @@ const EditorDnD = () => {
             addCodeBlock={addCodeBlock}
             addLineSpace={addLineSpace}
             height={false}
+            view={view}
           />
         </div>
       </div>

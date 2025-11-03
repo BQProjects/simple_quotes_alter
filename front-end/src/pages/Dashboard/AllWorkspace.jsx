@@ -39,6 +39,7 @@ const AllWorkspace = () => {
   const [openSort, setOpenSort] = useState(false);
   const sortButtonRef = useRef();
   const sortRef = useRef();
+  const [loading, setLoading] = useState(true);
 
   const handleFavorate = async (id, favorate, e) => {
     e.stopPropagation();
@@ -153,6 +154,11 @@ const AllWorkspace = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutsideSort);
     };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -291,174 +297,195 @@ const AllWorkspace = () => {
           </button>
 
           <div className="p-2 grid grid-cols-3 gap-4 h-[76vh] overflow-y-auto scrollbar-hide auto-rows-max">
-            {workspaces.map((workspace, index) => {
-              return (
+            {loading ? (
+              Array.from({ length: 9 }).map((_, index) => (
                 <div
                   key={index}
-                  className="w-full h-15 px-3 py-2 border border-gray-200 rounded-md flex items-center justify-start cursor-pointer hover:shadow-md hover:border-pink-300 transition-all duration-200 gap-2"
+                  className="w-full h-15 px-3 py-2 border border-gray-200 rounded-md flex items-center justify-start gap-2"
                 >
-                  <div
-                    onClick={() => navigate(`/workspace/${workspace._id}`)}
-                    className={`h-10 w-12  p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300 `}
-                  >
-                    <FaRegFolder
-                      style={{
-                        color: workspace.workspaceColor,
-                      }}
-                      className=" h-5 w-5"
-                    />
-                  </div>
-                  <div
-                    className="text-sm flex flex-col w-[63%]  "
-                    onClick={() => navigate(`/workspace/${workspace._id}`)}
-                  >
-                    <h2 className=" text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-ellipsis flex items-center justify-start gap-1">
-                      <span>
-                        {workspace.workspaceName
-                          ? workspace.workspaceName
-                          : "Workspace"}
-                      </span>
-                      <span className="z-10">
-                        {workspace.favorate ? (
-                          <FaStar
-                            onClick={(e) => {
-                              handleFavorate(workspace._id, false, e);
-                              const temp = [...workspaces];
-                              temp[index].favorate = false;
-                              setWorkspaces(temp);
-                            }}
-                            className="text-graidient_bottom"
-                          />
-                        ) : (
-                          <FaRegStar
-                            onClick={(e) => {
-                              handleFavorate(workspace._id, true, e);
-                              const temp = [...workspaces];
-                              temp[index].favorate = true;
-                              setWorkspaces(temp);
-                            }}
-                            className="text-gray-500"
-                          />
-                        )}
-                      </span>
-                    </h2>
-                    <p className="text-xs text-gray-400">
-                      {workspace.proposals.length} Proposals
-                    </p>
+                  <div className="h-10 w-12 p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300 bg-gray-200 animate-pulse"></div>
+                  <div className="text-sm flex flex-col w-[63%]">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2 mt-1"></div>
                   </div>
                   <div className="flex flex-row gap-1 items-center justify-end">
+                    <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                {workspaces.map((workspace, index) => {
+                  return (
                     <div
-                      className="relative h-8 w-8 rounded-[50%] "
-                      style={{
-                        marginRight:
-                          workspace.collabUsers?.length >= 0 ? "20px" : 0,
+                      key={index}
+                      className="w-full h-15 px-3 py-2 border border-gray-200 rounded-md flex items-center justify-start cursor-pointer hover:shadow-md hover:border-pink-300 transition-all duration-200 gap-2"
+                    >
+                      <div
+                        onClick={() => navigate(`/workspace/${workspace._id}`)}
+                        className={`h-10 w-12  p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300 `}
+                      >
+                        <FaRegFolder
+                          style={{
+                            color: workspace.workspaceColor,
+                          }}
+                          className=" h-5 w-5"
+                        />
+                      </div>
+                      <div
+                        className="text-sm flex flex-col w-[63%]  "
+                        onClick={() => navigate(`/workspace/${workspace._id}`)}
+                      >
+                        <h2 className=" text-gray-600 font-semibold overflow-hidden whitespace-nowrap text-ellipsis flex items-center justify-start gap-1">
+                          <span>
+                            {workspace.workspaceName
+                              ? workspace.workspaceName
+                              : "Workspace"}
+                          </span>
+                          <span className="z-10">
+                            {workspace.favorate ? (
+                              <FaStar
+                                onClick={(e) => {
+                                  handleFavorate(workspace._id, false, e);
+                                  const temp = [...workspaces];
+                                  temp[index].favorate = false;
+                                  setWorkspaces(temp);
+                                }}
+                                className="text-graidient_bottom"
+                              />
+                            ) : (
+                              <FaRegStar
+                                onClick={(e) => {
+                                  handleFavorate(workspace._id, true, e);
+                                  const temp = [...workspaces];
+                                  temp[index].favorate = true;
+                                  setWorkspaces(temp);
+                                }}
+                                className="text-gray-500"
+                              />
+                            )}
+                          </span>
+                        </h2>
+                        <p className="text-xs text-gray-400">
+                          {workspace.proposals.length} Proposals
+                        </p>
+                      </div>
+                      <div className="flex flex-row gap-1 items-center justify-end">
+                        <div
+                          className="relative h-8 w-8 rounded-[50%] "
+                          style={{
+                            marginRight:
+                              workspace.collabUsers?.length >= 0 ? "20px" : 0,
+                          }}
+                        >
+                          <img src={Profile} alt="aksjdch" />
+                          {workspace.collabUsers?.length >= 0 && (
+                            <div className="absolute h-8 w-8 bg-white top-0 left-[58%] rounded-[50%] text-gray-500 flex items-center justify-center shadow-md shadow-gray-300">
+                              + {workspace.collabUsers?.length + 1}
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          onClick={() => setThreeDots(index)}
+                          className="relative"
+                          ref={buttonRef}
+                        >
+                          <BsThreeDotsVertical className="h-4 w-4" />
+                          {threeDots === index && (
+                            <div
+                              ref={blockRef}
+                              className="absolute top-5 -left-20 flex flex-col z-20 bg-white px-2 py-2 w-40 items-center justify-center shadow-md shadow-gray-300 "
+                            >
+                              <p
+                                onClick={() => {
+                                  setPopup(index);
+                                  setThreeDots(null);
+                                }}
+                                className="py-1 px-2 w-full hover:bg-gray-100 flex items-center justify-start gap-2 text-gray-600"
+                              >
+                                <span>
+                                  {" "}
+                                  <FaRegEdit />
+                                </span>{" "}
+                                Edit
+                              </p>
+                              <p
+                                onClick={() => setDeleteW(index)}
+                                className="py-1 px-2 w-full hover:bg-gray-100 flex items-center justify-start gap-2 text-gray-600"
+                              >
+                                <span>
+                                  <MdOutlineDelete />
+                                </span>{" "}
+                                Delete
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {workspaces.length > 0 && workspaces.length < 9 && (
+                  <>
+                    {Array.from({
+                      length: Math.max(0, 9 - workspaces.length),
+                    }).map((_, index) => (
+                      <div
+                        key={`placeholder-${index}`}
+                        className="w-full h-20 px-3 py-2 border border-transparent rounded-md opacity-0 pointer-events-none"
+                        aria-hidden="true"
+                      >
+                        {/* Invisible placeholder to maintain grid structure */}
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {newW && (
+                  <div
+                    ref={addRef}
+                    className="w-full h-20 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer"
+                  >
+                    <div
+                      className={`h-10 w-12  p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300 `}
+                    >
+                      <FaRegFolder className=" h-5 w-5 text-gray-300" />
+                    </div>
+                    <div className="text-sm flex items-center w-[63%] ">
+                      <input
+                        type="text"
+                        className="py-1  border-b-1 border-black outline-none"
+                        placeholder="Workspace Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleNewWorkspace(name, "orange", []); // replace this with your actual function
+                          }
+                        }}
+                      />
+                      <FaCheck
+                        onClick={() => handleNewWorkspace(name, "orange", [])}
+                      />
+                    </div>
+                    <div className="flex flex-row gap-1 items-center justify-end">
+                      <div className="relative h-8 w-8 rounded-[50%] ">
+                        <img src={Profile} alt="aksjdch" />
+                      </div>
+                    </div>
+                    <button
+                      className="absolute top-1 right-1 p-1"
+                      onClick={() => {
+                        setName("");
+                        setNewW(false);
                       }}
                     >
-                      <img src={Profile} alt="aksjdch" />
-                      {workspace.collabUsers?.length >= 0 && (
-                        <div className="absolute h-8 w-8 bg-white top-0 left-[58%] rounded-[50%] text-gray-500 flex items-center justify-center shadow-md shadow-gray-300">
-                          + {workspace.collabUsers?.length + 1}
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      onClick={() => setThreeDots(index)}
-                      className="relative"
-                      ref={buttonRef}
-                    >
-                      <BsThreeDotsVertical className="h-4 w-4" />
-                      {threeDots === index && (
-                        <div
-                          ref={blockRef}
-                          className="absolute top-5 -left-20 flex flex-col z-20 bg-white px-2 py-2 w-40 items-center justify-center shadow-md shadow-gray-300 "
-                        >
-                          <p
-                            onClick={() => {
-                              setPopup(index);
-                              setThreeDots(null);
-                            }}
-                            className="py-1 px-2 w-full hover:bg-gray-100 flex items-center justify-start gap-2 text-gray-600"
-                          >
-                            <span>
-                              {" "}
-                              <FaRegEdit />
-                            </span>{" "}
-                            Edit
-                          </p>
-                          <p
-                            onClick={() => setDeleteW(index)}
-                            className="py-1 px-2 w-full hover:bg-gray-100 flex items-center justify-start gap-2 text-gray-600"
-                          >
-                            <span>
-                              <MdOutlineDelete />
-                            </span>{" "}
-                            Delete
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                      x
+                    </button>
                   </div>
-                </div>
-              );
-            })}
-            {workspaces.length > 0 && workspaces.length < 9 && (
-              <>
-                {Array.from({ length: Math.max(0, 9 - workspaces.length) }).map(
-                  (_, index) => (
-                    <div
-                      key={`placeholder-${index}`}
-                      className="w-full h-20 px-3 py-2 border border-transparent rounded-md opacity-0 pointer-events-none"
-                      aria-hidden="true"
-                    >
-                      {/* Invisible placeholder to maintain grid structure */}
-                    </div>
-                  )
                 )}
               </>
-            )}
-
-            {newW && (
-              <div
-                ref={addRef}
-                className="w-full h-20 px-3 py-2 border border-gray-100 rounded-md flex items-center justify-start gap-2 cursor-pointer"
-              >
-                <div
-                  className={`h-10 w-12  p-2 flex items-center justify-center rounded-md shadow-md shadow-gray-300 `}
-                >
-                  <FaRegFolder className=" h-5 w-5 text-gray-300" />
-                </div>
-                <div className="text-sm flex items-center w-[63%] ">
-                  <input
-                    type="text"
-                    className="py-1  border-b-1 border-black outline-none"
-                    placeholder="Workspace Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleNewWorkspace(name, "orange", []); // replace this with your actual function
-                      }
-                    }}
-                  />
-                  <FaCheck
-                    onClick={() => handleNewWorkspace(name, "orange", [])}
-                  />
-                </div>
-                <div className="flex flex-row gap-1 items-center justify-end">
-                  <div className="relative h-8 w-8 rounded-[50%] ">
-                    <img src={Profile} alt="aksjdch" />
-                  </div>
-                </div>
-                <button
-                  className="absolute top-1 right-1 p-1"
-                  onClick={() => {
-                    setName("");
-                    setNewW(false);
-                  }}
-                >
-                  x
-                </button>
-              </div>
             )}
           </div>
         </div>

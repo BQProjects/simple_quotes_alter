@@ -2,7 +2,14 @@ import React, { useContext } from "react";
 import { StateManageContext } from "../../../context/StateManageContext";
 import { FaEdit } from "react-icons/fa";
 
-const CostModuleSlate = ({ index, rows, selected, settings, preview }) => {
+const CostModuleSlate = ({
+  index,
+  rows,
+  selected,
+  settings,
+  preview,
+  view,
+}) => {
   const calculateTotalAmount = () => {
     return rows.content?.reduce((total, row) => total + (row.amount || 0), 0);
   };
@@ -42,50 +49,98 @@ const CostModuleSlate = ({ index, rows, selected, settings, preview }) => {
           <FaEdit />
         </button>
       )}
-      <table className="w-full border border-gray-300 rounded-sm">
-        <thead className="">
-          <tr className="bg-backgrounds text-left px-2 text-active_text">
-            <th className="border border-r-gray-200 font-normal px-2 py-2 text-left w-[65%]">
-              Deliverables
-            </th>
-            {rows.options.quantity && (
-              <th className="border border-r-gray-200 font-normal px-2 py-2 text-center">
-                Price
+      <div className={view === false ? "overflow-x-auto" : ""}>
+        <table
+          className={`border border-gray-300 rounded-sm ${
+            view === false ? "min-w-[700px]" : "w-full"
+          }`}
+        >
+          <thead className="">
+            <tr className="bg-backgrounds text-left px-2 text-active_text">
+              <th
+                className={`border border-r-gray-200 font-normal px-2 py-2 text-left ${
+                  view === false ? "text-xs" : "w-[65%]"
+                }`}
+              >
+                Deliverables
               </th>
-            )}
-            {rows.options.quantity && (
-              <th className="border border-r-gray-200 font-normal px-2 py-1 text-right">
-                Quantity
-              </th>
-            )}
-
-            <th className="border px-2 py-1 text-right font-normal">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.content?.map((row, index) => (
-            <tr key={index} className="text-heightlet_text">
-              <td className="border px-2 text-left  py-1">{row.deliverable}</td>
               {rows.options.quantity && (
-                <td className="border px-2 py-1">
-                  {rows.options.currency ? rows.options.currency : "$"}
-                  {row.price}
-                </td>
+                <th
+                  className={`border border-r-gray-200 font-normal px-2 py-2 text-center ${
+                    view === false ? "text-xs" : ""
+                  }`}
+                >
+                  Price
+                </th>
               )}
               {rows.options.quantity && (
-                <td className="border px-2 py-1 text-right">{row.quantity}</td>
+                <th
+                  className={`border border-r-gray-200 font-normal px-2 py-1 text-right ${
+                    view === false ? "text-xs" : ""
+                  }`}
+                >
+                  Quantity
+                </th>
               )}
 
-              <td className="border px-2 py-1 text-right">
-                {rows.options.currency ? rows.options.currency : "$"}
-                {row.amount}
-              </td>
+              <th
+                className={`border px-2 py-1 text-right font-normal ${
+                  view === false ? "text-xs" : ""
+                }`}
+              >
+                Amount
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.content?.map((row, index) => (
+              <tr key={index} className="text-heightlet_text">
+                <td
+                  className={`border px-2 text-left  py-1 ${
+                    view === false ? "text-xs" : ""
+                  }`}
+                >
+                  {row.deliverable}
+                </td>
+                {rows.options.quantity && (
+                  <td
+                    className={`border px-2 py-1 ${
+                      view === false ? "text-xs" : ""
+                    }`}
+                  >
+                    {rows.options.currency ? rows.options.currency : "$"}
+                    {row.price}
+                  </td>
+                )}
+                {rows.options.quantity && (
+                  <td
+                    className={`border px-2 py-1 text-right ${
+                      view === false ? "text-xs" : ""
+                    }`}
+                  >
+                    {row.quantity}
+                  </td>
+                )}
+
+                <td
+                  className={`border px-2 py-1 text-right ${
+                    view === false ? "text-xs" : ""
+                  }`}
+                >
+                  {rows.options.currency ? rows.options.currency : "$"}
+                  {row.amount}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className="mt-2 pt-4 px-2 text-active_text">
-        <div className="flex justify-between items-center gap-16">
+        <div
+          className={`flex justify-between items-center gap-16 ${
+            view === false ? "text-xs" : ""
+          }`}
+        >
           <span className=" w-48 text-left">Total Amount</span>
           <span className="text-heightlet_text">
             {rows.options.currency ? rows.options.currency : "$"}
@@ -93,7 +148,11 @@ const CostModuleSlate = ({ index, rows, selected, settings, preview }) => {
           </span>
         </div>
         {rows.options.discount && (
-          <div className="flex justify-between items-center gap-12 mt-[3px]">
+          <div
+            className={`flex justify-between items-center gap-12 mt-[3px] ${
+              view === false ? "text-xs" : ""
+            }`}
+          >
             <span className=" w-48 text-left flex">
               Discount{" "}
               <span className="text-non_active_text flex ml-2">
@@ -112,7 +171,11 @@ const CostModuleSlate = ({ index, rows, selected, settings, preview }) => {
           </div>
         )}
         {rows.options.tax && (
-          <div className="flex justify-between items-center gap-10 mt-[3px]">
+          <div
+            className={`flex justify-between items-center gap-10 mt-[3px] ${
+              view === false ? "text-xs" : ""
+            }`}
+          >
             <span className=" w-48 text-left flex">
               Tax{" "}
               <span className="text-non_active_text flex ml-2">
@@ -132,7 +195,11 @@ const CostModuleSlate = ({ index, rows, selected, settings, preview }) => {
           </div>
         )}
 
-        <div className="flex justify-between items-cente gap-16 mt-[3px] ">
+        <div
+          className={`flex justify-between items-cente gap-16 mt-[3px] ${
+            view === false ? "text-xs" : ""
+          }`}
+        >
           <span className=" w-48 text-left">Total Payable Amount</span>
           <span className="text-heightlet_text">
             {rows.options.currency ? rows.options.currency : "$"}

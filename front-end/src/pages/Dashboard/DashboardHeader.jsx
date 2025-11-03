@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/Web_logo.png";
 import sq_logo from "../../assets/sq_logo.svg";
-import { CiSearch } from "react-icons/ci";
+import { CiSearch, CiFileOn, CiFolderOn } from "react-icons/ci";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { UserContext } from "../../context/UserContext";
 import { StateManageContext } from "../../context/StateManageContext";
@@ -251,7 +251,7 @@ const DashboardHeader = () => {
         className="w-[30%] flex items-center justify-center text-gray-600 ml-[15%] relative"
         ref={searchRef}
       >
-        <div className="flex items-center border-[1px] rounded-md border-gray-200 w-[90%] hover:border-active_text focus-within:border-active_text ">
+        <div className="flex items-center border-[1px] rounded-md border-gray-200 w-full hover:border-active_text focus-within:border-active_text ">
           <CiSearch className="w-10 text-gray-600" />
           <input
             type="text"
@@ -266,12 +266,12 @@ const DashboardHeader = () => {
 
         {/* Search Results Dropdown */}
         {showResults && (
-          <div className="absolute top-full left-[5%] w-[90%] mt-1 bg-white border border-gray-200 shadow-lg z-40 max-h-[400px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 shadow-lg rounded-lg z-40 max-h-[400px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             {loading ? (
               <div className="p-3 text-center text-gray-500">Searching...</div>
             ) : searchQuery.length > 0 && searchResults.length > 0 ? (
               <>
-                <div className="sticky top-0 bg-gray-50 p-2 border-b border-gray-200">
+                <div className="sticky top-0 bg-gray-50 p-2 border-b border-gray-200 rounded-t-lg">
                   <p className="text-sm text-gray-500 font-medium">
                     Found {searchResults.length} items
                   </p>
@@ -279,20 +279,29 @@ const DashboardHeader = () => {
                 {searchResults.map((item, index) => (
                   <div
                     key={item._id || `item-${index}`}
-                    className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 flex items-center"
+                    className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 flex items-center transition-colors duration-200"
                     onClick={() => handleSelectItem(item)}
                   >
+                    <span className="text-xs text-gray-500 mr-2">
+                      {index + 1}.
+                    </span>
                     <div
-                      className={`w-2 h-2 ${
+                      className={`w-4 h-4 mr-2 ${
                         item.type === "proposal"
-                          ? "bg-graidient_bottom"
-                          : "bg-green-500"
-                      } rounded-full mr-2`}
-                    ></div>
+                          ? "text-blue-500"
+                          : "text-green-500"
+                      }`}
+                    >
+                      {item.type === "proposal" ? (
+                        <CiFileOn className="w-full h-full" />
+                      ) : (
+                        <CiFolderOn className="w-full h-full" />
+                      )}
+                    </div>
                     <div className="flex-1 w-full">
-                      <div className="flex justify-between ">
-                        <div className="flex ">
-                          <p className="text-gray-700 font-medium text-sm w-[60%] whitespace-nowrap text-ellipsis">
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-gray-700 font-medium text-sm whitespace-nowrap text-ellipsis">
                             {item.title ||
                               item.name ||
                               item.workspaceName ||
@@ -300,7 +309,7 @@ const DashboardHeader = () => {
                               "Unnamed Item"}
                           </p>
                         </div>
-                        <span className="text-xs text-gray-500 ml-2">
+                        <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
                           {item.type === "proposal" ? "Proposal" : "Workspace"}
                         </span>
                       </div>
@@ -322,7 +331,7 @@ const DashboardHeader = () => {
               </>
             ) : searchQuery.length === 0 && recentSearches.length > 0 ? (
               <>
-                <div className="sticky top-0 bg-gray-50 p-2 border-b border-gray-200">
+                <div className="sticky top-0 bg-gray-50 p-2 border-b border-gray-200 rounded-t-lg">
                   <p className="text-sm text-gray-500 font-medium">
                     Recent Searches
                   </p>
@@ -330,7 +339,7 @@ const DashboardHeader = () => {
                 {recentSearches.map((item, index) => (
                   <div
                     key={item.id || `recent-${index}`}
-                    className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 flex items-center"
+                    className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 flex items-center transition-colors duration-200"
                     onClick={() => {
                       // Find the original item to get all properties
                       const originalItem = allItems.find(
@@ -348,19 +357,30 @@ const DashboardHeader = () => {
                       }
                     }}
                   >
+                    <span className="text-xs text-gray-500 mr-2">
+                      {index + 1}.
+                    </span>
                     <div
-                      className={`w-2 h-2 ${
+                      className={`w-4 h-4 mr-2 ${
                         item.type === "proposal"
-                          ? "bg-graidient_bottom"
-                          : "bg-green-500"
-                      } rounded-full mr-2`}
-                    ></div>
+                          ? "text-blue-500"
+                          : "text-green-500"
+                      }`}
+                    >
+                      {item.type === "proposal" ? (
+                        <CiFileOn className="w-full h-full" />
+                      ) : (
+                        <CiFolderOn className="w-full h-full" />
+                      )}
+                    </div>
                     <div className="flex-1">
-                      <div className="flex justify-between">
-                        <p className="text-gray-700 font-medium text-sm">
-                          {item.title || "Unnamed Item"}
-                        </p>
-                        <span className="text-xs text-gray-500 ml-2">
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-gray-700 font-medium text-sm whitespace-nowrap text-ellipsis">
+                            {item.title || "Unnamed Item"}
+                          </p>
+                        </div>
+                        <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
                           {item.type === "proposal" ? "Proposal" : "Workspace"}
                         </span>
                       </div>
@@ -398,7 +418,7 @@ const DashboardHeader = () => {
             }`}
             onClick={toggleNotifications}
           >
-            <div className="h-[6px] w-[6px] bg-graidient_bottom absolute top-[8px] right-[8px] rounded-[50%]"></div>
+            <div className="h-[6px] w-[6px] bg-gradient_bottom absolute top-[8px] right-[8px] rounded-[50%]"></div>
             <IoNotificationsOutline className="h-5 w-5 text-gray-500" />
           </button>
 
@@ -468,19 +488,15 @@ const DashboardHeader = () => {
           {notifi && (
             <div
               ref={bellRef}
-              className="bg-white border border-gray-100 p-5 w-[450px] absolute z-[6000] rounded-lg flex flex-col items-center justify-center gap-1 top-12 right-20   px-2 py-3 shadow-gray-400 shadow-lg"
-              style={{
-                left: "50%",
-                transform: "translate(-50%)",
-              }}
+              className="absolute right-0 top-12 bg-white border border-gray-100 rounded-lg shadow-lg z-[6000] p-4 w-[450px] max-h-[300px] overflow-y-auto"
             >
-              <div className="w-full pt-1 ">
+              <div className="w-full pt-1 border-b border-gray-100 pb-2">
                 <h2 className="ml-3 font-semibold text-gray-600">
                   Notifications
                 </h2>
               </div>
               {!notifications ? (
-                <div className="w-full py-3 text-non_active_text flex items-start justify-center text-sm">
+                <div className="w-full py-3 text-gray-500 flex items-center justify-center text-sm">
                   No Notifications are there
                 </div>
               ) : (
@@ -489,28 +505,18 @@ const DashboardHeader = () => {
                   .slice(0, 4)
                   .map((item) => {
                     return (
-                      <div className="flex justify-between w-full mt-3 py-2  rounded-md">
-                        <div className="w-[10%]  h-full flex items-start justify-center">
-                          <div className="mt-2 w-1.5 h-1.5 rounded-[50%] bg-graidient_bottom"></div>
+                      <div className="flex justify-between w-full mt-3 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
+                        <div className="w-[10%] h-full flex items-start justify-center">
+                          <div className="mt-2 w-1.5 h-1.5 rounded-full bg-gradient_bottom"></div>
                         </div>
                         <div className="w-[90%]">
                           <p className="font-semibold text-gray-600 text-sm flex justify-between pr-7">
                             {item.title}
-                            <span
-                              className="text-xs font-normal"
-                              style={{
-                                color: "rgba(140, 140, 140, 1)",
-                              }}
-                            >
+                            <span className="text-xs font-normal text-gray-500">
                               {formatTime(item.createdAt)}
                             </span>
                           </p>
-                          <p
-                            className="w-[90%] text-xs  mt-2"
-                            style={{
-                              color: "rgba(140, 140, 140, 1)",
-                            }}
-                          >
+                          <p className="w-[90%] text-xs mt-2 text-gray-500">
                             {item.discription}
                           </p>
                         </div>
@@ -523,8 +529,8 @@ const DashboardHeader = () => {
         </div>
         <button
           onClick={() => navigate("/subscription")}
-          className="text-center py-2 px-2 border border-gray-300 rounded-md text-graidient_bottom 
-          flex items-center gap-2 justify-center hover:bg-graidient_bottom hover:text-white transition-colors text-sm"
+          className="text-center py-2 px-2 border border-gray-300 rounded-md text-gradient_bottom 
+          flex items-center gap-2 justify-center hover:bg-gradient_bottom hover:text-white transition-colors text-sm"
         >
           Upgrade
         </button>

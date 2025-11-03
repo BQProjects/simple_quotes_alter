@@ -332,9 +332,20 @@ const DashboardTemplates = () => {
 
       <div className="h-[74vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-400"></div>
-            <p className="text-gray-500 mt-4">Loading templates...</p>
+          <div className="mt-6">
+            <div className="text-gray-500 text-lg mb-2">
+              <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mt-4">
+              {Array.from({ length: 15 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-gray-100 animate-pulse"
+                >
+                  <div className="w-full h-64 bg-gray-200 rounded-xl"></div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-20">

@@ -70,6 +70,7 @@ const DropRow = ({
   addCodeBlock,
   addLineSpace,
   addDoubleImage,
+  view,
 }) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "TEXT", // Accepts draggable text items
@@ -834,6 +835,7 @@ const DropRow = ({
               rows={row}
               selected={selected}
               preview={preview}
+              view={view}
             />
           </div>
         ) : row.type === "code" ? (
@@ -870,6 +872,7 @@ const DropRow = ({
               selected={selected}
               setSign={setSign}
               preview={preview}
+              view={view}
             />
           </div>
         ) : row.type === "price" ? (
@@ -883,6 +886,7 @@ const DropRow = ({
               rows={row}
               selected={selected}
               preview={preview}
+              view={view}
               onChangeHeading={(newData) => {
                 const updatedContent = [...rows];
                 updatedContent[index].heading = newData;
