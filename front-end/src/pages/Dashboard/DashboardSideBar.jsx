@@ -125,7 +125,8 @@ const DashboardSideBar = ({ setBody }) => {
 
       <div className="flex flex-col gap-2 absolute bottom-5 w-full items-center">
         <button
-          onClick={() => navigate("/Settings")}
+          ref={buttonRef}
+          onClick={() => setSettings(true)}
           className={`flex items-center justify-start py-2   gap-4 text-start w-[85%] hover:bg-gray-200 px-3 rounded-md ${
             settings === true ? "bg-gray-200" : "none"
           }`}
@@ -152,6 +153,49 @@ const DashboardSideBar = ({ setBody }) => {
           </span>
         </button>
       </div>
+      {settings && (
+        <div
+          ref={blockRef}
+          className="flex flex-col text-gray-500  absolute bottom-5 left-[99%] w-[85%] bg-white  rounded-md z-[50000] shadow-lg shadow-gray-200 text-xs"
+        >
+          <button
+            onClick={() => navigate("/manage")}
+            className="flex items-center justify-start py-2 pl-3 mt-2   text-start w-full hover:bg-gray-50 "
+          >
+            <span className="w-7 h-7 flex items-center justify-center  rounded-md">
+              <FaUsers className="w-4 h-4 text-gray-600" />
+            </span>
+            Manage Users
+          </button>
+          <button
+            onClick={() => navigate("/subscription")}
+            className="flex items-center justify-start py-2 pl-3  text-start w-full hover:bg-gray-50 "
+          >
+            <span className="w-7 h-7 flex items-center justify-center  rounded-md">
+              <RiBillFill className="w-4 h-4 text-gray-600" />
+            </span>
+            Subscription Details
+          </button>
+          <button
+            onClick={() => navigate("/settings")}
+            className="flex items-center justify-start py-2 pl-3   text-start w-full hover:bg-gray-50 "
+          >
+            <span className="w-7 h-7 flex items-center justify-center  rounded-md">
+              <IoMdInformationCircle className="w-4 h-4 text-gray-600" />
+            </span>
+            General Settings
+          </button>
+          <button
+            onClick={() => Logout()}
+            className="flex items-center justify-start py-2 pl-3  text-start w-full  hover:bg-gray-50  mb-2"
+          >
+            <span className="w-7 h-7 flex items-center justify-center  rounded-md">
+              <IoLogOut className="w-4 h-4 text-gray-600" />
+            </span>
+            Logout
+          </button>
+        </div>
+      )}
     </div>
   );
 };

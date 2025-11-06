@@ -465,7 +465,7 @@ const DashboardHome = () => {
               <div className="w-full text-left flex items-center justify-start gap-2 text-lg text-gray-700 ">
                 <h1>Templates</h1>
               </div>
-              <div className="w-full h-[calc(100%-60px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+              <div className="w-full h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                 {templateLoading ? (
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     {Array.from({ length: 8 }).map((_, index) => (
