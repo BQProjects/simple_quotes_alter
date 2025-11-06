@@ -214,9 +214,13 @@ const DashboardHeader = () => {
   // show recent searches instead of all items
   const handleSearchFocus = () => {
     setShowResults(true);
-    // Show all items when focused
-    setSearchResults(allItems);
-    setLoading(false);
+    // Show recent searches if available, otherwise show all items
+    if (recentSearches.length > 0) {
+      setSearchResults([]); // Clear current results
+      setLoading(false);
+    } else {
+      setSearchResults(allItems);
+    }
   };
 
   const handleClickOutsideBell = (event) => {
@@ -270,66 +274,6 @@ const DashboardHeader = () => {
                 <div className="sticky top-0 bg-gray-50 p-2 border-b border-gray-200 rounded-t-lg">
                   <p className="text-sm text-gray-500 font-medium">
                     Found {searchResults.length} items
-                  </p>
-                </div>
-                {searchResults.map((item, index) => (
-                  <div
-                    key={item._id || `item-${index}`}
-                    className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 flex items-center transition-colors duration-200"
-                    onClick={() => handleSelectItem(item)}
-                  >
-                    <span className="text-xs text-gray-500 mr-2">
-                      {index + 1}.
-                    </span>
-                    <div
-                      className={`w-4 h-4 mr-2 ${
-                        item.type === "proposal"
-                          ? "text-blue-500"
-                          : "text-green-500"
-                      }`}
-                    >
-                      {item.type === "proposal" ? (
-                        <CiFileOn className="w-full h-full" />
-                      ) : (
-                        <CiFolderOn className="w-full h-full" />
-                      )}
-                    </div>
-                    <div className="flex-1 w-full">
-                      <div className="flex justify-between items-center">
-                        <div className="flex-1 min-w-0 overflow-hidden">
-                          <p className="text-gray-700 font-medium text-sm whitespace-nowrap text-ellipsis">
-                            {item.title ||
-                              item.name ||
-                              item.workspaceName ||
-                              item.proposalName ||
-                              "Unnamed Item"}
-                          </p>
-                        </div>
-                        <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                          {item.type === "proposal" ? "Proposal" : "Workspace"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        {item.createdAt
-                          ? new Date(item.createdAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              }
-                            )
-                          : "No date"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </>
-            ) : searchQuery.length === 0 && searchResults.length > 0 ? (
-              <>
-                <div className="sticky top-0 bg-gray-50 p-2 border-b border-gray-200 rounded-t-lg">
-                  <p className="text-sm text-gray-500 font-medium">
-                    All Items ({searchResults.length})
                   </p>
                 </div>
                 {searchResults.map((item, index) => (

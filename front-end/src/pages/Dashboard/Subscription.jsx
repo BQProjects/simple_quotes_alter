@@ -8,7 +8,6 @@ import { UserContext } from "../../context/UserContext";
 import { DatabaseContext } from "../../context/DatabaseContext";
 import axios from "axios";
 import profile from "../../assets/profile.png";
-import dropdown from "../../assets/dropdown.svg";
 import { RiDeleteBinLine } from "react-icons/ri";
 import toast from "react-hot-toast";
 
@@ -21,71 +20,16 @@ const Subscription = () => {
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [members, setMembers] = useState([]);
-  const [editModal, setEditModal] = useState(false);
-  const [editPlan, setEditPlan] = useState(
-    user.subscription === "yearly" ? "yearly" : "monthly"
-  );
-  const [editTeamSize, setEditTeamSize] = useState(members.length + 1);
-  const [billingHistory, setBillingHistory] = useState([
-    {
-      invoice: "Invoice_Month_Year",
-      billingDate: "Jun 05, 2026",
-      endDate: "July 05, 2026",
-      plan: "Monthly plan",
-      amount: "$ 12,00",
-      users: "1",
-    },
-    {
-      invoice: "Invoice_Month_Year",
-      billingDate: "Jun 05, 2026",
-      endDate: "July 05, 2026",
-      plan: "Monthly plan",
-      amount: "$ 12,00",
-      users: "1",
-    },
-    {
-      invoice: "Invoice_Month_Year",
-      billingDate: "Jun 05, 2026",
-      endDate: "July 05, 2026",
-      plan: "Monthly plan",
-      amount: "$ 12,00",
-      users: "1",
-    },
-  ]);
-  const [sortColumn, setSortColumn] = useState(null);
-  const [sortDirection, setSortDirection] = useState("asc");
-
-  const handleSort = (column) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
+  const getUsers = async () => {
+    try {
+      const res = await axios.get(`${databaseUrl}/api/workspace/getallusers`, {
+        params: { user_id: user.id },
+      });
+      setUsers(res.data);
+    } catch (error) {
+      console.error("Error fetching workspaces:", error);
     }
   };
-
-  const sortedBillingHistory = [...billingHistory].sort((a, b) => {
-    if (!sortColumn) return 0;
-    let aValue = a[sortColumn];
-    let bValue = b[sortColumn];
-
-    if (sortColumn === "billingDate" || sortColumn === "endDate") {
-      aValue = new Date(aValue);
-      bValue = new Date(bValue);
-    } else if (sortColumn === "amount") {
-      aValue = parseFloat(aValue.replace("$", "").replace(",", ""));
-      bValue = parseFloat(bValue.replace("$", "").replace(",", ""));
-    } else if (sortColumn === "users") {
-      aValue = parseInt(aValue);
-      bValue = parseInt(bValue);
-    }
-
-    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
-
-
 
   const createSubscription = async () => {
     try {
@@ -157,36 +101,11 @@ const Subscription = () => {
     }
   };
   useEffect(() => {
-    setEditTeamSize(members.length + 1);
-  }, [members]);
+    getMembers();
+  }, []);
   useEffect(() => {
-    if (user.subscriptionDate) {
-      const start = new Date(user.subscriptionDate);
-      const history = [];
-      for (let i = 0; i < 3; i++) {
-        const billDate = new Date(start);
-        billDate.setMonth(billDate.getMonth() - i);
-        const endDate = new Date(billDate);
-        if (user.subscription === "monthly") {
-          endDate.setMonth(endDate.getMonth() + 1);
-        } else {
-          endDate.setFullYear(endDate.getFullYear() + 1);
-        }
-        history.push({
-          invoice: `Invoice_${billDate.toLocaleDateString("en-US", {
-            month: "short",
-            year: "numeric",
-          })}`,
-          billingDate: billDate.toLocaleDateString(),
-          endDate: endDate.toLocaleDateString(),
-          plan: user.subscription === "yearly" ? "Yearly plan" : "Monthly plan",
-          amount: user.subscription === "yearly" ? "$ 120,00" : "$ 12,00",
-          users: "1",
-        });
-      }
-      setBillingHistory(history);
-    }
-  }, [user]);
+    getUsers();
+  }, []);
   return (
     <>
       <div className="bg-white w-full h-[85vh] flex flex-col items-center overflow-y-auto relative">
@@ -265,461 +184,251 @@ const Subscription = () => {
             </div>
           </div>
         )}
-        {editModal && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-40 flex justify-center items-center z-50 border border-gray-500">
-            <div className=" inline-flex justify-center items-center p-10 h-[21.25rem] rounded-[0.9375rem] bg-white  border border-gray-300">
-              <div className="flex flex-col justify-center items-center gap-10">
-                <div className="flex flex-col items-start gap-10">
-                  <div className="flex justify-between items-center w-[432px]">
-                    <div className="flex items-start p-1 rounded-[0.625rem] border border-[#e0e0e0] bg-white">
-                      <div
-                        className={`flex justify-center items-center gap-2.5 py-2 px-4 rounded-md cursor-pointer ${
-                          editPlan === "monthly"
-                            ? "bg-[#df064e] text-white"
-                            : "text-[#8c8c8c]"
-                        }`}
-                        onClick={() => setEditPlan("monthly")}
-                      >
-                        Monthly
-                      </div>
-                      <div
-                        className={`flex justify-center items-center gap-2.5 py-2 px-4 rounded-md cursor-pointer ${
-                          editPlan === "yearly"
-                            ? "bg-[#df064e] text-white"
-                            : "text-[#8c8c8c]"
-                        }`}
-                        onClick={() => setEditPlan("yearly")}
-                      >
-                        Yearly
-                      </div>
-                    </div>
-                    <div className="flex flex-end items-center gap-4">
-                      <div className="text-[#cbcbcb] text-sm leading-[normal] line-through">
-                        $19
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="popular flex justify-center items-center gap-0.5 py-1 px-2 rounded bg-[#f7f7f7]">
-                          <svg
-                            width={16}
-                            height={16}
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M5 2V8.6H6.8V14L11 6.8H8.6L11 2H5Z"
-                              fill="#FFBE41"
-                            />
-                          </svg>
-                          <div className="save_20_ text-neutral-600 text-xs leading-[normal]">
-                            Flexibility first
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-start gap-10 self-stretch">
-                    <div className="flex justify-between items-center w-[432px]">
-                      <div className="flex items-center gap-2">
-                        <svg
-                          width={24}
-                          height={24}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M19.1824 4.91249L11.9987 4.75L4.81493 4.91249C3.48377 4.9426 2.35667 5.90322 2.11598 7.21278C1.53426 10.3779 1.53426 13.6225 2.11598 16.7876C2.35667 18.0972 3.48377 19.0578 4.81493 19.0879L11.9987 19.2504L19.1824 19.0879C20.5135 19.0578 21.6406 18.0972 21.8813 16.7876C22.463 13.6225 22.463 10.3779 21.8813 7.21278C21.6406 5.90322 20.5135 4.9426 19.1824 4.91249ZM4.84885 6.41211L11.9987 6.25038L19.1485 6.41211C19.7687 6.42613 20.2939 6.87374 20.406 7.48393C20.5593 8.31792 20.6698 9.15776 20.7374 10.0002H3.25987C3.32752 9.15776 3.43799 8.31792 3.59127 7.48393C3.70342 6.87374 4.22859 6.42613 4.84885 6.41211ZM3.17969 12.0002C3.17969 13.5119 3.31688 15.0235 3.59127 16.5165C3.70342 17.1266 4.22859 17.5742 4.84885 17.5883L11.9987 17.75L19.1485 17.5883C19.7687 17.5742 20.2939 17.1266 20.406 16.5165C20.6804 15.0235 20.8176 13.5119 20.8176 12.0002H3.17969Z"
-                            fill="#8C8C8C"
-                          />
-                        </svg>
-                        <div className="text_200 text-[#8c8c8c] leading-[normal]">
-                          Billing Plan
-                        </div>
-                      </div>
-                      <div className="flex flex-col flex-shrink-0 justify-center items-center gap-1 w-[6.375rem]">
-                        <div className="flex items-center">
-                          <div className="text-neutral-600 text-2xl leading-[normal]">
-                            ${editPlan === "yearly" ? "120" : "10"}
-                          </div>
-                          <div className="text-[#8c8c8c] text-sm leading-[normal]">
-                            /{editPlan === "yearly" ? "year" : "month"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center self-stretch">
-                      <div className="flex items-center gap-2">
-                        <svg
-                          width={24}
-                          height={24}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M15.6364 19V17.5556C15.6364 16.7894 15.3299 16.0546 14.7843 15.5128C14.2388 14.971 13.4988 14.6667 12.7273 14.6667H6.90909C6.13755 14.6667 5.39761 14.971 4.85205 15.5128C4.30649 16.0546 4 16.7894 4 17.5556V19M20 19V17.5556C19.9995 16.9155 19.785 16.2937 19.3901 15.7878C18.9952 15.2819 18.4423 14.9206 17.8182 14.7606M14.9091 6.09389C15.5348 6.253 16.0895 6.6144 16.4856 7.12111C16.8816 7.62783 17.0966 8.25104 17.0966 8.8925C17.0966 9.53396 16.8816 10.1572 16.4856 10.6639C16.0895 11.1706 15.5348 11.532 14.9091 11.6911M12.7273 8.88889C12.7273 10.4844 11.4248 11.7778 9.81818 11.7778C8.21154 11.7778 6.90909 10.4844 6.90909 8.88889C6.90909 7.2934 8.21154 6 9.81818 6C11.4248 6 12.7273 7.2934 12.7273 8.88889Z"
-                            stroke="#8C8C8C"
-                            strokeWidth="1.7"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <div className="text_200-1 text-[#8c8c8c] leading-[normal]">
-                          Choose Team Size
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-start gap-2.5">
-                        <div className="div_css-yk16xz-control flex justify-end items-center py-1 pl-6 pr-2 rounded-[0.625rem] bg-[#f7f7f7]">
-                          <div className="flex flex-col justify-center items-center w-[1.1875rem] h-[1.4375rem] border-b border-b-[#cbcbcb] text-neutral-600 text-center text-lg leading-[normal]">
-                            {editTeamSize.toString().padStart(2, "0")}
-                          </div>
-                          <div className="flex flex-col justify-between items-start">
-                            <div
-                              className="flex flex-col justify-center items-center p-2 cursor-pointer"
-                              onClick={() => setEditTeamSize(editTeamSize + 1)}
-                            >
-                              <svg
-                                width={10}
-                                height={5}
-                                viewBox="0 0 10 5"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path d="M0 5L5 0L10 5H0Z" fill="#ACACAC" />
-                              </svg>
-                            </div>
-                            <div
-                              className="flex flex-col justify-center items-center p-2 cursor-pointer"
-                              onClick={() =>
-                                setEditTeamSize(Math.max(1, editTeamSize - 1))
-                              }
-                            >
-                              <svg
-                                width={10}
-                                height={5}
-                                viewBox="0 0 10 5"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path d="M0 0L5 5L10 0H0Z" fill="#ACACAC" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center gap-4 self-stretch">
-                  <div className="flex justify-center items-center gap-4">
-                    <button
-                      className="px-5 py-2 bg-gray-300 rounded-md"
-                      onClick={() => setEditModal(false)}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="button-2 flex justify-center items-center py-2 px-3 rounded-lg border border-[#e0e0e0] bg-[#df064e] text-white leading-[normal] cursor-pointer"
-                      onClick={() => {
-                        setPlan(editPlan);
-                        createSubscription();
-                        setEditModal(false);
-                      }}
-                    >
-                      Update Subscription
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        <h1 className="mb-4 flex items-center justify-start gap-2 text-xl mt-8 w-full px-6">
+        <h1 className="mb-4 flex items-center justify-start gap-2 text-xl mt-8 w-full pl-10">
           <BiReceipt className=" mr-1" /> Subscription
         </h1>
-        <div className="w-full px-6 flex justify-center gap-10 mt-7">
-          {/* Monthly Plan */}
-          <div
-            className={`flex flex-col justify-center items-center gap-10 p-10 w-full rounded-[0.9375rem] border-[0.8px] bg-white transition-all duration-200 ${
-              user.subscription === "monthly"
-                ? "border-[#df064e] shadow-md shadow-pink-100"
-                : "border-gray-200"
-            }`}
-          >
-            <div className="flex justify-between items-start w-full">
-              <div className="flex flex-col flex-shrink-0 items-start gap-2">
-                <div className="text-[#1f1f1f] text-xl font-medium leading-[normal]">
-                  Monthly Plan
-                </div>
-                <div className="text-[#717171] text-sm leading-[normal]">
-                  30 days validity
-                </div>
+        <div className="w-[90%] flex justify-center gap-10 mt-7">
+          <div className="w-[46%] border border-gray-200 rounded-lg p-4 py-7">
+            <div className="flex justify-between">
+              <div className=" border border-gray-100 p-[3px]">
+                <button
+                  onClick={() => setPlan("yearly")}
+                  className={`px-4 py-2 ${
+                    plan === "yearly"
+                      ? "bg-graidient_bottom text-white  "
+                      : "none text-gray-700"
+                  } rounded-lg`}
+                >
+                  Yearly
+                </button>
+                <button
+                  onClick={() => setPlan("monthly")}
+                  className={`px-4 py-1  ${
+                    plan === "monthly"
+                      ? "bg-graidient_bottom text-white  "
+                      : "none text-gray-700"
+                  } rounded-lg`}
+                >
+                  Monthly
+                </button>
               </div>
-              <div className="flex flex-col items-start gap-2 text-[#8c8c8c] leading-[normal]">
-                $10/month
+              <div className="flex gap-2 items-center">
+                <p className="text-gray-500 ">15$</p>
+                <p className="text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">
+                  save 20%
+                </p>
               </div>
             </div>
+            <div className="flex mt-7 items-center justify-between">
+              <h2 className="ml-2 flex items-center gap-2 text-gray-600 text-lg ">
+                <CiCreditCard1 className="text-2xl" />
+                Billing Plan
+              </h2>
+              <p className="text-2xl flex items-center text-gray-700">
+                {10 * (members.length + 1)}$
+                <span className="text-gary-500 text-sm mr-3">/month</span>
+              </p>
+            </div>
+            <div className="flex mt-7 items-center justify-between">
+              <h2 className="ml-2 flex items-center gap-2 text-gray-600 text-lg ">
+                <MdOutlinePeopleOutline />
+                Team Size
+              </h2>
+              <input
+                type="number"
+                className="w-12 px-1 py-1 border border-gray-200 outline-none rounded-md mr-3"
+                value={members.length + 1}
+                readOnly={true}
+              />
+            </div>
 
-            <div className="flex items-center gap-4 w-full">
-              {user.subscription === "monthly" ? (
-                <>
-                  <div
-                    onClick={CancelSubscription}
-                    className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
-                  >
-                    Cancel Subscription
-                  </div>
-                  <button
-                    onClick={() => setEditModal(true)}
-                    className="px-4 py-2 border border-graidient_bottom rounded-md text-graidient_bottom"
-                  >
-                    Edit
-                  </button>
-                </>
-              ) : (
-                <div
-                  onClick={() => {
-                    setPlan("monthly");
-                    createSubscription();
-                  }}
-                  className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] bg-[#df064e] text-white text-sm font-medium leading-[normal] cursor-pointer"
+            <div className="w-full flex justify-center ">
+              {user.subscription !== "monthly" &&
+              user.subscription !== "yearly" &&
+              user.subscription !== "shared" ? (
+                <button
+                  onClick={() => createSubscription()}
+                  className="w-[90%] text-center py-2 border border-graidient_bottom rounded-md text-graidient_bottom mt-7 flex items-center gap-2 justify-center"
                 >
-                  {user.subscription === "yearly"
-                    ? "Switch to Monthly"
-                    : "Subscribe Monthly"}
-                </div>
+                  Start New Plan <FaArrowRight />
+                </button>
+              ) : (
+                <button
+                  onClick={() => CancelSubscription()}
+                  className="w-[90%] text-center py-2 border border-graidient_bottom rounded-sm text-graidient_bottom mt-7 flex items-center gap-2 justify-center"
+                >
+                  Cancel Plan
+                </button>
               )}
             </div>
           </div>
-
-          {/* Yearly Plan */}
-          <div
-            className={`flex flex-col justify-center items-center gap-10 p-10 w-full rounded-[0.9375rem] border-[0.8px] bg-white transition-all duration-200 ${
-              user.subscription === "yearly"
-                ? "border-[#df064e] shadow-md shadow-pink-100"
-                : "border-gray-200"
-            }`}
-          >
-            <div className="flex justify-between items-start w-full">
-              <div className="flex flex-col flex-shrink-0 items-start gap-2">
-                <div className="text-[#1f1f1f] text-xl font-medium leading-[normal]">
-                  Yearly Plan
-                </div>
-                <div className="text-[#717171] text-sm leading-[normal]">
-                  365 days validity
-                </div>
-              </div>
-              <div className="flex flex-col items-start gap-2 text-[#8c8c8c] leading-[normal]">
-                $120/year
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 w-full">
-              {user.subscription === "yearly" ? (
-                <>
-                  <div
-                    onClick={CancelSubscription}
-                    className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
-                  >
-                    Cancel Subscription
-                  </div>
-                  <button
-                    onClick={() => setEditModal(true)}
-                    className="px-4 py-2 border border-graidient_bottom rounded-md text-graidient_bottom"
-                  >
-                    Edit
-                  </button>
-                </>
-              ) : (
-                <div
-                  onClick={() => {
-                    setPlan("yearly");
-                    createSubscription();
-                  }}
-                  className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] bg-[#df064e] text-white text-sm font-medium leading-[normal] cursor-pointer"
-                >
-                  {user.subscription === "monthly"
-                    ? "Switch to Yearly"
-                    : "Subscribe Yearly"}
-                </div>
-              )}
-            </div>
+          <div className="w-[46%] border border-gray-200 rounded-lg px-6 py-7 flex flex-col  gap-2">
+            <h2 className="mt-2 mb-5 text-lg text-gray-700 w-full text-center">
+              Everything You Need – One Plan, Full Access
+            </h2>
+            <p className="ml-3 text-gray-500 flex items-center gap-2">
+              {" "}
+              <FaCheck className="text-graidient_bottom" />
+              Unlimited proposals
+            </p>
+            <p className="ml-3 text-gray-500 flex items-center gap-2">
+              <FaCheck className="text-graidient_bottom" /> Real-time proposal
+              analytics
+            </p>
+            <p className="ml-3 text-gray-500 flex items-center gap-2">
+              <FaCheck className="text-graidient_bottom" />
+              100+ professionally designed templates
+            </p>
+            <p className="ml-3 text-gray-500 flex items-center gap-2">
+              <FaCheck className="text-graidient_bottom" />
+              User roles & team collaboration
+            </p>
+            <p className="ml-3 text-gray-500 flex items-center gap-2">
+              <FaCheck className="text-graidient_bottom" /> Shared access to
+              proposals & assets
+            </p>
           </div>
         </div>
-
-        <h1 className="mb-4 flex items-center justify-start gap-2 text-xl mt-8 w-full px-6">
-          <BiReceipt className=" mr-1" /> Billing history
-        </h1>
-        {/* Billing history table */}
-        <div className="w-full px-6">
-          <div className="flex flex-col justify-center items-start w-full rounded-[0.625rem] border border-[#e0e0e0] bg-[#ede4dc]/[.30] mt-4">
-            <div className="flex justify-between items-center self-stretch py-1 px-5 h-16 border border-[#e0e0e0] bg-[#eee]">
-              <div className="flex items-center gap-2 p-2 w-[12.5rem]">
-                <div className="flex flex-col items-start gap-2 invoice text-neutral-600 leading-[normal]">
-                  Invoice
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "invoice" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("invoice")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[9.25rem]">
-                <div className="flex flex-col items-start gap-2 billing_date text-neutral-600 leading-[normal]">
-                  Billing date
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "billingDate" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("billingDate")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[9.25rem]">
-                <div className="flex flex-col items-start gap-2 end_date text-neutral-600 leading-[normal]">
-                  End date
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "endDate" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("endDate")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[8.25rem]">
-                <div className="flex flex-col items-start gap-2 plan text-neutral-600 leading-[normal]">
-                  Plan
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "plan" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("plan")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[6.25rem]">
-                <div className="flex flex-col items-start gap-2 amount text-neutral-600 leading-[normal]">
-                  Amount
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "amount" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("amount")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[6.25rem]">
-                <div className="flex flex-col items-start gap-2 users text-neutral-600 leading-[normal]">
-                  Users
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "users" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("users")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-full">
-                <div className="carbon_document-pdf w-4 h-4"></div>
-              </div>
-            </div>
-            {sortedBillingHistory.map((item, index) => (
-              <div
-                key={index}
-                className={`flex justify-between items-center self-stretch py-1 px-5 border-b border-b-[#e0e0e0] ${
-                  index % 2 === 0 ? "bg-[#fefefe]" : "bg-[#f7f7f7]"
-                }`}
-              >
-                <div className="flex items-center gap-2 p-2 w-[12.5rem]">
-                  <div className="flex flex-col justify-center items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.invoice}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[9.25rem]">
-                  <div className="flex flex-col items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.billingDate}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[9.25rem]">
-                  <div className="flex flex-col items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.endDate}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[8.25rem]">
-                  <div className="flex flex-col justify-center items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.plan}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[6.25rem]">
-                  <div className="flex flex-col justify-center items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.amount}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[6.25rem]">
-                  <div className="flex flex-col justify-center items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.users}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 p-2 rounded-full">
-                  <svg
-                    width={16}
-                    height={16}
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+        {user.subscription !== "shared" && (
+          <div className="w-[87%] flex flex-col items-center mt-5  rounded-md py-4   ">
+            <div className="flex items-center justify-end w-[97%]">
+              {user.subscription !== "monthly" &&
+                user.subscription !== "yearly" && (
+                  <button
+                    onClick={() => setPopUp(true)}
+                    className="px-4 py-1 border border-graidient_bottom rounded-md text-graidient_bottom"
                   >
-                    <path
-                      d="M15 9V8H12V13H13V11H14.5V10H13V9H15ZM9.5 13H7.5V8H9.5C9.8977 8.0004 10.279 8.15856 10.5602 8.43978C10.8414 8.721 10.9996 9.1023 11 9.5V11.5C10.9996 11.8977 10.8414 12.279 10.5602 12.5602C10.279 12.8414 9.8977 12.9996 9.5 13ZM8.5 12H9.5C9.63261 12 9.75979 11.9473 9.85355 11.8536C9.94732 11.7598 10 11.6326 10 11.5V9.5C10 9.36739 9.94732 9.24021 9.85355 9.14645C9.75979 9.05268 9.63261 9 9.5 9H8.5V12ZM5.5 8H3V13H4V11.5H5.5C5.76509 11.4996 6.01922 11.3941 6.20667 11.2067C6.39412 11.0192 6.4996 10.7651 6.5 10.5V9C6.5 8.73478 6.39464 8.48043 6.20711 8.29289C6.01957 8.10536 5.76522 8 5.5 8ZM4 10.5V9H5.5L5.5005 10.5H4Z"
-                      fill="#525252"
-                    />
-                    <path
-                      d="M11 7.00023V5.00023C11.0018 4.93452 10.9893 4.8692 10.9634 4.80878C10.9375 4.74836 10.8988 4.69427 10.85 4.65023L7.35 1.15023C7.30617 1.10116 7.25212 1.0623 7.19165 1.03638C7.13118 1.01047 7.06576 0.998127 7 1.00023H2C1.73503 1.00102 1.48113 1.10663 1.29377 1.294C1.1064 1.48136 1.00079 1.73526 1 2.00023V14.0002C1 14.2654 1.10536 14.5198 1.29289 14.7073C1.48043 14.8949 1.73478 15.0002 2 15.0002H10V14.0002H2V2.00023H6V5.00023C6.00079 5.2652 6.1064 5.5191 6.29377 5.70646C6.48113 5.89383 6.73503 5.99944 7 6.00023H10V7.00023H11ZM7 5.00023V2.20023L9.8 5.00023H7Z"
-                      fill="#525252"
-                    />
-                  </svg>
-                </div>
-              </div>
-            ))}
+                    Add Member
+                  </button>
+                )}
+            </div>
+            <table className="auto-table w-full mt-5 mb-20  ">
+              <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0 rounded-md">
+                <tr>
+                  <th className="text-center">Username</th>
+                  <th className=" text-center">Gmail</th>
+                  <th className=" text-center">Quick Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.map((item, index) => {
+                  return (
+                    <tr key={item._id}>
+                      <td className="pl-10">{item.fullName}</td>
+                      <td className="text-center">{item.email}</td>
+                      <td className="text-center flex justify-center">
+                        <RiDeleteBinLine
+                          onClick={() => deleteMember(item._id)}
+                          className="text-gray-600 text-lg hover:text-graidient_bottom cursor-pointer"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="w-[87%] flex flex-col items-center mt-7 border border-gray-200 rounded-md p-6    ">
+          <div className="text-lg flex items-center gap-4 text-gray-700 w-full justify-start">
+            <CiCreditCard1 className="text-3xl text-graidient_bottom" /> Current
+            Plan
+          </div>
+          <div className="flex mt-3 items-center justify-between w-[90%]">
+            <h2 className="ml-2 flex items-center gap-2 text-gray-700 text-lg ">
+              Price
+            </h2>
+            <p className="text-2xl flex items-center text-gray-700">
+              {user.subscription === "trial" ? "10" : (members.length + 1) * 10}
+              $<span className="text-gary-500 text-sm mr-3">/month</span>
+            </p>
+          </div>
+          <div className="flex mt-3 w-[90%] items-center justify-between">
+            <h2 className="ml-2 flex items-center gap-2 text-gray-600 text-lg  ">
+              Billed
+            </h2>
+            <p className="text-xl flex items-center text-gray-700 mr-8 text-start">
+              {user.subscription === "trial"
+                ? "Trail"
+                : user.subscription === "monthly"
+                ? "Monthly"
+                : user.subscription === "yearly"
+                ? "Yearly"
+                : user.subscription === "canceled"
+                ? "Canceled"
+                : user.subscription === "shared"
+                ? "Shared"
+                : "Expired"}
+            </p>
+          </div>
+          <div className="flex mt-3 items-center justify-between w-[90%]">
+            <h2 className="ml-2 flex items-center gap-2 text-gray-600 text-lg ">
+              Start Date
+            </h2>
+            <p className="text-xl flex items-center text-gray-700 text-start">
+              {new Date(user.subscriptionDate || Date.now()).toLocaleDateString(
+                "en-US",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }
+              )}
+            </p>
+          </div>
+          <div className="flex mt-3 items-center justify-between w-[90%]">
+            <h2 className="ml-2 flex items-center gap-2 text-gray-600 text-lg ">
+              End Date
+            </h2>
+            <p className="text-xl flex items-center text-gray-700 text-start">
+              {user.subscription === "trial"
+                ? new Date(
+                    new Date(user.subscriptionDate).setDate(
+                      new Date(user.subscriptionDate).getDate() + 14
+                    )
+                  ).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : new Date(
+                    user.subscriptionEnd || Date.now()
+                  ).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+            </p>
+          </div>
+          <div className="flex mt-3 items-center justify-between w-[90%]">
+            <h2 className="ml-2 flex items-center gap-2 text-gray-600 text-lg ">
+              Team Size
+            </h2>
+            <p className="text-xl flex items-center text-gray-700">
+              {user.subscription === "trial" ? "1" : members.length + 1} Members
+            </p>
+          </div>
+        </div>
+        <div className="w-[87%] flex flex-col items-center mt-7 border border-gray-200 rounded-md p-6 mb-10">
+          <div className="text-lg flex items-center gap-4 text-gray-700 w-full justify-start">
+            <CiCreditCard1 className="text-3xl text-graidient_bottom" />
+            Invoices
+          </div>
+          <div className="flex mt-3 items-center justify-between w-[90%]">
+            <h2 className="ml-2 flex items-center gap-2 text-gray-700 text-lg ">
+              Invoice 1
+            </h2>
+            <button className="px-4 py-1 border border-graidient_bottom rounded-md text-graidient_bottom">
+              Download
+            </button>
+          </div>
+          <div className="flex mt-3 w-[90%] items-center justify-between">
+            <h2 className="ml-2 flex items-center gap-2 text-gray-600 text-lg  ">
+              Invoice 2
+            </h2>
+            <button className="px-4 py-1 border border-graidient_bottom rounded-md text-graidient_bottom">
+              Download
+            </button>
           </div>
         </div>
       </div>
