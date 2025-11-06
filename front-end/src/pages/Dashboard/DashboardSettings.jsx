@@ -137,27 +137,21 @@ const DashboardSettings = () => {
           <div className="h-[74vh] overflow-y-auto scrollbar-hide">
             {/* Manage team row/card per design */}
             <div
-              className="relative w-full h-20 bg-white border border-gray-200 rounded-md mb-6 flex items-center justify-between px-6"
-              style={{ boxSizing: "border-box" }}
+              className="flex justify-between items-start border border-gray-200 self-stretch py-4 px-6 rounded-[0.4375rem] bg-white mb-6"
               onClick={() => navigate("/manage")}
             >
-              <div>
+              <div className="flex flex-col items-start gap-2 self-stretch">
                 <h3 className="text-xl font-medium text-neutral-600">
                   Manage team
                 </h3>
                 <p className="text-[.9375rem] leading-normal text-[#8c8c8c] self-stretch">
-                  Body text
+                  Add, remove, or edit members in your workspace. Assign roles
+                  and <br /> permissions to control who can , edit, and send
+                  proposals.
                 </p>
               </div>
 
-              <button
-                onClick={() => toast("Open manage team")}
-                className="flex items-center justify-center text-gray-600"
-                aria-label="Manage team"
-                style={{ height: 48 }}
-              >
-                <IoChevronForward className="w-5 h-5 text-gray-500" />
-              </button>
+              <IoChevronForward className="w-5 h-5 text-gray-500" />
             </div>
 
             {/* Subscription details row/card per design */}
@@ -171,7 +165,9 @@ const DashboardSettings = () => {
                     Subscription details
                   </div>
                   <div className="text-[.9375rem] leading-normal text-[#8c8c8c] self-stretch">
-                    Body text
+                    View and manage your current plan details, billing period,
+                    and renewal <br /> dates. Stay updated on your subscription
+                    status and usage.
                   </div>
                 </div>
                 <div className="flex mt-3 items-center justify-between w-[50%]">
