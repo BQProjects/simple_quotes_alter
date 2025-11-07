@@ -2,13 +2,13 @@ import React, { useContext, useState, useEffect } from "react";
 import { BiReceipt } from "react-icons/bi";
 import { CiCreditCard1 } from "react-icons/ci";
 import { MdOutlinePeopleOutline } from "react-icons/md";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaArrowDown } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa6";
+import { FaUsers } from "react-icons/fa";
 import { UserContext } from "../../context/UserContext";
 import { DatabaseContext } from "../../context/DatabaseContext";
 import axios from "axios";
 import profile from "../../assets/profile.png";
-import dropdown from "../../assets/dropdown.svg";
 import { RiDeleteBinLine } from "react-icons/ri";
 import toast from "react-hot-toast";
 
@@ -52,10 +52,39 @@ const Subscription = () => {
       users: "1",
     },
   ]);
+  const [sortBy, setSortBy] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
 
   const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(column);
+      setSortOrder("asc");
+    }
+  };
+
+  const sortedMembers = React.useMemo(() => {
+    if (!sortBy) return members;
+    return [...members].sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+      if (sortBy === "fullName") {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      } else if (sortBy === "email") {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [members, sortBy, sortOrder]);
+
+  const handleBillingSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -85,8 +114,6 @@ const Subscription = () => {
     return 0;
   });
 
-
-
   const createSubscription = async () => {
     try {
       const res = await axios.post(
@@ -95,6 +122,7 @@ const Subscription = () => {
           subscription: plan,
           subscriptionDate: new Date(),
           user_id: user.id,
+          teamSize: editTeamSize,
         }
       );
       console.log(res.data);
@@ -145,6 +173,14 @@ const Subscription = () => {
       console.error("Error fetching workspaces:", error);
     }
   };
+  const getAllUsers = async () => {
+    try {
+      const res = await axios.get(`${databaseUrl}/api/auth/getallusers`);
+      setUsers(res.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
   const addMember = async () => {
     try {
       const res = await axios.post(`${databaseUrl}/api/auth/addmem`, {
@@ -159,6 +195,9 @@ const Subscription = () => {
   useEffect(() => {
     setEditTeamSize(members.length + 1);
   }, [members]);
+  useEffect(() => {
+    getMembers();
+  }, []);
   useEffect(() => {
     if (user.subscriptionDate) {
       const start = new Date(user.subscriptionDate);
@@ -206,10 +245,13 @@ const Subscription = () => {
               />
               <div className="h-[65%] w-full overflow-auto">
                 {users
-                  ?.filter((item) =>
-                    item.fullName
-                      .toLowerCase()
-                      .includes(search?.toLowerCase() || "")
+                  ?.filter(
+                    (item) =>
+                      item.fullName
+                        .toLowerCase()
+                        .includes(search?.toLowerCase() || "") &&
+                      item._id !== user.id &&
+                      !members.some((member) => member._id === item._id)
                   )
                   .map((item) => (
                     <div
@@ -241,7 +283,7 @@ const Subscription = () => {
               </div>
               <div className="mt-2 w-full flex items-center justify-end gap-3">
                 <button
-                  className="px-5 py-2  bg-gray-300 rounded-md"
+                  className="px-5 py-2 bg-gray-300 rounded-md"
                   onClick={() => {
                     setSearch("");
                     setSelected(null);
@@ -466,15 +508,18 @@ const Subscription = () => {
             <div className="flex items-center gap-4 w-full">
               {user.subscription === "monthly" ? (
                 <>
-                  <div
+                  <button
                     onClick={CancelSubscription}
-                    className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
+                    className="h-[34px] flex justify-center items-center gap-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
                   >
                     Cancel Subscription
-                  </div>
+                  </button>
                   <button
-                    onClick={() => setEditModal(true)}
-                    className="px-4 py-2 border border-graidient_bottom rounded-md text-graidient_bottom"
+                    onClick={() => {
+                      setEditModal(true);
+                      setEditTeamSize(user.teamMembers || 1);
+                    }}
+                    className="h-[34px] px-4 border border-graidient_bottom rounded-md text-graidient_bottom"
                   >
                     Edit
                   </button>
@@ -520,15 +565,18 @@ const Subscription = () => {
             <div className="flex items-center gap-4 w-full">
               {user.subscription === "yearly" ? (
                 <>
-                  <div
+                  <button
                     onClick={CancelSubscription}
-                    className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
+                    className="h-[34px] flex justify-center items-center gap-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
                   >
                     Cancel Subscription
-                  </div>
+                  </button>
                   <button
-                    onClick={() => setEditModal(true)}
-                    className="px-4 py-2 border border-graidient_bottom rounded-md text-graidient_bottom"
+                    onClick={() => {
+                      setEditModal(true);
+                      setEditTeamSize(user.teamMembers || 1);
+                    }}
+                    className="h-[34px] px-4 border border-graidient_bottom rounded-md text-graidient_bottom"
                   >
                     Edit
                   </button>
@@ -550,176 +598,315 @@ const Subscription = () => {
           </div>
         </div>
 
+        {user.subscription !== "shared" && (
+          <div className="w-full px-6 mt-5">
+            <div className="w-full flex items-center justify-between mb-4">
+              <h1 className="flex items-center gap-3 text-[20px] font-normal">
+                <div className="w-8 h-8 flex items-center justify-center rounded-md">
+                  <FaUsers />
+                </div>
+                Manage Team
+              </h1>
+              <button
+                onClick={() => {
+                  getAllUsers();
+                  setPopUp(true);
+                }}
+                className="px-4 py-1 border border-graidient_bottom rounded-md text-graidient_bottom"
+              >
+                Add Member
+              </button>
+            </div>
+            <div className="w-full rounded-[0.625rem] border border-[#e0e0e0] bg-[#ede4dc]/30 overflow-hidden">
+              <table className="w-full">
+                <thead className="h-16 bg-[#eee] border-b border-[#e0e0e0] sticky top-0">
+                  <tr>
+                    <th className="pl-3 pr-5 py-1 text-left">
+                      <div
+                        className="flex items-center gap-2 w-[12.5rem] cursor-pointer"
+                        onClick={() => handleSort("fullName")}
+                      >
+                        <span className="text-neutral-600 font-medium">
+                          Username
+                        </span>
+                        {sortBy === "fullName" ? (
+                          sortOrder === "asc" ? (
+                            <FaArrowDown className="w-3 h-3 text-neutral-600" />
+                          ) : (
+                            <FaArrowDown className="w-3 h-3 text-neutral-600 transform rotate-180" />
+                          )
+                        ) : (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600 opacity-50" />
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-2 py-1 text-left">
+                      <div
+                        className="flex items-center gap-2 w-[10.875rem] cursor-pointer"
+                        onClick={() => handleSort("email")}
+                      >
+                        <span className="text-neutral-600 font-medium">
+                          Gmail
+                        </span>
+                        {sortBy === "email" ? (
+                          sortOrder === "asc" ? (
+                            <FaArrowDown className="w-3 h-3 text-neutral-600" />
+                          ) : (
+                            <FaArrowDown className="w-3 h-3 text-neutral-600 transform rotate-180" />
+                          )
+                        ) : (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600 opacity-50" />
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-5 py-1 text-right">
+                      <div className="flex items-center gap-4 justify-end p-2">
+                        <div className="w-4 h-4" />
+                        <div className="w-4 h-4" />
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedMembers.map((item, index) => (
+                    <tr
+                      key={item._id}
+                      className={`border-b border-b-[#e0e0e0] ${
+                        index % 2 === 0 ? "bg-[#fefefe]" : "bg-[#f7f7f7]"
+                      }`}
+                    >
+                      <td className="py-1 pl-3 pr-5">
+                        <div className="flex items-center gap-2 w-[12.5rem]">
+                          <span className="text-sm text-gray-700">
+                            {item.fullName}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-1 px-2">
+                        <div className="flex items-center gap-0.5 w-[10.875rem]">
+                          <span className="text-sm text-gray-700">
+                            {item.email}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-1 px-5 text-right">
+                        <div className="flex items-center gap-4 justify-end">
+                          <RiDeleteBinLine
+                            onClick={() => deleteMember(item._id)}
+                            className="text-gray-600 text-lg hover:text-graidient_bottom cursor-pointer"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         <h1 className="mb-4 flex items-center justify-start gap-2 text-xl mt-8 w-full px-6">
           <BiReceipt className=" mr-1" /> Billing history
         </h1>
         {/* Billing history table */}
-        <div className="w-full px-6">
-          <div className="flex flex-col justify-center items-start w-full rounded-[0.625rem] border border-[#e0e0e0] bg-[#ede4dc]/[.30] mt-4">
-            <div className="flex justify-between items-center self-stretch py-1 px-5 h-16 border border-[#e0e0e0] bg-[#eee]">
-              <div className="flex items-center gap-2 p-2 w-[12.5rem]">
-                <div className="flex flex-col items-start gap-2 invoice text-neutral-600 leading-[normal]">
-                  Invoice
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "invoice" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("invoice")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[9.25rem]">
-                <div className="flex flex-col items-start gap-2 billing_date text-neutral-600 leading-[normal]">
-                  Billing date
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "billingDate" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("billingDate")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[9.25rem]">
-                <div className="flex flex-col items-start gap-2 end_date text-neutral-600 leading-[normal]">
-                  End date
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "endDate" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("endDate")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[8.25rem]">
-                <div className="flex flex-col items-start gap-2 plan text-neutral-600 leading-[normal]">
-                  Plan
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "plan" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("plan")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[6.25rem]">
-                <div className="flex flex-col items-start gap-2 amount text-neutral-600 leading-[normal]">
-                  Amount
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "amount" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("amount")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 w-[6.25rem]">
-                <div className="flex flex-col items-start gap-2 users text-neutral-600 leading-[normal]">
-                  Users
-                </div>
-                <img
-                  src={dropdown}
-                  alt="dropdown"
-                  width={11}
-                  height={11}
-                  className={`cursor-pointer transform ${
-                    sortColumn === "users" && sortDirection === "desc"
-                      ? "rotate-180"
-                      : ""
-                  }`}
-                  onClick={() => handleSort("users")}
-                />
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-full">
-                <div className="carbon_document-pdf w-4 h-4"></div>
-              </div>
-            </div>
-            {sortedBillingHistory.map((item, index) => (
-              <div
-                key={index}
-                className={`flex justify-between items-center self-stretch py-1 px-5 border-b border-b-[#e0e0e0] ${
-                  index % 2 === 0 ? "bg-[#fefefe]" : "bg-[#f7f7f7]"
-                }`}
-              >
-                <div className="flex items-center gap-2 p-2 w-[12.5rem]">
-                  <div className="flex flex-col justify-center items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.invoice}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[9.25rem]">
-                  <div className="flex flex-col items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.billingDate}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[9.25rem]">
-                  <div className="flex flex-col items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.endDate}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[8.25rem]">
-                  <div className="flex flex-col justify-center items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.plan}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[6.25rem]">
-                  <div className="flex flex-col justify-center items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.amount}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 p-2 w-[6.25rem]">
-                  <div className="flex flex-col justify-center items-start gap-2 text-[#1f1f1f] text-sm leading-[normal]">
-                    {item.users}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 p-2 rounded-full">
-                  <svg
-                    width={16}
-                    height={16}
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+        <div className="w-full px-6 mb-10">
+          <div className="w-full mt-4 rounded-[0.625rem] border border-[#e0e0e0] bg-[#ede4dc]/30 overflow-hidden">
+            <table className="w-full">
+              <thead className="h-16 bg-[#eee] border-b border-[#e0e0e0] sticky top-0">
+                <tr>
+                  <th className="pl-3 pr-5 py-1 text-left">
+                    <div
+                      className="flex items-center gap-2 w-[12.5rem] cursor-pointer"
+                      onClick={() => handleBillingSort("invoice")}
+                    >
+                      <span className="text-neutral-600 font-medium">
+                        Invoice
+                      </span>
+                      {sortColumn === "invoice" ? (
+                        sortDirection === "asc" ? (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600" />
+                        ) : (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600 transform rotate-180" />
+                        )
+                      ) : (
+                        <FaArrowDown className="w-3 h-3 text-neutral-600 opacity-50" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-2 py-1 text-left">
+                    <div
+                      className="flex items-center gap-2 w-[9.25rem] cursor-pointer"
+                      onClick={() => handleBillingSort("billingDate")}
+                    >
+                      <span className="text-neutral-600 font-medium">
+                        Billing date
+                      </span>
+                      {sortColumn === "billingDate" ? (
+                        sortDirection === "asc" ? (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600" />
+                        ) : (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600 transform rotate-180" />
+                        )
+                      ) : (
+                        <FaArrowDown className="w-3 h-3 text-neutral-600 opacity-50" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-2 py-1 text-left">
+                    <div
+                      className="flex items-center gap-2 w-[9.25rem] cursor-pointer"
+                      onClick={() => handleBillingSort("endDate")}
+                    >
+                      <span className="text-neutral-600 font-medium">
+                        End date
+                      </span>
+                      {sortColumn === "endDate" ? (
+                        sortDirection === "asc" ? (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600" />
+                        ) : (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600 transform rotate-180" />
+                        )
+                      ) : (
+                        <FaArrowDown className="w-3 h-3 text-neutral-600 opacity-50" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-2 py-1 text-left">
+                    <div
+                      className="flex items-center gap-2 w-[8.25rem] cursor-pointer"
+                      onClick={() => handleBillingSort("plan")}
+                    >
+                      <span className="text-neutral-600 font-medium">Plan</span>
+                      {sortColumn === "plan" ? (
+                        sortDirection === "asc" ? (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600" />
+                        ) : (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600 transform rotate-180" />
+                        )
+                      ) : (
+                        <FaArrowDown className="w-3 h-3 text-neutral-600 opacity-50" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-2 py-1 text-left">
+                    <div
+                      className="flex items-center gap-2 w-[6.25rem] cursor-pointer"
+                      onClick={() => handleBillingSort("amount")}
+                    >
+                      <span className="text-neutral-600 font-medium">
+                        Amount
+                      </span>
+                      {sortColumn === "amount" ? (
+                        sortDirection === "asc" ? (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600" />
+                        ) : (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600 transform rotate-180" />
+                        )
+                      ) : (
+                        <FaArrowDown className="w-3 h-3 text-neutral-600 opacity-50" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-2 py-1 text-left">
+                    <div
+                      className="flex items-center gap-2 w-[6.25rem] cursor-pointer"
+                      onClick={() => handleBillingSort("users")}
+                    >
+                      <span className="text-neutral-600 font-medium">
+                        Users
+                      </span>
+                      {sortColumn === "users" ? (
+                        sortDirection === "asc" ? (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600" />
+                        ) : (
+                          <FaArrowDown className="w-3 h-3 text-neutral-600 transform rotate-180" />
+                        )
+                      ) : (
+                        <FaArrowDown className="w-3 h-3 text-neutral-600 opacity-50" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-5 py-1 text-right">
+                    <div className="flex items-center gap-4 justify-end p-2">
+                      <div className="w-4 h-4" />
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedBillingHistory.map((item, index) => (
+                  <tr
+                    key={index}
+                    className={`border-b border-b-[#e0e0e0] ${
+                      index % 2 === 0 ? "bg-[#fefefe]" : "bg-[#f7f7f7]"
+                    }`}
                   >
-                    <path
-                      d="M15 9V8H12V13H13V11H14.5V10H13V9H15ZM9.5 13H7.5V8H9.5C9.8977 8.0004 10.279 8.15856 10.5602 8.43978C10.8414 8.721 10.9996 9.1023 11 9.5V11.5C10.9996 11.8977 10.8414 12.279 10.5602 12.5602C10.279 12.8414 9.8977 12.9996 9.5 13ZM8.5 12H9.5C9.63261 12 9.75979 11.9473 9.85355 11.8536C9.94732 11.7598 10 11.6326 10 11.5V9.5C10 9.36739 9.94732 9.24021 9.85355 9.14645C9.75979 9.05268 9.63261 9 9.5 9H8.5V12ZM5.5 8H3V13H4V11.5H5.5C5.76509 11.4996 6.01922 11.3941 6.20667 11.2067C6.39412 11.0192 6.4996 10.7651 6.5 10.5V9C6.5 8.73478 6.39464 8.48043 6.20711 8.29289C6.01957 8.10536 5.76522 8 5.5 8ZM4 10.5V9H5.5L5.5005 10.5H4Z"
-                      fill="#525252"
-                    />
-                    <path
-                      d="M11 7.00023V5.00023C11.0018 4.93452 10.9893 4.8692 10.9634 4.80878C10.9375 4.74836 10.8988 4.69427 10.85 4.65023L7.35 1.15023C7.30617 1.10116 7.25212 1.0623 7.19165 1.03638C7.13118 1.01047 7.06576 0.998127 7 1.00023H2C1.73503 1.00102 1.48113 1.10663 1.29377 1.294C1.1064 1.48136 1.00079 1.73526 1 2.00023V14.0002C1 14.2654 1.10536 14.5198 1.29289 14.7073C1.48043 14.8949 1.73478 15.0002 2 15.0002H10V14.0002H2V2.00023H6V5.00023C6.00079 5.2652 6.1064 5.5191 6.29377 5.70646C6.48113 5.89383 6.73503 5.99944 7 6.00023H10V7.00023H11ZM7 5.00023V2.20023L9.8 5.00023H7Z"
-                      fill="#525252"
-                    />
-                  </svg>
-                </div>
-              </div>
-            ))}
+                    <td className="py-1 pl-3 pr-5">
+                      <div className="flex items-center gap-2 w-[12.5rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.invoice}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[9.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.billingDate}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[9.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.endDate}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[8.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.plan}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[6.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.amount}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[6.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.users}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-5 text-right">
+                      <div className="flex items-center gap-4 justify-end">
+                        <svg
+                          width={16}
+                          height={16}
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M15 9V8H12V13H13V11H14.5V10H13V9H15ZM9.5 13H7.5V8H9.5C9.8977 8.0004 10.279 8.15856 10.5602 8.43978C10.8414 8.721 10.9996 9.1023 11 9.5V11.5C10.9996 11.8977 10.8414 12.279 10.5602 12.5602C10.279 12.8414 9.8977 12.9996 9.5 13ZM8.5 12H9.5C9.63261 12 9.75979 11.9473 9.85355 11.8536C9.94732 11.7598 10 11.6326 10 11.5V9.5C10 9.36739 9.94732 9.24021 9.85355 9.14645C9.75979 9.05268 9.63261 9 9.5 9H8.5V12ZM5.5 8H3V13H4V11.5H5.5C5.76509 11.4996 6.01922 11.3941 6.20667 11.2067C6.39412 11.0192 6.4996 10.7651 6.5 10.5V9C6.5 8.73478 6.39464 8.48043 6.20711 8.29289C6.01957 8.10536 5.76522 8 5.5 8ZM4 10.5V9H5.5L5.5005 10.5H4Z"
+                            fill="#525252"
+                          />
+                          <path
+                            d="M11 7.00023V5.00023C11.0018 4.93452 10.9893 4.8692 10.9634 4.80878C10.9375 4.74836 10.8988 4.69427 10.85 4.65023L7.35 1.15023C7.30617 1.10116 7.25212 1.0623 7.19165 1.03638C7.13118 1.01047 7.06576 0.998127 7 1.00023H2C1.73503 1.00102 1.48113 1.10663 1.29377 1.294C1.1064 1.48136 1.00079 1.73526 1 2.00023V14.0002C1 14.2654 1.10536 14.5198 1.29289 14.7073C1.48043 14.8949 1.73478 15.0002 2 15.0002H10V14.0002H2V2.00023H6V5.00023C6.00079 5.2652 6.1064 5.5191 6.29377 5.70646C6.48113 5.89383 6.73503 5.99944 7 6.00023H10V7.00023H11ZM7 5.00023V2.20023L9.8 5.00023H7Z"
+                            fill="#525252"
+                          />
+                        </svg>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

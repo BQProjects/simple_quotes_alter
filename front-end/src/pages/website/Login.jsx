@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import Signup_logo from "../../assets/Signup_logo.png";
 import Google from "../../assets/Google.png";
 import Linkedin from "../../assets/Linkedin.png";
@@ -21,6 +21,12 @@ const Login = () => {
   const [errorL, setErrorL] = useState(null);
   const navigate = useNavigate();
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
 
   const handleSignupFirst = () => {
     if (email === "" || password === "") {

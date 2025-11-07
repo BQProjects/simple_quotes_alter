@@ -568,7 +568,7 @@ const ManageUsers = () => {
         )}
         <div className="w-full flex items-center justify-between mb-4">
           <h1 className="flex items-center gap-3 text-[20px] font-normal">
-            <div className="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100">
+            <div className="w-8 h-8 flex items-center justify-center rounded-md">
               <FaUsers />
             </div>
             Manage Team

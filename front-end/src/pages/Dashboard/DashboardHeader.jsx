@@ -241,6 +241,7 @@ const DashboardHeader = () => {
           alt="Logo"
           style={{ opacity: 1 }}
           draggable="false"
+          onClick={() => navigate("/")}
         />
       </div>
       <div
@@ -585,8 +586,7 @@ const DashboardHeader = () => {
         </div>
         <button
           onClick={() => navigate("/subscription")}
-          className="text-center py-2 px-2 border border-gray-300 rounded-md text-gradient_bottom 
-          flex items-center gap-2 justify-center hover:bg-gradient_bottom hover:text-white transition-colors text-sm"
+          className="bg-white text-botton_white_text border-[1px] border-botton_white_text flex text-center py-2 px-2 items-center justify-center gap-2 rounded-md hover:bg-graidient_bottom hover:text-white"
         >
           Upgrade
         </button>

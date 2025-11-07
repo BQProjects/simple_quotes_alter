@@ -46,6 +46,7 @@ const {
   editCollab,
   deleteCollabUser,
   getNotifications,
+  deleteProfile,
 } = require("../Components/workspceComponent");
 
 const workspace = express.Router();
@@ -98,5 +99,6 @@ workspace.post("/removecollabuser", DeleteUserToTheWorkspace);
 workspace.get("/getallworkspaces", getAllWorkspacesIncluded);
 workspace.post("/editcollab", editCollab);
 workspace.post("/deletecollab", deleteCollabUser);
+workspace.post("/deleteProfile", deleteProfile);
 
 module.exports = workspace;

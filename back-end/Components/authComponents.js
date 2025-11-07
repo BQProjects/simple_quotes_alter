@@ -342,6 +342,17 @@ const chnagePassword = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find({}, "fullName email avatar _id");
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   login,
   logout,
@@ -353,4 +364,5 @@ module.exports = {
   getSharedUsers,
   getUserBGmail,
   chnagePassword,
+  getAllUsers,
 };
