@@ -12,8 +12,8 @@ import { Toaster } from "react-hot-toast";
 
 createRoot(document.getElementById("root")).render(
   <>
-    <UserContextProvider>
-      <DatabaseContextProvider>
+    <DatabaseContextProvider>
+      <UserContextProvider>
         <StateManageContextProvider>
           <HashRouter>
             <Toaster
@@ -36,7 +36,7 @@ createRoot(document.getElementById("root")).render(
             <App />
           </HashRouter>
         </StateManageContextProvider>
-      </DatabaseContextProvider>
-    </UserContextProvider>
+      </UserContextProvider>
+    </DatabaseContextProvider>
   </>
 );

@@ -158,6 +158,7 @@ const getUser = async (req, res) => {
           : new Date(),
         teamMembers: user.teamMembers ? user.teamMembers : 1,
         subscriptionEnd: user.subscriptionEnd || new Date(),
+        teamSize: user.teamSize ? parseInt(user.teamSize) : 1,
       };
       return res.json(temp);
     } else {
@@ -172,7 +173,7 @@ const getUser = async (req, res) => {
 };
 
 const setSubscription = async (req, res) => {
-  const { subscription, subscriptionDate, user_id } = req.body;
+  const { subscription, subscriptionDate, user_id, teamSize } = req.body; // Include teamSize
 
   try {
     const profile = await UserModel.findById(user_id);
@@ -240,6 +241,11 @@ const setSubscription = async (req, res) => {
           })
         );
       }
+    }
+
+    // Update teamSize if provided
+    if (teamSize !== undefined) {
+      profile.teamSize = teamSize;
     }
 
     await profile.save();
