@@ -1329,6 +1329,21 @@ const deleteCollabUser = async (req, res) => {
   }
 };
 
+const deleteProfile = async (req, res) => {
+  const { user_id } = req.body;
+
+  try {
+    const user = await UserModel.findByIdAndDelete(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json({ message: "Profile deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting profile:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   workspaceCreate,
   workspaceDelete,
@@ -1375,4 +1390,5 @@ module.exports = {
   editCollab,
   deleteCollabUser,
   getNotifications,
+  deleteProfile,
 };

@@ -2200,7 +2200,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+1 123 456 7890",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -2224,7 +2224,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 Anywhere St., Any City",
+              text: "Your Company Address",
             },
           ],
         },
@@ -2672,7 +2672,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+1 123 456 7890",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -2680,7 +2680,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -2688,7 +2688,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "your.email@example.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -2696,7 +2696,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 Anywhere St., Any City",
+              text: "Your Company Address",
             },
           ],
         },
@@ -3186,7 +3186,7 @@ const Sidebar = ({
           type: "paragrapgh-two",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -3194,7 +3194,7 @@ const Sidebar = ({
           type: "paragrapgh-two",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -3202,7 +3202,7 @@ const Sidebar = ({
           type: "paragrapgh-two",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -3210,7 +3210,7 @@ const Sidebar = ({
           type: "paragrapgh-two",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -3639,7 +3639,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "📞+91 0123456789",
+              text: "📞+[Country Code] [Your Number]",
             },
           ],
           align: "left",
@@ -3648,7 +3648,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "🌐www.yourwebsite@gmail.com",
+              text: "🌐www.yourcompany.com",
             },
           ],
           align: "left",
@@ -3657,7 +3657,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "📨yourname@gmail.com",
+              text: "📨info@yourcompany.com",
             },
           ],
           align: "left",
@@ -4107,7 +4107,7 @@ const Sidebar = ({
           align: "left",
           children: [
             {
-              text: "Olivia Wilson",
+              text: "[Your Name]",
             },
           ],
         },
@@ -4117,7 +4117,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Rimberio Co",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -4126,7 +4126,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "rimberio@pixelhuee.studio",
+              text: "info@yourcompany.com",
             },
           ],
           align: "right",
@@ -4917,7 +4917,7 @@ const Sidebar = ({
           align: "left",
           children: [
             {
-              text: "Olivia Wilson",
+              text: "[Your Name]",
             },
           ],
         },
@@ -4950,7 +4950,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Great Client & Co.",
+              text: "[Client Name]",
             },
           ],
         },
@@ -6689,7 +6689,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -6697,7 +6697,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -6705,7 +6705,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -6713,7 +6713,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -7698,7 +7698,7 @@ const Sidebar = ({
           align: "left",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -7706,7 +7706,7 @@ const Sidebar = ({
           type: "heading-six",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
           align: "left",
@@ -8576,7 +8576,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -8584,7 +8584,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -8592,7 +8592,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -8600,7 +8600,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -8656,7 +8656,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -8664,7 +8664,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -8672,7 +8672,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -8680,7 +8680,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -9508,7 +9508,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -9516,7 +9516,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -9524,7 +9524,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -9532,7 +9532,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -9933,7 +9933,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
           align: "right",
@@ -9942,7 +9942,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
           align: "right",
@@ -9951,7 +9951,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
           align: "right",
@@ -9960,7 +9960,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
           align: "right",
@@ -10398,7 +10398,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
           align: "center",
@@ -10407,7 +10407,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
           align: "center",
@@ -10416,7 +10416,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
           align: "center",
@@ -10425,7 +10425,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
           align: "center",
@@ -11303,7 +11303,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+1 123 456 7890",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -11327,7 +11327,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 Anywhere St., Any City",
+              text: "Your Company Address",
             },
           ],
         },
@@ -11543,7 +11543,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+1 123 456 7890",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -11551,7 +11551,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -11559,7 +11559,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "your.email@example.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -11567,7 +11567,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 Anywhere St., Any City",
+              text: "Your Company Address",
             },
           ],
         },
@@ -11787,7 +11787,7 @@ const Sidebar = ({
           type: "paragrapgh-two",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -11795,7 +11795,7 @@ const Sidebar = ({
           type: "paragrapgh-two",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -11803,7 +11803,7 @@ const Sidebar = ({
           type: "paragrapgh-two",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -11811,7 +11811,7 @@ const Sidebar = ({
           type: "paragrapgh-two",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -12005,7 +12005,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "📞+91 0123456789",
+              text: "📞+[Country Code] [Your Number]",
             },
           ],
           align: "left",
@@ -12014,7 +12014,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "🌐www.yourwebsite@gmail.com",
+              text: "🌐www.yourcompany.com",
             },
           ],
           align: "left",
@@ -12023,7 +12023,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "📨yourname@gmail.com",
+              text: "📨info@yourcompany.com",
             },
           ],
           align: "left",
@@ -12260,7 +12260,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "Rimberio Co",
+              text: "[Your Company Name]",
             },
           ],
           align: "right",
@@ -13459,7 +13459,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -13467,7 +13467,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -13475,7 +13475,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -13483,7 +13483,7 @@ const Sidebar = ({
           type: "paragrapgh",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -13924,7 +13924,7 @@ const Sidebar = ({
           align: "left",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -13932,7 +13932,7 @@ const Sidebar = ({
           type: "heading-six",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
           align: "left",
@@ -14355,7 +14355,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -14363,7 +14363,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -14371,7 +14371,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -14379,7 +14379,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -14435,7 +14435,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -14443,7 +14443,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -14451,7 +14451,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -14459,7 +14459,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -14816,7 +14816,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -14824,7 +14824,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
         },
@@ -14832,7 +14832,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
         },
@@ -14840,7 +14840,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
         },
@@ -15022,7 +15022,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
           align: "right",
@@ -15031,7 +15031,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
           align: "right",
@@ -15040,7 +15040,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "yourname@gmail.com",
+              text: "info@yourcompany.com",
             },
           ],
           align: "right",
@@ -15049,7 +15049,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "Your Company Address",
             },
           ],
           align: "right",
@@ -15265,7 +15265,7 @@ const Sidebar = ({
           align: "center",
           children: [
             {
-              text: "+91 0123456789",
+              text: "+[Country Code] [Your Number]",
             },
           ],
         },
@@ -15273,16 +15273,7 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "www.yourwebsite@gmail.com",
-            },
-          ],
-          align: "center",
-        },
-        {
-          type: "paragraph",
-          children: [
-            {
-              text: "yourname@gmail.com",
+              text: "www.yourcompany.com",
             },
           ],
           align: "center",
@@ -15291,7 +15282,16 @@ const Sidebar = ({
           type: "paragraph",
           children: [
             {
-              text: "123 xyz road street",
+              text: "info@yourcompany.com",
+            },
+          ],
+          align: "center",
+        },
+        {
+          type: "paragraph",
+          children: [
+            {
+              text: "Your Company Address",
             },
           ],
           align: "center",

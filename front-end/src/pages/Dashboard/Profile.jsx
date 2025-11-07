@@ -14,10 +14,12 @@ import { DatabaseContext } from "../../context/DatabaseContext";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import toast from "react-hot-toast";
 import Select from "react-select"; // Add this import for React Select
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
-  const { user } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const { databaseUrl } = useContext(DatabaseContext);
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [country, setCuntry] = useState("India | +91");
   const [phoneno, setPhoneno] = useState("");
@@ -27,6 +29,7 @@ const Profile = () => {
   const [subscription, setSubscription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -211,6 +214,34 @@ const Profile = () => {
     }
   };
 
+
+  // Called when user confirms deletion in the modal
+  const deleteProfileConfirmed = async () => {
+    try {
+      await axios.post(`${databaseUrl}/api/workspace/deleteProfile`, {
+        user_id: user.id,
+      });
+      toast.success("Profile deleted successfully");
+      // Clear user context and localStorage
+      setUser(null);
+      localStorage.removeItem("user");
+      setShowDeleteModal(false);
+      // Redirect to login
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+      toast.error("Failed to delete profile");
+    }
+  };
+
+  const handleLogout = () => {
+    // Clear user context and localStorage
+    setUser(null);
+    localStorage.removeItem("user");
+    // Redirect to login
+    window.location.href = "/login";
+  };
+
   return (
     <>
       <div className="w-full bg-white min-h-[85vh] px-10 pt-10 shadow-lg shadow-gray-300">
@@ -351,18 +382,57 @@ const Profile = () => {
             </div>
           </div>
           <div className="w-full flex items-center justify-around mb-10">
-            <button className="text-graidient_bottom hover:text-pink-600 transition-colors">
+            <button
+              className="text-graidient_bottom hover:text-pink-600 transition-colors"
+              onClick={() => navigate(`/changepass/${user.id}`)}
+            >
               Change Password
             </button>
-            <button className="text-graidient_bottom hover:text-pink-600 transition-colors">
+            <button
+              className="text-graidient_bottom hover:text-pink-600 transition-colors"
+              onClick={handleLogout}
+            >
               Logout
             </button>
-            <button className="text-graidient_bottom hover:text-pink-600 transition-colors">
+            <button
+              className="text-graidient_bottom hover:text-pink-600 transition-colors"
+              onClick={() => setShowDeleteModal(true)}
+            >
               Delete Profile
             </button>
           </div>
         </div>
       </div>
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-[24px] p-6 flex flex-col items-center justify-center gap-8">
+            <h2 className="text-[32px] font-normal text-[#525252] text-center">
+              Delete Profile
+            </h2>
+            <p className="text-[14px] leading-6 text-[#717171] text-center">
+              Are you sure you want to delete your profile? This action cannot
+              be <br /> undone and will permanently remove your account data,
+              preferences,
+              <br />
+              and saved information.
+            </p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className=" text-[#717171] bg-gray-300 rounded-md px-4 py-2 flex items-center justify-center"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteProfileConfirmed}
+                className="bg-[#DF064E] text-white px-4 py-2 rounded-md  flex items-center justify-center"
+              >
+                Confirm Deletion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

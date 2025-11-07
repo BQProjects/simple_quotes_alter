@@ -33,6 +33,7 @@ const EditorDnD = () => {
   const [move, setMove] = useState(false);
   const [share, setShare] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [style, setStyle] = useState({
     headingTypography: "roboto",
     paragrapghTypography: "roboto",
@@ -78,6 +79,7 @@ const EditorDnD = () => {
 
   const getProposal = async () => {
     try {
+      setLoading(true);
       await axios
         .get(`${databaseUrl}/api/editor/getsingle`, {
           params: { id: id }, // Pass parameters correctly
@@ -95,6 +97,8 @@ const EditorDnD = () => {
         });
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -681,30 +685,40 @@ const EditorDnD = () => {
             background: "rgba(255, 255, 255, 1)",
           }}
         >
-          <Sidebar
-            addEmptyRow={addEmptyRow}
-            addInputRow={addInputRow}
-            addTextRow={addTextRow}
-            addHeadingRow={addHeadingRow}
-            addDoublePara={addDoublePara}
-            addImageAndParagraph={addImageAndParagraph}
-            addImageRow={addImageRow}
-            addBreakPoint={addBreakPoint}
-            addTableRow={addTableRow}
-            addCodeBlock={addCodeBlock}
-            selected={selected}
-            active={active}
-            setActive={setActive}
-            style={style}
-            setStyle={setStyle}
-            rows={rows}
-            setRows={setRows}
-            settings={settings}
-            setSettings={setSettings}
-            addCoverPage={addCoverPage}
-            preview={preview}
-            addDoubleImage={addDoubleImage}
-          />
+          {loading ? (
+            <div className="p-4 space-y-4">
+              <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          ) : (
+            <Sidebar
+              addEmptyRow={addEmptyRow}
+              addInputRow={addInputRow}
+              addTextRow={addTextRow}
+              addHeadingRow={addHeadingRow}
+              addDoublePara={addDoublePara}
+              addImageAndParagraph={addImageAndParagraph}
+              addImageRow={addImageRow}
+              addBreakPoint={addBreakPoint}
+              addTableRow={addTableRow}
+              addCodeBlock={addCodeBlock}
+              selected={selected}
+              active={active}
+              setActive={setActive}
+              style={style}
+              setStyle={setStyle}
+              rows={rows}
+              setRows={setRows}
+              settings={settings}
+              setSettings={setSettings}
+              addCoverPage={addCoverPage}
+              preview={preview}
+              addDoubleImage={addDoubleImage}
+            />
+          )}
         </div>
 
         {/* Canvas Section */}
@@ -716,27 +730,37 @@ const EditorDnD = () => {
           }}
           ref={dropCanvasRef}
         >
-          <DropCanvas
-            rows={rows}
-            settings={settings}
-            setRows={setRows}
-            preview={view === false ? true : preview}
-            setSignEdit={setSignEdit}
-            dropCanvasRef={dropCanvasRef}
-            addEmptyRow={addEmptyRow}
-            addInputRow={addInputRow}
-            addTextRow={addTextRow}
-            addHeadingRow={addHeadingRow}
-            addDoublePara={addDoublePara}
-            addImageAndParagraph={addImageAndParagraph}
-            addImageRow={addImageRow}
-            addBreakPoint={addBreakPoint}
-            addTableRow={addTableRow}
-            addCodeBlock={addCodeBlock}
-            addLineSpace={addLineSpace}
-            height={false}
-            view={view}
-          />
+          {loading ? (
+            <div className="p-8 space-y-4 w-full max-w-4xl">
+              <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-32 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-24 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          ) : (
+            <DropCanvas
+              rows={rows}
+              settings={settings}
+              setRows={setRows}
+              preview={view === false ? true : preview}
+              setSignEdit={setSignEdit}
+              dropCanvasRef={dropCanvasRef}
+              addEmptyRow={addEmptyRow}
+              addInputRow={addInputRow}
+              addTextRow={addTextRow}
+              addHeadingRow={addHeadingRow}
+              addDoublePara={addDoublePara}
+              addImageAndParagraph={addImageAndParagraph}
+              addImageRow={addImageRow}
+              addBreakPoint={addBreakPoint}
+              addTableRow={addTableRow}
+              addCodeBlock={addCodeBlock}
+              addLineSpace={addLineSpace}
+              height={false}
+              view={view}
+            />
+          )}
         </div>
       </div>
     </DndProvider>

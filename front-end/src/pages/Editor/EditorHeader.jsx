@@ -722,7 +722,7 @@ const EditorHeader = ({
           {share && (
             <div
               ref={shareRef}
-              className="bg-white border border-gray-300 p-5 w-80 absolute top-10 z-[6000] right-0 rounded-lg flex flex-col items-center justify-center gap-1 "
+              className="bg-white border border-gray-300 p-3 md:p-5 w-72 md:w-80 absolute top-10 z-[6000] right-0 rounded-lg flex flex-col items-center justify-center gap-1 "
             >
               <h2 className="text-md font-bold">
                 Share & Download Your Proposal
