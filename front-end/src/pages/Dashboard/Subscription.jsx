@@ -114,23 +114,39 @@ const Subscription = () => {
     return 0;
   });
 
-  const createSubscription = async () => {
+  const createSubscription = async (overridePlan = null) => {
     try {
+      if (members.length + 1 > editTeamSize) {
+        toast.error("Team size exceeds the allowed limit.");
+        return;
+      }
+      const currentPlan = overridePlan || user.subscription; // Use the current subscription plan unless overridden
+
+      console.log("Sending to backend:", {
+        subscription: currentPlan,
+        subscriptionDate: new Date(),
+        user_id: user.id,
+        teamSize: editTeamSize,
+      });
+
       const res = await axios.post(
         `${databaseUrl}/api/auth/changeSubscription`,
         {
-          subscription: plan,
+          subscription: currentPlan,
           subscriptionDate: new Date(),
           user_id: user.id,
           teamSize: editTeamSize,
         }
       );
-      console.log(res.data);
-      toast.success(
-        "Congratualations! for purchasing simple quotes membership"
-      );
+      console.log("Response from backend:", res.data);
+      toast.success("Congratulations! Your subscription has been updated.");
+      // Fetch updated user data to reflect changes in the UI
+      const updatedUser = await axios.get(`${databaseUrl}/api/auth/getUser`, {
+        params: { user_id: user.id },
+      });
+      setEditTeamSize(updatedUser.data.teamSize);
     } catch (error) {
-      console.error("Error fetching workspaces:", error);
+      console.error("Error updating subscription:", error);
     }
   };
 
@@ -183,20 +199,29 @@ const Subscription = () => {
   };
   const addMember = async () => {
     try {
+      if (members.length >= user.teamSize) {
+        toast.error("Cannot add more members. Team size limit reached.");
+        return;
+      }
       const res = await axios.post(`${databaseUrl}/api/auth/addmem`, {
         user_id: user.id,
         new_user: selected,
       });
       setMembers([...members, res.data]);
     } catch (error) {
-      console.error("Error fetching workspaces:", error);
+      console.error("Error adding member:", error);
     }
+  };
+  const handlePlanSwitch = (newPlan) => {
+    setPlan(newPlan);
+    createSubscription(newPlan);
   };
   useEffect(() => {
     setEditTeamSize(members.length + 1);
   }, [members]);
   useEffect(() => {
     getMembers();
+    console.log("User data fetched from database:", user);
   }, []);
   useEffect(() => {
     if (user.subscriptionDate) {
@@ -384,7 +409,7 @@ const Subscription = () => {
                       <div className="flex flex-col flex-shrink-0 justify-center items-center gap-1 w-[6.375rem]">
                         <div className="flex items-center">
                           <div className="text-neutral-600 text-2xl leading-[normal]">
-                            ${editPlan === "yearly" ? "120" : "10"}
+                            ${(editPlan === "yearly" ? 120 : 10) * editTeamSize}
                           </div>
                           <div className="text-[#8c8c8c] text-sm leading-[normal]">
                             /{editPlan === "yearly" ? "year" : "month"}
@@ -416,7 +441,7 @@ const Subscription = () => {
                       <div className="flex flex-col items-start gap-2.5">
                         <div className="div_css-yk16xz-control flex justify-end items-center py-1 pl-6 pr-2 rounded-[0.625rem] bg-[#f7f7f7]">
                           <div className="flex flex-col justify-center items-center w-[1.1875rem] h-[1.4375rem] border-b border-b-[#cbcbcb] text-neutral-600 text-center text-lg leading-[normal]">
-                            {editTeamSize.toString().padStart(2, "0")}
+                            {(editTeamSize ?? 0).toString()}
                           </div>
                           <div className="flex flex-col justify-between items-start">
                             <div
@@ -466,9 +491,8 @@ const Subscription = () => {
                     <button
                       className="button-2 flex justify-center items-center py-2 px-3 rounded-lg border border-[#e0e0e0] bg-[#df064e] text-white leading-[normal] cursor-pointer"
                       onClick={() => {
-                        setPlan(editPlan);
-                        createSubscription();
-                        setEditModal(false);
+                        createSubscription(); // Save the updated subscription details, including team size
+                        setEditModal(false); // Close the modal
                       }}
                     >
                       Update Subscription
@@ -517,7 +541,7 @@ const Subscription = () => {
                   <button
                     onClick={() => {
                       setEditModal(true);
-                      setEditTeamSize(user.teamMembers || 1);
+                      setEditTeamSize(user.teamSize.toString()); // Initialize with teamSize from the database
                     }}
                     className="h-[34px] px-4 border border-graidient_bottom rounded-md text-graidient_bottom"
                   >
@@ -527,8 +551,7 @@ const Subscription = () => {
               ) : (
                 <div
                   onClick={() => {
-                    setPlan("monthly");
-                    createSubscription();
+                    handlePlanSwitch("monthly");
                   }}
                   className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] bg-[#df064e] text-white text-sm font-medium leading-[normal] cursor-pointer"
                 >
@@ -574,7 +597,7 @@ const Subscription = () => {
                   <button
                     onClick={() => {
                       setEditModal(true);
-                      setEditTeamSize(user.teamMembers || 1);
+                      setEditTeamSize(user.teamSize.toString()); // Initialize with teamSize from the database
                     }}
                     className="h-[34px] px-4 border border-graidient_bottom rounded-md text-graidient_bottom"
                   >
@@ -584,8 +607,7 @@ const Subscription = () => {
               ) : (
                 <div
                   onClick={() => {
-                    setPlan("yearly");
-                    createSubscription();
+                    handlePlanSwitch("yearly");
                   }}
                   className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] bg-[#df064e] text-white text-sm font-medium leading-[normal] cursor-pointer"
                 >

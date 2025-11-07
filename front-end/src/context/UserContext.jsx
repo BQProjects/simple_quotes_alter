@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { DatabaseContext } from "./DatabaseContext";
 
 export const UserContext = createContext({});
 
 export function UserContextProvider({ children }) {
+  const { databaseUrl } = useContext(DatabaseContext);
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem("user")) || null
   );
@@ -16,12 +18,9 @@ export function UserContextProvider({ children }) {
 
   const getUserData = async () => {
     try {
-      const res = await axios.get(
-        `https://simple-quotes-alter-ggrf.vercel.app/api/auth/getUser`,
-        {
-          params: { user_id: user.id },
-        }
-      );
+      const res = await axios.get(`${databaseUrl}/api/auth/getUser`, {
+        params: { user_id: user.id },
+      });
 
       const userData = res.data;
       setUser(userData);
@@ -57,7 +56,7 @@ export function UserContextProvider({ children }) {
   const expired = async () => {
     try {
       const res = await axios.post(
-        `https://simple-quotes-alter-ggrf.vercel.app/api/auth/changeSubscription`,
+        `${databaseUrl}/api/auth/changeSubscription`,
         {
           subscription: "expired",
           subscriptionDate: new Date(),
