@@ -18,6 +18,8 @@ import ChangePassword from "../pages/website/ChangePassword.jsx";
 import ForgotPassWord from "../pages/website/ForgotPassWord.jsx";
 import DashboardTemplates from "../pages/Dashboard/DashboardTemplates.jsx";
 import DashboardSettings from "../pages/Dashboard/DashboardSettings.jsx";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 const Home = React.lazy(() => import("../pages/website/Home"));
 const Signup = React.lazy(() => import("../pages/website/Signup"));
 const Pricing = React.lazy(() => import("../pages/website/Pricing"));
@@ -35,6 +37,9 @@ const Preview = React.lazy(() => import("../pages/Editor/Preview.jsx"));
 const WebsiteRoute = () => {
   const { user } = useContext(UserContext);
   const location = useLocation();
+  const stripePromise = loadStripe(
+    "pk_test_51SRcXr95IShH8lqTviFxVXxqTLHQGCH9pB8AXS8u2JrAqTcldx49StZxNTpEBzoTLkLGuDyFJCYzTXooqLiCYUFE00944LM6Zw"
+  );
   return (
     <>
       <Routes>
@@ -137,7 +142,9 @@ const WebsiteRoute = () => {
           path="subscription"
           element={
             <Dashboard>
-              <Subscription />
+              <Elements stripe={stripePromise}>
+                <Subscription />
+              </Elements>
             </Dashboard>
           }
         />

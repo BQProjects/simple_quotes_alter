@@ -159,6 +159,7 @@ const getUser = async (req, res) => {
         teamMembers: user.teamMembers ? user.teamMembers : 1,
         subscriptionEnd: user.subscriptionEnd || new Date(),
         teamSize: user.teamSize ? parseInt(user.teamSize) : 1,
+        invoices: user.Invoices,
       };
       return res.json(temp);
     } else {
@@ -173,7 +174,8 @@ const getUser = async (req, res) => {
 };
 
 const setSubscription = async (req, res) => {
-  const { subscription, subscriptionDate, user_id, teamSize } = req.body; // Include teamSize
+  const { subscription, subscriptionDate, user_id, teamSize, invoice } =
+    req.body; // Include teamSize
 
   try {
     const profile = await UserModel.findById(user_id);
@@ -247,6 +249,12 @@ const setSubscription = async (req, res) => {
     if (teamSize !== undefined) {
       profile.teamSize = teamSize;
     }
+
+    if (!profile.Invoices) {
+      profile.Invoices = [];
+    }
+
+    profile.Invoices.push(invoice);
 
     await profile.save();
     return res.status(200).json(profile);

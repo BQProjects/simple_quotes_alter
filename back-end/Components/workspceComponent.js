@@ -5,6 +5,43 @@ const AnalyticsModel = require("../models/analysticsModel");
 const RecycleModel = require("../models/RecycleBinModel");
 const ViewModel = require("../models/viewAnalystics");
 const CollabModel = require("../models/collabModel");
+const Stripe = require("stripe");
+
+const stripe = new Stripe(process.env.STRIPE_KEY);
+
+const stripePaymentIntegration = async (req, res) => {
+  try {
+    const { amount, user_id, plan, teamSize } = req.body;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Subscription Plan - ${plan}`,
+            },
+            unit_amount: amount, // in cents
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `https://simple-quotes-alter.vercel.app/#/subscription?success=true&plan=${plan}&user=${user_id}&teamSize=${teamSize}`,
+      cancel_url: `https://simple-quotes-alter.vercel.app/#/subscription?cancelled=true&plan=${plan}&user=${user_id}&teamSize=${teamSize}`,
+      metadata: {
+        user_id,
+        plan,
+      },
+    });
+
+    res.json({ url: session.url }); // Send Stripe redirect URL
+  } catch (err) {
+    console.error("Error creating checkout session:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
 
 const workspaceUpdate = async (req, res) => {
   const { id, value } = req.body;
@@ -1391,4 +1428,5 @@ module.exports = {
   deleteCollabUser,
   getNotifications,
   deleteProfile,
+  stripePaymentIntegration,
 };

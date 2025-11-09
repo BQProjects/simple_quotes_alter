@@ -107,6 +107,7 @@ const UserSchema = new Schema({
   ProposalN: {
     type: Boolean,
   },
+  Invoices: [{ type: Object }],
   notifications: [{ type: Object }],
 });
 

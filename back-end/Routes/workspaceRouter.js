@@ -47,11 +47,14 @@ const {
   deleteCollabUser,
   getNotifications,
   deleteProfile,
+  stripePaymentIntegration,
 } = require("../Components/workspceComponent");
 
 const workspace = express.Router();
 
 workspace.use(cors());
+
+workspace.post("/payment-integration", stripePaymentIntegration);
 
 workspace.get("/getall", workspaceGetAll);
 workspace.get("/getnotification", getNotifications);
