@@ -175,7 +175,7 @@ const getUser = async (req, res) => {
 
 const setSubscription = async (req, res) => {
   const { subscription, subscriptionDate, user_id, teamSize, invoice } =
-    req.body; // Include teamSize
+    req.body;
 
   try {
     const profile = await UserModel.findById(user_id);
@@ -184,7 +184,7 @@ const setSubscription = async (req, res) => {
     }
 
     const startDate = new Date(subscriptionDate);
-    let endDate = null;
+    let endDate = new Date(subscriptionDate);
 
     if (subscription === "expired") {
       profile.subscription = "expired";
@@ -250,11 +250,28 @@ const setSubscription = async (req, res) => {
       profile.teamSize = teamSize;
     }
 
-    if (!profile.Invoices) {
-      profile.Invoices = [];
-    }
+    // Create invoice if subscription is active
+    if (subscription === "monthly" || subscription === "yearly") {
+      if (!profile.Invoices) {
+        profile.Invoices = [];
+      }
 
-    profile.Invoices.push(invoice);
+      const newInvoice = {
+        invoice: `Invoice_${startDate.toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        })}`,
+        billingDate: startDate,
+        endDate: endDate,
+        plan: subscription,
+        amount:
+          (subscription === "monthly" ? 10 : 120) *
+          (teamSize || profile.teamSize || 1),
+        users: teamSize || profile.teamSize || 1,
+      };
+
+      profile.Invoices.push(newInvoice);
+    }
 
     await profile.save();
     return res.status(200).json(profile);

@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { BiReceipt } from "react-icons/bi";
 import { CiCreditCard1 } from "react-icons/ci";
 import { MdOutlinePeopleOutline } from "react-icons/md";
-import { FaArrowRight, FaArrowDown } from "react-icons/fa";
+import { FaArrowRight, FaArrowDown, FaArrowLeft } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa6";
 import { FaUsers } from "react-icons/fa";
 import { UserContext } from "../../context/UserContext";
@@ -26,12 +26,10 @@ const Subscription = () => {
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [members, setMembers] = useState([]);
-  const [editModal, setEditModal] = useState(false);
+  const [subscribeModal, setSubscribeModal] = useState(false);
+  const [subscribePlan, setSubscribePlan] = useState("monthly");
+  const [subscribeTeamSize, setSubscribeTeamSize] = useState(1);
   const navigate = useNavigate();
-  const [editPlan, setEditPlan] = useState(
-    user.subscription === "yearly" ? "yearly" : "monthly"
-  );
-  const [editTeamSize, setEditTeamSize] = useState(members.length + 1);
   const [billingHistory, setBillingHistory] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
@@ -111,7 +109,7 @@ const Subscription = () => {
       const success = query.get("success");
       const canceled = query.get("canceled");
       const plan = query.get("plan");
-      const user = query.get("user");
+      const userId = query.get("user");
       const teamSize = query.get("teamSize");
 
       // ✅ Prevent re-execution if already handled
@@ -119,38 +117,47 @@ const Subscription = () => {
 
       try {
         if (success) {
+          const startDate = new Date();
+          let endDate = new Date();
+
+          if (plan === "monthly") {
+            endDate.setMonth(endDate.getMonth() + 1);
+          } else if (plan === "yearly") {
+            endDate.setFullYear(endDate.getFullYear() + 1);
+          }
+
           // 🔹 Update backend with new subscription details
           const res = await axios.post(
             `${databaseUrl}/api/auth/changeSubscription`,
             {
               subscription: plan,
-              subscriptionDate: new Date(),
-              user_id: user,
-              teamSize: teamSize,
-              invoice: {
-                invoice: "Invoice_Month_Year",
-                billingDate: new Date(),
-                endDate: new Date(),
-                plan: plan,
-                amount: teamSize * 10,
-                users: teamSize,
-              },
+              subscriptionDate: startDate,
+              user_id: userId,
+              teamSize: parseInt(teamSize),
             }
           );
 
           console.log("Response from backend:", res.data);
           toast.success(
-            "🎉 Congratulations! Your subscription has been updated."
+            "🎉 Congratulations! Your subscription has been activated."
           );
 
           // 🔹 Fetch updated user details
           const updatedUser = await axios.get(
             `${databaseUrl}/api/auth/getUser`,
             {
-              params: { user_id: user },
+              params: { user_id: userId },
             }
           );
-          setEditTeamSize(updatedUser.data.teamSize);
+
+          if (updatedUser.data) {
+            // Team size updated in user context
+          }
+
+          // Refresh the page to show updated subscription
+          setTimeout(() => {
+            window.location.href = window.location.pathname;
+          }, 1500);
         } else if (canceled) {
           toast.error("❌ Payment was canceled or failed.");
         }
@@ -164,37 +171,51 @@ const Subscription = () => {
     };
 
     handleSubscription();
-  }, [location.search, databaseUrl, setEditTeamSize]);
+  }, [location.search, databaseUrl]);
 
-  const createSubscription = async (overridePlan = null) => {
+  const createSubscription = async (overridePlan = null, teamSize = null) => {
     try {
       sessionStorage.removeItem("subscriptionHandled");
-      if (members.length + 1 > editTeamSize) {
-        toast.error("Team size exceeds the allowed limit.");
-        return;
-      }
-      const currentPlan = overridePlan || user.subscription; // Use the current subscription plan unless overridden
+
+      const currentPlan = overridePlan || user.subscription;
+      const finalTeamSize = teamSize || 1;
 
       console.log("Sending to backend:", {
         subscription: currentPlan,
         subscriptionDate: new Date(),
         user_id: user.id,
-        teamSize: editTeamSize,
+        teamSize: finalTeamSize,
       });
+
       const stripe_res = await axios.post(
         `${databaseUrl}/api/workspace/payment-integration`,
         {
-          amount: editTeamSize * 10 * 100, // convert to cents
+          amount: finalTeamSize * 10 * 100, // convert to cents
           user_id: user.id,
           plan: currentPlan,
-          teamSize: editTeamSize,
+          teamSize: finalTeamSize,
         }
       );
 
       window.location.href = stripe_res.data.url;
     } catch (error) {
       console.error("Error updating subscription:", error);
+      toast.error("Failed to process subscription");
     }
+  };
+
+  const handleNewSubscription = (plan) => {
+    setSubscribePlan(plan);
+    setSubscribeModal(true);
+  };
+
+  const confirmSubscription = () => {
+    if (subscribeTeamSize < 1) {
+      toast.error("Team size must be at least 1");
+      return;
+    }
+    setSubscribeModal(false);
+    createSubscription(subscribePlan, subscribeTeamSize);
   };
 
   const CancelSubscription = async () => {
@@ -275,9 +296,6 @@ const Subscription = () => {
     setPlan(newPlan);
     createSubscription(newPlan);
   };
-  useEffect(() => {
-    setEditTeamSize(members.length + 1);
-  }, [members]);
   useEffect(() => {
     getMembers();
     console.log("User data fetched from database:", user);
@@ -392,92 +410,32 @@ const Subscription = () => {
             </div>
           </div>
         )}
-        {editModal && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-40 flex justify-center items-center z-50 border border-gray-500">
-            <div className=" inline-flex justify-center items-center p-10 h-[21.25rem] rounded-[0.9375rem] bg-white  border border-gray-300">
+        {subscribeModal && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-40 flex justify-center items-center z-50">
+            <div className="inline-flex justify-center items-center p-10 rounded-[0.9375rem] bg-white border border-gray-300">
               <div className="flex flex-col justify-center items-center gap-10">
-                <div className="flex flex-col items-start gap-10">
-                  <div className="flex justify-between items-center w-[432px]">
-                    <div className="flex items-start p-1 rounded-[0.625rem] border border-[#e0e0e0] bg-white">
-                      <div
-                        className={`flex justify-center items-center gap-2.5 py-2 px-4 rounded-md cursor-pointer ${
-                          editPlan === "monthly"
-                            ? "bg-[#df064e] text-white"
-                            : "text-[#8c8c8c]"
-                        }`}
-                        onClick={() => setEditPlan("monthly")}
-                      >
-                        Monthly
-                      </div>
-                      <div
-                        className={`flex justify-center items-center gap-2.5 py-2 px-4 rounded-md cursor-pointer ${
-                          editPlan === "yearly"
-                            ? "bg-[#df064e] text-white"
-                            : "text-[#8c8c8c]"
-                        }`}
-                        onClick={() => setEditPlan("yearly")}
-                      >
-                        Yearly
-                      </div>
-                    </div>
-                    <div className="flex flex-end items-center gap-4">
-                      <div className="text-[#cbcbcb] text-sm leading-[normal] line-through">
-                        $19
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="popular flex justify-center items-center gap-0.5 py-1 px-2 rounded bg-[#f7f7f7]">
-                          <svg
-                            width={16}
-                            height={16}
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M5 2V8.6H6.8V14L11 6.8H8.6L11 2H5Z"
-                              fill="#FFBE41"
-                            />
-                          </svg>
-                          <div className="save_20_ text-neutral-600 text-xs leading-[normal]">
-                            Flexibility first
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                <div className="flex flex-col items-start gap-6">
+                  <div className="text-[#1f1f1f] text-xl font-semibold">
+                    Subscribe to{" "}
+                    {subscribePlan === "monthly" ? "Monthly" : "Yearly"} Plan
                   </div>
-                  <div className="flex flex-col items-start gap-10 self-stretch">
-                    <div className="flex justify-between items-center w-[432px]">
-                      <div className="flex items-center gap-2">
-                        <svg
-                          width={24}
-                          height={24}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M19.1824 4.91249L11.9987 4.75L4.81493 4.91249C3.48377 4.9426 2.35667 5.90322 2.11598 7.21278C1.53426 10.3779 1.53426 13.6225 2.11598 16.7876C2.35667 18.0972 3.48377 19.0578 4.81493 19.0879L11.9987 19.2504L19.1824 19.0879C20.5135 19.0578 21.6406 18.0972 21.8813 16.7876C22.463 13.6225 22.463 10.3779 21.8813 7.21278C21.6406 5.90322 20.5135 4.9426 19.1824 4.91249ZM4.84885 6.41211L11.9987 6.25038L19.1485 6.41211C19.7687 6.42613 20.2939 6.87374 20.406 7.48393C20.5593 8.31792 20.6698 9.15776 20.7374 10.0002H3.25987C3.32752 9.15776 3.43799 8.31792 3.59127 7.48393C3.70342 6.87374 4.22859 6.42613 4.84885 6.41211ZM3.17969 12.0002C3.17969 13.5119 3.31688 15.0235 3.59127 16.5165C3.70342 17.1266 4.22859 17.5742 4.84885 17.5883L11.9987 17.75L19.1485 17.5883C19.7687 17.5742 20.2939 17.1266 20.406 16.5165C20.6804 15.0235 20.8176 13.5119 20.8176 12.0002H3.17969Z"
-                            fill="#8C8C8C"
-                          />
-                        </svg>
-                        <div className="text_200 text-[#8c8c8c] leading-[normal]">
-                          Billing Plan
-                        </div>
-                      </div>
-                      <div className="flex flex-col flex-shrink-0 justify-center items-center gap-1 w-[6.375rem]">
-                        <div className="flex items-center">
-                          <div className="text-neutral-600 text-2xl leading-[normal]">
-                            ${(editPlan === "yearly" ? 120 : 10) * editTeamSize}
-                          </div>
-                          <div className="text-[#8c8c8c] text-sm leading-[normal]">
-                            /{editPlan === "yearly" ? "year" : "month"}
-                          </div>
-                        </div>
+
+                  <div className="flex flex-col gap-4 w-[400px]">
+                    <div className="flex justify-between items-center">
+                      <div className="text-[#8c8c8c]">Plan</div>
+                      <div className="text-[#1f1f1f] font-medium">
+                        {subscribePlan === "monthly" ? "Monthly" : "Yearly"}
                       </div>
                     </div>
-                    <div className="flex justify-between items-center self-stretch">
+
+                    <div className="flex justify-between items-center">
+                      <div className="text-[#8c8c8c]">Price per user</div>
+                      <div className="text-[#1f1f1f] font-medium">
+                        ${subscribePlan === "monthly" ? "10/month" : "120/year"}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                       <div className="flex items-center gap-2">
                         <svg
                           width={24}
@@ -494,78 +452,103 @@ const Subscription = () => {
                             strokeLinejoin="round"
                           />
                         </svg>
-                        <div className="text_200-1 text-[#8c8c8c] leading-[normal]">
-                          Choose Team Size
-                        </div>
+                        <div className="text-[#8c8c8c]">Team Size</div>
                       </div>
-                      <div className="flex flex-col items-start gap-2.5">
-                        <div className="div_css-yk16xz-control flex justify-end items-center py-1 pl-6 pr-2 rounded-[0.625rem] bg-[#f7f7f7]">
-                          <div className="flex flex-col justify-center items-center w-[1.1875rem] h-[1.4375rem] border-b border-b-[#cbcbcb] text-neutral-600 text-center text-lg leading-[normal]">
-                            {(editTeamSize ?? 0).toString()}
-                          </div>
-                          <div className="flex flex-col justify-between items-start">
-                            <div
-                              className="flex flex-col justify-center items-center p-2 cursor-pointer"
-                              onClick={() => setEditTeamSize(editTeamSize + 1)}
-                            >
-                              <svg
-                                width={10}
-                                height={5}
-                                viewBox="0 0 10 5"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path d="M0 5L5 0L10 5H0Z" fill="#ACACAC" />
-                              </svg>
-                            </div>
-                            <div
-                              className="flex flex-col justify-center items-center p-2 cursor-pointer"
-                              onClick={() =>
-                                setEditTeamSize(Math.max(1, editTeamSize - 1))
-                              }
-                            >
-                              <svg
-                                width={10}
-                                height={5}
-                                viewBox="0 0 10 5"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path d="M0 0L5 5L10 0H0Z" fill="#ACACAC" />
-                              </svg>
-                            </div>
-                          </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="p-2 rounded-md hover:bg-gray-100"
+                          onClick={() =>
+                            setSubscribeTeamSize(
+                              Math.max(1, subscribeTeamSize - 1)
+                            )
+                          }
+                        >
+                          <svg
+                            width={20}
+                            height={20}
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5 10H15"
+                              stroke="#525252"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </button>
+                        <div className="w-12 text-center text-[#1f1f1f] font-medium">
+                          {subscribeTeamSize}
                         </div>
+                        <button
+                          className="p-2 rounded-md hover:bg-gray-100"
+                          onClick={() =>
+                            setSubscribeTeamSize(subscribeTeamSize + 1)
+                          }
+                        >
+                          <svg
+                            width={20}
+                            height={20}
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M10 5V15M5 10H15"
+                              stroke="#525252"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                      <div className="text-[#1f1f1f] font-semibold">Total</div>
+                      <div className="text-[#df064e] text-2xl font-bold">
+                        $
+                        {(subscribePlan === "monthly" ? 10 : 120) *
+                          subscribeTeamSize}
+                        <span className="text-sm text-[#8c8c8c] font-normal">
+                          /{subscribePlan === "monthly" ? "month" : "year"}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-center gap-4 self-stretch">
-                  <div className="flex justify-center items-center gap-4">
-                    <button
-                      className="px-5 py-2 bg-gray-300 rounded-md"
-                      onClick={() => setEditModal(false)}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="button-2 flex justify-center items-center py-2 px-3 rounded-lg border border-[#e0e0e0] bg-[#df064e] text-white leading-[normal] cursor-pointer"
-                      onClick={() => {
-                        createSubscription(); // Save the updated subscription details, including team size
-                        setEditModal(false); // Close the modal
-                      }}
-                    >
-                      Update Subscription
-                    </button>
-                  </div>
+
+                <div className="flex justify-center items-center gap-4">
+                  <button
+                    className="px-5 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                    onClick={() => {
+                      setSubscribeModal(false);
+                      setSubscribeTeamSize(1);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-5 py-2 bg-[#df064e] text-white rounded-md hover:bg-[#c0054a]"
+                    onClick={confirmSubscription}
+                  >
+                    Continue to Payment
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         )}
-        <h1 className="mb-4 flex items-center justify-start gap-2 text-xl mt-8 w-full px-6">
-          <BiReceipt className=" mr-1" /> Subscription
-        </h1>
+
+        <div className="flex items-center justify-start gap-4 text-xl w-full px-6 mt-8 mb-4">
+          <button onClick={() => navigate(-1)} className="flex items-center">
+            <FaArrowLeft className="w-4 h-4" />
+          </button>
+          <h1 className="flex items-center gap-2">
+            <BiReceipt className=" mr-1" /> Subscription
+          </h1>
+        </div>
         <div className="w-full px-6 flex justify-center gap-10 mt-7">
           {/* Monthly Plan */}
           <div
@@ -584,35 +567,29 @@ const Subscription = () => {
                   30 days validity
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-2 text-[#8c8c8c] leading-[normal]">
-                $10/month
+              <div className="flex flex-col items-end gap-2">
+                <div className="text-[#8c8c8c] text-sm leading-[normal]">
+                  $10 per user/month
+                </div>
+                {user.subscription === "monthly" && (
+                  <div className="text-[#df064e] text-lg font-semibold">
+                    ${10 * (user.teamSize || 1)}/month total
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex items-center gap-4 w-full">
               {user.subscription === "monthly" ? (
-                <>
-                  <button
-                    onClick={CancelSubscription}
-                    className="h-[34px] flex justify-center items-center gap-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
-                  >
-                    Cancel Subscription
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditModal(true);
-                      setEditTeamSize(user.teamSize.toString()); // Initialize with teamSize from the database
-                    }}
-                    className="h-[34px] px-4 border border-graidient_bottom rounded-md text-graidient_bottom"
-                  >
-                    Edit
-                  </button>
-                </>
+                <button
+                  onClick={CancelSubscription}
+                  className="h-[34px] flex justify-center items-center gap-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
+                >
+                  Cancel Subscription
+                </button>
               ) : (
                 <div
-                  onClick={() => {
-                    handlePlanSwitch("monthly");
-                  }}
+                  onClick={() => handleNewSubscription("monthly")}
                   className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] bg-[#df064e] text-white text-sm font-medium leading-[normal] cursor-pointer"
                 >
                   {user.subscription === "yearly"
@@ -640,35 +617,29 @@ const Subscription = () => {
                   365 days validity
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-2 text-[#8c8c8c] leading-[normal]">
-                $120/year
+              <div className="flex flex-col items-end gap-2">
+                <div className="text-[#8c8c8c] text-sm leading-[normal]">
+                  $120 per user/year
+                </div>
+                {user.subscription === "yearly" && (
+                  <div className="text-[#df064e] text-lg font-semibold">
+                    ${120 * (user.teamSize || 1)}/year total
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex items-center gap-4 w-full">
               {user.subscription === "yearly" ? (
-                <>
-                  <button
-                    onClick={CancelSubscription}
-                    className="h-[34px] flex justify-center items-center gap-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
-                  >
-                    Cancel Subscription
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditModal(true);
-                      setEditTeamSize(user.teamSize.toString()); // Initialize with teamSize from the database
-                    }}
-                    className="h-[34px] px-4 border border-graidient_bottom rounded-md text-graidient_bottom"
-                  >
-                    Edit
-                  </button>
-                </>
+                <button
+                  onClick={CancelSubscription}
+                  className="h-[34px] flex justify-center items-center gap-2 px-4 rounded-[0.3125rem] border-[0.5px] border-[#df064e] bg-white text-[#df064e] text-sm font-medium leading-[normal] cursor-pointer"
+                >
+                  Cancel Subscription
+                </button>
               ) : (
                 <div
-                  onClick={() => {
-                    handlePlanSwitch("yearly");
-                  }}
+                  onClick={() => handleNewSubscription("yearly")}
                   className="flex justify-center items-center gap-2 py-2 px-4 rounded-[0.3125rem] bg-[#df064e] text-white text-sm font-medium leading-[normal] cursor-pointer"
                 >
                   {user.subscription === "monthly"
@@ -680,24 +651,27 @@ const Subscription = () => {
           </div>
         </div>
 
-        {user.subscription !== "shared" && (
+        {(user.subscription === "monthly" ||
+          user.subscription === "yearly") && (
           <div className="w-full px-6 mt-5">
             <div className="w-full flex items-center justify-between mb-4">
               <h1 className="flex items-center gap-3 text-[20px] font-normal">
                 <div className="w-8 h-8 flex items-center justify-center rounded-md">
                   <FaUsers />
                 </div>
-                Manage Team
+                Manage Team ({members.length + 1}/{user.teamSize || 1})
               </h1>
-              <button
-                onClick={() => {
-                  getAllUsers();
-                  setPopUp(true);
-                }}
-                className="px-4 py-1 border border-graidient_bottom rounded-md text-graidient_bottom"
-              >
-                Add Member
-              </button>
+              {members.length < (user.teamSize || 1) - 1 && (
+                <button
+                  onClick={() => {
+                    getAllUsers();
+                    setPopUp(true);
+                  }}
+                  className="px-4 py-1 border border-graidient_bottom rounded-md text-graidient_bottom"
+                >
+                  Add Member
+                </button>
+              )}
             </div>
             <div className="w-full rounded-[0.625rem] border border-[#e0e0e0] bg-[#ede4dc]/30 overflow-hidden">
               <table className="w-full">
@@ -936,14 +910,14 @@ const Subscription = () => {
                       <td className="py-1 px-2">
                         <div className="flex items-center gap-0.5 w-[9.25rem]">
                           <span className="text-sm text-[#1f1f1f]">
-                            {item.billingDate}
+                            {new Date(item.billingDate).toLocaleDateString()}
                           </span>
                         </div>
                       </td>
                       <td className="py-1 px-2">
                         <div className="flex items-center gap-0.5 w-[9.25rem]">
                           <span className="text-sm text-[#1f1f1f]">
-                            {item.endDate}
+                            {new Date(item.endDate).toLocaleDateString()}
                           </span>
                         </div>
                       </td>
