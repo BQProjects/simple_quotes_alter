@@ -324,7 +324,7 @@ const DashboardTemplates = () => {
   };
 
   return (
-    <div className="w-full bg-white min-h-[85vh] px-10 pt-6 shadow-lg shadow-gray-300">
+    <div className="w-full bg-white min-h-[85vh] px-10 pt-6  shadow-gray-300">
       <div className="text-xl text-gray-500 flex items-center justify-start gap-3 mt-4">
         <HiTemplate size={26} />
         <h1>Templates</h1>

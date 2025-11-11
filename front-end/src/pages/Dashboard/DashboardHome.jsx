@@ -34,6 +34,7 @@ const DashboardHome = () => {
     timespent: 0,
   });
   const [trafficData, setTrafficData] = useState([]);
+  const [trafficLoading, setTrafficLoading] = useState(true);
   const [error, setError] = useState(null);
   const [templates, setTemplates] = useState([]);
   const [templateLoading, setTemplateLoading] = useState(true);
@@ -143,6 +144,7 @@ const DashboardHome = () => {
   };
 
   const fetchTrafficData = async () => {
+    setTrafficLoading(true);
     try {
       const res = await axios.get(
         `${databaseUrl}/api/workspace/analytics-data`
@@ -151,6 +153,8 @@ const DashboardHome = () => {
     } catch (error) {
       console.error("Error fetching traffic data:", error);
       setTrafficData([]);
+    } finally {
+      setTrafficLoading(false);
     }
   };
 
@@ -544,8 +548,12 @@ const DashboardHome = () => {
             <div className="w-full lg:flex-1 lg:w-auto">
               <ProposalsLineChart proposals={proposals} />
             </div>
-            <div className="w-full lg:w-auto lg:max-w-sm h-full">
-              <TrafficPieChart data={trafficData} width={320} height={350} />
+            <div className="w-full lg:w-auto lg:max-w-sm">
+              <TrafficPieChart
+                data={trafficData}
+                title="Traffic by Location"
+                loading={trafficLoading}
+              />
             </div>
           </div>
         </div>

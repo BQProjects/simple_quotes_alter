@@ -38,6 +38,7 @@ const DashboardFirst = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [proposals, setProposals] = useState([]);
   const [renameV, setRenameV] = useState("");
+  const [loading, setLoading] = useState(true);
   const [rename, setRename] = useState(null);
   const [move, setMove] = useState(null);
   // const [workspaces, setWorkspaces] = useState([]);
@@ -184,6 +185,7 @@ const DashboardFirst = () => {
   }, [id]); // Re-run if `id` changes
 
   const getAllProposals = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `${databaseUrl}/api/editor/getproposal`,
@@ -196,6 +198,8 @@ const DashboardFirst = () => {
     } catch (error) {
       console.error("Error fetching proposals:", error);
       setErrorMessage("Failed to fetch proposals. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -365,189 +369,238 @@ const DashboardFirst = () => {
           <h3>{workspace ? workspace.workspaceName : "jlsbdvljs"}</h3>
         </div>
         <div className="w-full h-[75vh] overflow-y-auto scrollbar-hide relative">
-          <table className="auto-table w-full ">
-            <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0">
-              <tr>
-                <th className="rounded-l-sm px-4 py-2 w-[45%]">
-                  Proposal Name
-                </th>
-                <th className="px-4 py-2 w-[25%]">Views</th>
-                <th className="rounded-r-sm pl-10 py-2 w-[20%]">
-                  Quick Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="">
-              {proposals.map((proposal, index) => {
-                return (
-                  <tr
-                    className="border-b border-gray-100 mt-1 text-gray-600 hover:bg-gray-50 cursor-pointer h-14 "
-                    key={index}
-                  >
-                    <td
-                      key={proposal._id}
-                      className="px-4 flex flex-col items-start justify-center  text-left pt-1"
+          {loading ? (
+            <div className="w-full">
+              <table className="auto-table w-full ">
+                <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0">
+                  <tr>
+                    <th className="rounded-l-sm px-4 py-2 w-[45%]">
+                      Proposal Name
+                    </th>
+                    <th className="px-4 py-2 w-[25%]">Views</th>
+                    <th className="rounded-r-sm pl-10 py-2 w-[20%]">
+                      Quick Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <tr key={i} className="border-b border-gray-100 h-14">
+                      <td className="px-4 py-3">
+                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-4 bg-gray-200 rounded w-1/4" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-4 bg-gray-200 rounded w-1/6 ml-auto" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : proposals.length === 0 ? (
+            <div className="h-[75vh] flex flex-col items-center justify-center gap-4">
+              <div className="w-28 h-28 rounded-lg bg-gray-100 flex items-center justify-center">
+                <FaRegFileLines className="text-4xl text-gray-400" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-700">
+                No proposals yet
+              </h2>
+              <p className="text-sm text-gray-500 text-center max-w-xl">
+                This workspace doesn't have any proposals. Create your first
+                proposal to get started.
+              </p>
+            </div>
+          ) : (
+            <table className="auto-table w-full ">
+              <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0">
+                <tr>
+                  <th className="rounded-l-sm px-4 py-2 w-[45%]">
+                    Proposal Name
+                  </th>
+                  <th className="px-4 py-2 w-[25%]">Views</th>
+                  <th className="rounded-r-sm pl-10 py-2 w-[20%]">
+                    Quick Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="">
+                {proposals.map((proposal, index) => {
+                  return (
+                    <tr
+                      className="border-b border-gray-100 mt-1 text-gray-600 hover:bg-gray-50 cursor-pointer h-14 "
+                      key={index}
                     >
-                      <span className="flex items-center gap-2 w-full">
-                        {proposal.favorate ? (
-                          <FaStar
-                            onClick={() => {
-                              handleFavorate(false, proposal._id);
-                              const temp = [...proposals];
-                              temp[index].favorate = false;
-                              setProposals(temp);
-                            }}
-                            className="text-graidient_bottom"
-                          />
-                        ) : (
-                          <FaRegStar
-                            onClick={() => {
-                              handleFavorate(true, proposal._id);
-                              const temp = [...proposals];
-                              temp[index].favorate = true;
-                              setProposals(temp);
-                            }}
-                            className="text-gray-500"
-                          />
-                        )}
+                      <td
+                        key={proposal._id}
+                        className="px-4 flex flex-col items-start justify-center  text-left pt-1"
+                      >
+                        <span className="flex items-center gap-2 w-full">
+                          {proposal.favorate ? (
+                            <FaStar
+                              onClick={() => {
+                                handleFavorate(false, proposal._id);
+                                const temp = [...proposals];
+                                temp[index].favorate = false;
+                                setProposals(temp);
+                              }}
+                              className="text-graidient_bottom"
+                            />
+                          ) : (
+                            <FaRegStar
+                              onClick={() => {
+                                handleFavorate(true, proposal._id);
+                                const temp = [...proposals];
+                                temp[index].favorate = true;
+                                setProposals(temp);
+                              }}
+                              className="text-gray-500"
+                            />
+                          )}
 
-                        <input
-                          onClick={() => {
-                            if (rename === null) {
-                              navigate(`/editor/${proposal._id}`);
-                            }
-                          }}
-                          value={
-                            rename === proposal._id
-                              ? renameV
-                              : proposal.proposalName
-                          }
-                          className={`w-[70%] overflow-hidden whitespace-nowrap text-ellipsis outline-none ${
-                            rename === proposal._id
-                              ? "border-b border-gray-800"
-                              : "none"
-                          } `}
-                          onChange={(e) => setRenameV(e.target.value)}
-                          readOnly={rename === proposal._id ? false : true}
-                        />
-                        {rename === proposal._id && (
-                          <button
+                          <input
                             onClick={() => {
-                              handleRename(proposal._id, index);
-                            }}
-                          >
-                            <FaCheck />
-                          </button>
-                        )}
-                      </span>
-                      <span className="text-xs text-gray-500 ml-7 ">
-                        Created on {formatDate(proposal.createdAt)}
-                      </span>
-                    </td>
-                    <td className="pl-5 pr-3">
-                      {proposal.views ? (
-                        <span className="flex flex-col  items-start justify-center">
-                          <span className="flex items-center justify-start gap-2">
-                            <FiEye />
-                            {proposal.views}
-                          </span>
-                          <span className=" text-xs text-gray-500">
-                            Last vist {getLastSeen(proposal.lastUpdate)}
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="flex flex-row gap-1 items-center justify-start">
-                          <FiEye />0
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="flex flex-row gap-4  ml-8 ">
-                        <GoLink
-                          onClick={() => {
-                            copyToClipboard(proposal._id);
-                          }}
-                          className="w-4 h-4 text-gray-600 "
-                        />
-                        <SiSimpleanalytics
-                          onClick={() => navigate(`/analytics/${proposal._id}`)}
-                          className="w-4 h-4 text-gray-600 "
-                        />
-                        <IoMdLock
-                          className={`${
-                            proposal.locked || selLocked.includes(proposal._id)
-                              ? "text-graidient_bottom"
-                              : "text-gray-500"
-                          } w-5 h-4 text-gray-600 `}
-                          onClick={() => {
-                            handleLocked(!proposal.locked, proposal._id);
-                            const temp = [...proposals];
-                            temp[index].locked = !proposal.locked;
-                            setProposals(temp);
-                          }}
-                        />
-
-                        <FaRegCopy
-                          onClick={() => handleDuplicate(proposal._id)}
-                        />
-                        <div className="relative" ref={buttonRef}>
-                          <BsThreeDotsVertical
-                            onClick={() => {
-                              if (threeDots !== null) {
-                                setThreeDots(null);
-                              } else {
-                                setThreeDots(index);
+                              if (rename === null) {
+                                navigate(`/editor/${proposal._id}`);
                               }
                             }}
-                            className={`${
-                              threeDots === index
-                                ? "text-graidient_bottom"
-                                : "text-gray-600"
-                            }`}
+                            value={
+                              rename === proposal._id
+                                ? renameV
+                                : proposal.proposalName
+                            }
+                            className={`w-[70%] overflow-hidden whitespace-nowrap text-ellipsis outline-none ${
+                              rename === proposal._id
+                                ? "border-b border-gray-800"
+                                : "none"
+                            } `}
+                            onChange={(e) => setRenameV(e.target.value)}
+                            readOnly={rename === proposal._id ? false : true}
                           />
-                          {threeDots === index && (
-                            <div
-                              ref={blockRef}
-                              className="absolute top-5 -left-20 flex flex-col z-50 bg-white px-2 py-2 w-40 items-center justify-center shadow-md shadow-gray-300"
+                          {rename === proposal._id && (
+                            <button
+                              onClick={() => {
+                                handleRename(proposal._id, index);
+                              }}
                             >
-                              <p
-                                onClick={() => {
-                                  setRename(proposal._id);
-                                  setRenameV(proposal.proposalName);
-                                  setThreeDots(null);
-                                }}
-                                className="py-1 px-1 w-full hover:bg-gray-100"
-                              >
-                                Rename
-                              </p>
-                              <p
-                                onClick={() => {
-                                  setMove(proposal._id);
-                                  setThreeDots(null);
-                                }}
-                                className="py-1 px-1 w-full hover:bg-gray-100"
-                              >
-                                Move To
-                              </p>
-                              <p
-                                onClick={() => {
-                                  handleDelete(proposal._id);
-                                  setThreeDots(null);
-                                }}
-                                className="py-1 px-1 w-full hover:bg-gray-100"
-                              >
-                                Delete
-                              </p>
-                            </div>
+                              <FaCheck />
+                            </button>
                           )}
+                        </span>
+                        <span className="text-xs text-gray-500 ml-7 ">
+                          Created on {formatDate(proposal.createdAt)}
+                        </span>
+                      </td>
+                      <td className="pl-5 pr-3">
+                        {proposal.views ? (
+                          <span className="flex flex-col  items-start justify-center">
+                            <span className="flex items-center justify-start gap-2">
+                              <FiEye />
+                              {proposal.views}
+                            </span>
+                            <span className=" text-xs text-gray-500">
+                              Last vist {getLastSeen(proposal.lastUpdate)}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="flex flex-row gap-1 items-center justify-start">
+                            <FiEye />0
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        <div className="flex flex-row gap-4  ml-8 ">
+                          <GoLink
+                            onClick={() => {
+                              copyToClipboard(proposal._id);
+                            }}
+                            className="w-4 h-4 text-gray-600 "
+                          />
+                          <SiSimpleanalytics
+                            onClick={() =>
+                              navigate(`/analytics/${proposal._id}`)
+                            }
+                            className="w-4 h-4 text-gray-600 "
+                          />
+                          <IoMdLock
+                            className={`${
+                              proposal.locked ||
+                              selLocked.includes(proposal._id)
+                                ? "text-graidient_bottom"
+                                : "text-gray-500"
+                            } w-5 h-4 text-gray-600 `}
+                            onClick={() => {
+                              handleLocked(!proposal.locked, proposal._id);
+                              const temp = [...proposals];
+                              temp[index].locked = !proposal.locked;
+                              setProposals(temp);
+                            }}
+                          />
+
+                          <FaRegCopy
+                            onClick={() => handleDuplicate(proposal._id)}
+                          />
+                          <div className="relative" ref={buttonRef}>
+                            <BsThreeDotsVertical
+                              onClick={() => {
+                                if (threeDots !== null) {
+                                  setThreeDots(null);
+                                } else {
+                                  setThreeDots(index);
+                                }
+                              }}
+                              className={`${
+                                threeDots === index
+                                  ? "text-graidient_bottom"
+                                  : "text-gray-600"
+                              }`}
+                            />
+                            {threeDots === index && (
+                              <div
+                                ref={blockRef}
+                                className="absolute top-5 -left-20 flex flex-col z-50 bg-white px-2 py-2 w-40 items-center justify-center shadow-md shadow-gray-300"
+                              >
+                                <p
+                                  onClick={() => {
+                                    setRename(proposal._id);
+                                    setRenameV(proposal.proposalName);
+                                    setThreeDots(null);
+                                  }}
+                                  className="py-1 px-1 w-full hover:bg-gray-100"
+                                >
+                                  Rename
+                                </p>
+                                <p
+                                  onClick={() => {
+                                    setMove(proposal._id);
+                                    setThreeDots(null);
+                                  }}
+                                  className="py-1 px-1 w-full hover:bg-gray-100"
+                                >
+                                  Move To
+                                </p>
+                                <p
+                                  onClick={() => {
+                                    handleDelete(proposal._id);
+                                    setThreeDots(null);
+                                  }}
+                                  className="py-1 px-1 w-full hover:bg-gray-100"
+                                >
+                                  Delete
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </>

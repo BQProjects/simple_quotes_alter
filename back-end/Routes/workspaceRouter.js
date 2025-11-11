@@ -49,7 +49,7 @@ const {
   deleteProfile,
   stripePaymentIntegration,
   getAnalyticsData,
-  GetRecyclebinByLimit
+  GetRecyclebinByLimit,
 } = require("../Components/workspceComponent");
 
 const workspace = express.Router();
