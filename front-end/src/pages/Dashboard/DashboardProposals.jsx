@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import { StateManageContext } from "../../context/StateManageContext";
 import { RiArrowUpDownLine } from "react-icons/ri";
 
+
 const DashboardProposals = () => {
   const [deleteModal, setDeleteModal] = useState({
     open: false,
@@ -45,6 +46,14 @@ const DashboardProposals = () => {
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const scrollContainerRef = useRef(null);
+
+
+  const [skip, setSkip] = React.useState(0);
+  const limit = 10;
+
 
   const handleMove = async () => {
     try {
@@ -64,6 +73,7 @@ const DashboardProposals = () => {
     }
   };
 
+
   const handleDelete = async (id) => {
     try {
       const res = await axios.post(`${databaseUrl}/api/workspace/delete`, {
@@ -80,6 +90,7 @@ const DashboardProposals = () => {
     }
   };
 
+
   const handleDuplicate = async (id) => {
     try {
       const res = await axios.post(`${databaseUrl}/api/workspace/duplicate`, {
@@ -87,12 +98,14 @@ const DashboardProposals = () => {
         user_id: user.id,
       });
 
+
       setProposals([res.data, ...proposals]);
       toast.success("Duplicate Proposal has been created");
     } catch (error) {
       console.log(error);
     }
   };
+
 
   const handleRename = async (id, index) => {
     try {
@@ -111,15 +124,89 @@ const DashboardProposals = () => {
     }
   };
 
+
+  const getProposalByLimit = async () => {
+    try {
+      const res = await axios.get(
+        `${databaseUrl}/api/template/getproposalbylimit`,
+        {
+          params: { user_id: user.id, skip, limit },
+        }
+      );
+
+
+      setProposals(res.data.proposals || []);
+      setSkip(limit);
+      console.log("Proposals Bin Data:", res.data.proposals);
+      
+      // Check if initial load has less data than limit
+      if (!res.data.proposals || res.data.proposals.length < limit) {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Error fetching workspaces:", error);
+      setProposals([]);
+    }
+  };
+
+
+  useEffect(() => {
+    getProposalByLimit();
+  }, []);
+
+
+  const handleLoad = async () => {
+    if (loadingMore || !hasMore) return;
+    
+    try {
+      setLoadingMore(true);
+      const res = await axios.get(
+        `${databaseUrl}/api/template/getproposalbylimit`,
+        {
+          params: { skip, limit, user_id: user.id },
+        }
+      );
+
+      if (res.data.proposals && res.data.proposals.length > 0) {
+        setProposals((prev) => [...prev, ...res.data.proposals]);
+        setSkip((prev) => prev + limit);
+        
+        // Check if we received less data than requested
+        if (res.data.proposals.length < limit) {
+          setHasMore(false);
+        }
+      } else {
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.error("Error fetching more proposals data:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleScroll = (e) => {
+    const element = e.target;
+    const bottom = Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop) < 1;
+    
+    if (bottom && !loadingMore && hasMore) {
+      handleLoad();
+    }
+  };
+
+
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+
 
   const getLastSeen = (date) => {
     if (!date) return "No data";
 
+
     const now = new Date();
     const lastSeenDate = new Date(date);
     const diffInSeconds = Math.floor((now - lastSeenDate) / 1000);
+
 
     if (diffInSeconds < 60) {
       return `${diffInSeconds} seconds ago`;
@@ -132,19 +219,25 @@ const DashboardProposals = () => {
     }
   };
 
+
   const formatDate = (dateInput) => {
     if (!dateInput) return "Invalid Date";
 
+
     const date = new Date(dateInput);
 
+
     if (isNaN(date.getTime())) return "Invalid Date"; // Handle invalid dates
+
 
     const day = date.getDate();
     const month = date.toLocaleString("en-US", { month: "short" }); // Get short month name (e.g., "Jan")
     const year = date.getFullYear();
 
+
     return `${day} ${month} ${year}`;
   };
+
 
   const handleLocked = async (data, id) => {
     try {
@@ -157,10 +250,12 @@ const DashboardProposals = () => {
     }
   };
 
+
   const getBaseUrl = () => {
     const url = window.location.origin; // Gets up to .com, .net, etc.
     return url;
   };
+
 
   const copyToClipboard = (id) => {
     const domain = getBaseUrl();
@@ -174,6 +269,7 @@ const DashboardProposals = () => {
       });
   };
 
+
   const handleFavorate = async (favorate, id) => {
     try {
       await axios.put(`${databaseUrl}/api/editor/favorate`, {
@@ -185,17 +281,6 @@ const DashboardProposals = () => {
     }
   };
 
-  const getProposal = async (id) => {
-    try {
-      const res = await axios.get(`${databaseUrl}/api/workspace/proposal`, {
-        params: { id: id },
-      });
-
-      console.log(res.data);
-    } catch (error) {
-      console.error("Error fetching workspaces:", error);
-    }
-  };
 
   const handleClickOutsideBlock = (event) => {
     if (
@@ -208,15 +293,18 @@ const DashboardProposals = () => {
     }
   };
 
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutsideBlock);
     return () => {
       document.removeEventListener("mousedown", handleClickOutsideBlock);
     };
   }, []);
+  
   const [openSort, setOpenSort] = useState(false);
   const sortButtonRef = useRef();
   const sortRef = useRef();
+  
   const handleClickOutsideSort = (event) => {
     if (
       sortRef.current &&
@@ -228,6 +316,7 @@ const DashboardProposals = () => {
     }
   };
 
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutsideSort);
     return () => {
@@ -235,10 +324,12 @@ const DashboardProposals = () => {
     };
   }, []);
 
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
+
 
   // ConfirmProposalDeletion modal component
   const ConfirmProposalDeletion = ({
@@ -292,6 +383,7 @@ const DashboardProposals = () => {
       </div>
     );
   };
+
 
   return (
     <>
@@ -408,7 +500,11 @@ const DashboardProposals = () => {
               )}
             </span>
           </div>
-          <div className="w-full h-[75vh] overflow-y-auto scrollbar-hide relative overflow-x-hidden">
+          <div 
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="w-full h-[75vh] overflow-y-auto scrollbar-hide relative overflow-x-hidden"
+          >
             <table className="auto-table w-full ">
               <thead className="h-12 bg-gray-100 text-left text-gray-500  text-sm font-semibold sticky top-0 z-10">
                 <tr>
@@ -614,6 +710,7 @@ const DashboardProposals = () => {
                                 </span>
                               </span>
 
+
                               <span className="group relative flex items-center">
                                 <FaRegCopy
                                   className="text-gray-600 hover:text-graidient_bottom cursor-pointer"
@@ -685,11 +782,22 @@ const DashboardProposals = () => {
                     })}
               </tbody>
             </table>
+            {loadingMore && (
+              <div className="flex justify-center py-4">
+                <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+              </div>
+            )}
+            {!hasMore && !loadingMore && proposals.length > 0 && (
+              <div className="flex justify-center py-6">
+                <p className="text-gray-500 text-sm">You've reached the end</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </>
   );
 };
+
 
 export default DashboardProposals;

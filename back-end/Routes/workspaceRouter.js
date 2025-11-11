@@ -49,6 +49,7 @@ const {
   deleteProfile,
   stripePaymentIntegration,
   getAnalyticsData,
+  GetRecyclebinByLimit
 } = require("../Components/workspceComponent");
 
 const workspace = express.Router();
@@ -105,5 +106,7 @@ workspace.get("/getallworkspaces", getAllWorkspacesIncluded);
 workspace.post("/editcollab", editCollab);
 workspace.post("/deletecollab", deleteCollabUser);
 workspace.post("/deleteProfile", deleteProfile);
+
+workspace.get("/getrecyclebin", GetRecyclebinByLimit);
 
 module.exports = workspace;

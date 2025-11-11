@@ -6,6 +6,7 @@ const RecycleModel = require("../models/RecycleBinModel");
 const ViewModel = require("../models/viewAnalystics");
 const CollabModel = require("../models/collabModel");
 const Stripe = require("stripe");
+const mongoose = require("mongoose");
 
 const stripe = new Stripe(process.env.STRIPE_KEY);
 
@@ -1419,6 +1420,35 @@ const getAnalyticsData = async (req, res) => {
   }
 };
 
+const GetRecyclebinByLimit = async (req, res) => {
+  try {
+    const skip = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+    const user_id = req.query.user_id;
+
+    if (!user_id) return res.status(400).json({ message: "user_id required" });
+
+    const userObjectId = new mongoose.Types.ObjectId(user_id);
+
+    const RecycleBinData = await RecycleModel.find({ user: userObjectId })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "proposals",
+        populate: { path: "workspaces" }, 
+      });
+
+    res.status(200).json({
+      proposals: RecycleBinData,
+      count: RecycleBinData.length,
+    });
+  } catch (err) {
+    console.error("Error fetching recycle bin:", err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   workspaceCreate,
   workspaceDelete,
@@ -1468,4 +1498,5 @@ module.exports = {
   deleteProfile,
   stripePaymentIntegration,
   getAnalyticsData,
+  GetRecyclebinByLimit,
 };
