@@ -15,6 +15,7 @@ import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useLocation, useNavigate } from "react-router-dom";
+import Paymentverification from "./Paymentverification";
 
 const Subscription = () => {
   const [plan, setPlan] = useState("yearly");
@@ -113,6 +114,7 @@ const Subscription = () => {
       const plan = query.get("plan");
       const user = query.get("user");
       const teamSize = query.get("teamSize");
+      const [thankyou, setThankyou] = React.useState(false);
 
       // ✅ Prevent re-execution if already handled
       if (sessionStorage.getItem("subscriptionHandled")) return;
@@ -137,6 +139,14 @@ const Subscription = () => {
               },
             }
           );
+
+          // Show Pop Up
+          setThankyou(true);
+
+          //Close PopUp after 5 mins
+          setTimeout(() => {
+            setThankyou(false);
+          }, 5000);
 
           console.log("Response from backend:", res.data);
           toast.success(
@@ -996,6 +1006,11 @@ const Subscription = () => {
           </div>
         </div>
       </div>
+
+      {thankyou && (
+        <Paymentverification
+        />
+      )}
     </>
   );
 };

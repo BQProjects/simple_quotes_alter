@@ -51,23 +51,23 @@ export function StateManageContextProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    if (user?.id && databaseUrl) {
-      getProposals();
-    }
-  }, [user?.id, databaseUrl, sortP]);
+  // useEffect(() => {
+  //   if (user?.id && databaseUrl) {
+  //     getProposals();
+  //   }
+  // }, [user?.id, databaseUrl, sortP]);
 
-  const getProposals = async () => {
-    try {
-      const res = await axios.get(`${databaseUrl}/api/workspace/getproposals`, {
-        params: { user_id: user.id, sort: sortP },
-      });
+  // const getProposals = async () => {
+  //   try {
+  //     const res = await axios.get(`${databaseUrl}/api/workspace/getproposals`, {
+  //       params: { user_id: user.id, sort: sortP },
+  //     });
 
-      setProposals(res.data);
-    } catch (error) {
-      console.error("Error fetching workspaces:", error);
-    }
-  };
+  //     setProposals(res.data);
+  //   } catch (error) {
+  //     console.error("Error fetching workspaces:", error);
+  //   }
+  // };
 
   useEffect(() => {
     if (user?.id && databaseUrl) {

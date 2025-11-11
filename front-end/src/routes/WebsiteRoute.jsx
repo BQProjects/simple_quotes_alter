@@ -20,6 +20,7 @@ import DashboardTemplates from "../pages/Dashboard/DashboardTemplates.jsx";
 import DashboardSettings from "../pages/Dashboard/DashboardSettings.jsx";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import Paymentverification from "../pages/Dashboard/Paymentverification.jsx";
 const Home = React.lazy(() => import("../pages/website/Home"));
 const Signup = React.lazy(() => import("../pages/website/Signup"));
 const Pricing = React.lazy(() => import("../pages/website/Pricing"));
@@ -52,6 +53,7 @@ const WebsiteRoute = () => {
         <Route path="/terms" element={<Terms />} />
         <Route path="/changepass/:id" element={<ChangePassword />} />
         <Route path="/forgot" element={<ForgotPassWord />} />
+        <Route path="/payment-thankyou" element={<Paymentverification />} />
 
         <Route
           path="/editor/:id"
