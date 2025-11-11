@@ -506,28 +506,57 @@ const EditorDnD = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="w-full  ">
-        <EditorHeader
-          share={share}
-          setShare={setShare}
-          rows={rows}
-          id={id}
-          proposalName={proposalName}
-          menu={menu}
-          setMenu={setMenu}
-          parentRef={parentRef}
-          setMove={setMove}
-          move={move}
-          setRows={setRows}
-          setPreview={setPreview}
-          preview={preview}
-          setFavorate={setFavorate}
-          favorate={favorate}
-          settings={settings}
-          createdAt={createdAt}
-          dropCanvasRef={dropCanvasRef}
-          view={view}
-          setView={setView}
-        />
+        {loading ? (
+          <div className="w-full flex items-center justify-evenly h-[64px] px-7 border-b-[1px] border-gray-200 shadow-sm shadow-gray-300 be-vietnam-pro-regular relative">
+            {/* Left side skeleton */}
+            <div className="flex flex-row w-[50%] items-center justify-start gap-1 relative">
+              <div className="w-[40px] h-[30px] bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-16 w-[1px] bg-gray-200 ml-[13px] z-50"></div>
+              <div className="flex flex-col ml-2 gap-[1px]">
+                <div className="h-5 bg-gray-200 rounded animate-pulse w-32"></div>
+                <div className="h-3 bg-gray-200 rounded animate-pulse w-24 mt-1"></div>
+              </div>
+            </div>
+
+            {/* Right side skeleton */}
+            <div className="w-[60%] flex items-center justify-end gap-3">
+              <div className="p-[7px] rounded-md bg-gray-200 animate-pulse w-8 h-8"></div>
+              <div className="p-[7px] rounded-md bg-gray-200 animate-pulse w-8 h-8 -ml-1.5"></div>
+              <div className="h-16 w-[1px] bg-gray-200 z-20"></div>
+              <div className="p-[7px] rounded-md bg-gray-200 animate-pulse w-8 h-8"></div>
+              <div className="p-[7px] rounded-md bg-gray-200 animate-pulse w-8 h-8"></div>
+              <div className="p-[7px] rounded-md bg-gray-200 animate-pulse w-8 h-8"></div>
+              <div className="h-16 w-[1px] bg-gray-200 z-20"></div>
+              <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
+              <div className="p-[7px] rounded-md bg-gray-200 animate-pulse w-8 h-8"></div>
+              <div className="p-[7px] rounded-md bg-gray-200 animate-pulse w-8 h-8 ml-[-3px]"></div>
+              <div className="bg-gray-200 rounded-md py-2 px-4 animate-pulse w-16 h-8"></div>
+            </div>
+          </div>
+        ) : (
+          <EditorHeader
+            share={share}
+            setShare={setShare}
+            rows={rows}
+            id={id}
+            proposalName={proposalName}
+            menu={menu}
+            setMenu={setMenu}
+            parentRef={parentRef}
+            setMove={setMove}
+            move={move}
+            setRows={setRows}
+            setPreview={setPreview}
+            preview={preview}
+            setFavorate={setFavorate}
+            favorate={favorate}
+            settings={settings}
+            createdAt={createdAt}
+            dropCanvasRef={dropCanvasRef}
+            view={view}
+            setView={setView}
+          />
+        )}
       </div>
 
       <div
@@ -686,12 +715,74 @@ const EditorDnD = () => {
           }}
         >
           {loading ? (
-            <div className="p-4 space-y-4">
-              <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+            <div className="flex flex-row">
+              {/* Left icon bar skeleton */}
+              <div
+                style={{ height: "calc(100vh - 65px)" }}
+                className="w-20 relative flex flex-col border-r-[1px] gap-2 border-gray-100 shadow-md shadow-gray-300 pt-2"
+              >
+                <div className="flex p-1 flex-col w-full h-14 text-[12px] text-gray-500 items-center justify-center">
+                  <div className="p-1 rounded-md border border-gray-200 bg-gray-200 animate-pulse w-5 h-5"></div>
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-8 mt-1"></div>
+                </div>
+                <div className="flex p-1 flex-col w-full h-14 text-[12px] text-gray-500 items-center justify-center">
+                  <div className="p-1 rounded-md border border-gray-200 bg-gray-200 animate-pulse w-5 h-5"></div>
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-8 mt-1"></div>
+                </div>
+                <div className="flex p-1 flex-col w-full h-14 text-[12px] text-gray-500 items-center justify-center">
+                  <div className="p-1 rounded-md border border-gray-200 bg-gray-200 animate-pulse w-5 h-5"></div>
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-8 mt-1"></div>
+                </div>
+                <div className="flex p-1 flex-col w-full h-14 text-[12px] text-gray-500 items-center justify-center">
+                  <div className="p-1 rounded-md border border-gray-200 bg-gray-200 animate-pulse w-5 h-5"></div>
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-8 mt-1"></div>
+                </div>
+                <div className="flex p-1 flex-col w-full h-14 text-[12px] text-gray-500 items-center justify-center">
+                  <div className="p-1 rounded-md border border-gray-200 bg-gray-200 animate-pulse w-5 h-5"></div>
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-8 mt-1"></div>
+                </div>
+                <div className="w-full h-40 absolute bottom-10 pb-0 left-0 flex flex-col items-center justify-end">
+                  <div className="flex p-1 flex-col w-full h-14 text-[12px] text-gray-500 items-center justify-center">
+                    <div className="p-1 rounded-md bg-gray-200 animate-pulse w-5 h-5"></div>
+                  </div>
+                  <div className="flex p-1 flex-col w-full h-14 text-[12px] text-gray-500 items-center justify-center">
+                    <div className="p-1 rounded-md bg-gray-200 animate-pulse w-5 h-5"></div>
+                  </div>
+                </div>
+              </div>
+              {/* Main content area skeleton */}
+              <div
+                className="w-[220px] overflow-x-hidden pr-4 overflow-auto pb-[16px] scrollbar-hide"
+                style={{
+                  boxShadow: "0px 0px 4px 0px rgba(0, 0, 0, 0.2)",
+                  height: "calc(100vh - 65px)",
+                }}
+              >
+                <div className="p-2 w-full mx-3">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+                </div>
+                <div className="space-y-4">
+                  <div className="w-[95%] mx-3 h-12 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-[95%] mx-3 h-12 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-[95%] mx-3 h-12 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-[95%] mx-3 h-12 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="w-full h-[1px] ml-2 bg-gray-300 mt-3"></div>
+                <div className="p-2 w-full mx-3">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
+                </div>
+                <div className="space-y-4">
+                  <div className="w-[95%] mx-3 h-12 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-[95%] mx-3 h-12 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="w-full h-[1px] ml-2 bg-gray-300 mt-3"></div>
+                <div className="p-2 w-full mx-3">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-14"></div>
+                </div>
+                <div className="space-y-4">
+                  <div className="w-[95%] mx-3 h-12 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
             </div>
           ) : (
             <Sidebar

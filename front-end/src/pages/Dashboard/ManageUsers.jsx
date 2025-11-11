@@ -9,7 +9,8 @@ import { FaEdit } from "react-icons/fa";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import profile from "../../assets/profile.png";
 import toast from "react-hot-toast";
-import { FaArrowDown } from "react-icons/fa";
+import { FaArrowDown, FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const ManageUsers = () => {
   const [addNew, setAddNew] = useState(false);
@@ -30,6 +31,7 @@ const ManageUsers = () => {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
+    const navigate = useNavigate();
 
   const getUsers = async () => {
     try {
@@ -567,12 +569,20 @@ const ManageUsers = () => {
           </div>
         )}
         <div className="w-full flex items-center justify-between mb-4">
-          <h1 className="flex items-center gap-3 text-[20px] font-normal">
-            <div className="w-8 h-8 flex items-center justify-center rounded-md">
-              <FaUsers />
-            </div>
-            Manage Team
-          </h1>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2"
+            >
+              <FaArrowLeft className="w-4 h-4" />
+            </button>
+            <h1 className="flex items-center gap-3 text-[20px] font-normal">
+              <div className="w-8 h-8 flex items-center justify-center rounded-md">
+                <FaUsers />
+              </div>
+              Manage Team
+            </h1>
+          </div>
           <button
             onClick={() => setAddNew(true)}
             className="px-4 py-2 rounded-md bg-[#DF064E] text-white flex items-center gap-2 hover:shadow-md transition"
