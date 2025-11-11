@@ -48,6 +48,7 @@ const {
   getNotifications,
   deleteProfile,
   stripePaymentIntegration,
+  getAnalyticsData,
   GetRecyclebinByLimit
 } = require("../Components/workspceComponent");
 
@@ -68,6 +69,7 @@ workspace.delete("/deletew/:id", workspaceDelete);
 workspace.put("/edit", workspaceEdit);
 workspace.post("/temp", temp);
 workspace.post("/analytics", createAnalytics);
+workspace.get("/analytics-data", getAnalyticsData);
 workspace.get("/proposal", getProposal);
 workspace.post("/duplicate", createDuplicate);
 workspace.post("/rename", proposalRename);

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import DropCanvas from "./DropCanvas";
@@ -137,6 +137,28 @@ const Preview = () => {
     }
   };
 
+  const extractHeadingText = (content) => {
+    if (!content) return "Untitled";
+    if (typeof content === "string") return content;
+    if (Array.isArray(content)) {
+      // Slate editor format: extract text from children
+      return (
+        content
+          .map((node) => {
+            if (node.text) return node.text;
+            if (node.children) {
+              return node.children.map((child) => child.text || "").join("");
+            }
+            return "";
+          })
+          .join("")
+          .trim() || "Untitled"
+      );
+    }
+    if (content.text) return content.text;
+    return "Untitled";
+  };
+
   const groupDataByHeading = (data) => {
     const groups = [];
     let currentGroup = null;
@@ -144,8 +166,7 @@ const Preview = () => {
     data.forEach((item) => {
       if (item.type === "heading") {
         if (currentGroup) groups.push(currentGroup);
-        const headingText =
-          item.content?.[0]?.children?.[0]?.text || "Untitled";
+        const headingText = extractHeadingText(item.content);
         currentGroup = { heading: headingText, items: [item] };
       } else {
         if (!currentGroup) {

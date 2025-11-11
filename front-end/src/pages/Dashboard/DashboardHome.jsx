@@ -33,6 +33,7 @@ const DashboardHome = () => {
     totalViews: 0,
     timespent: 0,
   });
+  const [trafficData, setTrafficData] = useState([]);
   const [error, setError] = useState(null);
   const [templates, setTemplates] = useState([]);
   const [templateLoading, setTemplateLoading] = useState(true);
@@ -105,6 +106,7 @@ const DashboardHome = () => {
       getfavorate();
       getViews();
       fetchTemplates();
+      fetchTrafficData();
     }
   }, [user?.id, databaseUrl]);
 
@@ -137,6 +139,18 @@ const DashboardHome = () => {
     } catch (error) {
       console.error("Error fetching views:", error);
       setError("Failed to fetch views. Please try again later.");
+    }
+  };
+
+  const fetchTrafficData = async () => {
+    try {
+      const res = await axios.get(
+        `${databaseUrl}/api/workspace/analytics-data`
+      );
+      setTrafficData(res.data || []);
+    } catch (error) {
+      console.error("Error fetching traffic data:", error);
+      setTrafficData([]);
     }
   };
 
@@ -531,7 +545,7 @@ const DashboardHome = () => {
               <ProposalsLineChart proposals={proposals} />
             </div>
             <div className="w-full lg:w-auto lg:max-w-sm h-full">
-              <TrafficPieChart width={320} height={350} />
+              <TrafficPieChart data={trafficData} width={320} height={350} />
             </div>
           </div>
         </div>

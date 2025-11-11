@@ -1,19 +1,9 @@
 import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
-const TrafficPieChart = ({
-  data,
-  title = "Traffic by Location",
-}) => {
-  // Default data if none provided
-  const defaultData = [
-    { name: "UAE", value: 52.1, color: "#ACACAC" },
-    { name: "India", value: 22.8, color: "#8C8C8C" },
-    { name: "Canada", value: 13.9, color: "#525252" },
-    { name: "Other", value: 11.35, color: "#1F1F1F" },
-  ];
-
-  const chartData = data || defaultData;
+const TrafficPieChart = ({ data, title = "Traffic by Location" }) => {
+  // Use provided data or empty array if none provided
+  const chartData = data || [];
 
   const renderCustomizedLabel = ({
     cx,
@@ -59,57 +49,66 @@ const TrafficPieChart = ({
 
       {/* Chart and Legend Container */}
       <div className="flex flex-col justify-center items-center gap-2 w-full flex-1 min-h-0">
-        {/* Pie Chart */}
-        <div className="relative flex justify-center">
-          <ResponsiveContainer width={220} height={220}>
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={100}
-                paddingAngle={1}
-                dataKey="value"
-                label={renderCustomizedLabel}
-                labelLine={false}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Legend */}
-        <div className="flex flex-col justify-center gap-2 w-full max-w-[280px] px-4">
-          {chartData.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between gap-2"
-            >
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span
-                  className="text-sm text-gray-600 leading-tight truncate"
-                  style={{ letterSpacing: "0.12px" }}
-                >
-                  {item.name}
-                </span>
-              </div>
-              <span
-                className="text-sm text-gray-800 font-medium flex-shrink-0"
-                style={{ letterSpacing: "0.12px" }}
-              >
-                {item.value}%
-              </span>
+        {chartData.length === 0 ? (
+          <div className="flex justify-center items-center h-[220px] text-gray-500">
+            No data available
+          </div>
+        ) : (
+          <>
+            {/* Pie Chart */}
+            <div className="relative flex justify-center">
+              <ResponsiveContainer width={220} height={220}>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={100}
+                    paddingAngle={1}
+                    dataKey="value"
+                    label={renderCustomizedLabel}
+                    labelLine={false}
+                    isAnimationActive={true}
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          ))}
-        </div>
+
+            {/* Legend */}
+            <div className="flex flex-col justify-center gap-2 w-full max-w-[280px] px-4">
+              {chartData.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span
+                      className="text-sm text-gray-600 leading-tight truncate"
+                      style={{ letterSpacing: "0.12px" }}
+                    >
+                      {item.name}
+                    </span>
+                  </div>
+                  <span
+                    className="text-sm text-gray-800 font-medium flex-shrink-0"
+                    style={{ letterSpacing: "0.12px" }}
+                  >
+                    {item.value}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

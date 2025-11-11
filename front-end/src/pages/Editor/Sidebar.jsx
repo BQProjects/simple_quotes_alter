@@ -55,16 +55,11 @@ import { VscHistory } from "react-icons/vsc";
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import profile from "../../assets/profile.png";
 import { useNavigate, useParams } from "react-router-dom";
-import cover_img_1 from "../../assets/cover_1.jpg";
-import cover_img_2 from "../../assets/cover_img_2.jpg";
-import cover_img_3 from "../../assets/cover_img_3.jpg";
-import cover_img_4 from "../../assets/cover_img_4.jpg";
-import cover_img_5 from "../../assets/cover_img_5.jpg";
-import cost_lv2 from "../../assets/cost_lv2.svg";
-import signn_lv2 from "../../assets/sign_lv2.svg";
-import content_lv2 from "../../assets/content_lv2.svg";
 import cover_lv2 from "../../assets/cover_lv2.svg";
 import sections_lv2 from "../../assets/sections_lv2.svg";
+import content_lv2 from "../../assets/content_lv2.svg";
+import cost_lv2 from "../../assets/cost_lv2.svg";
+import signn_lv2 from "../../assets/sign_lv2.svg";
 import { FaAngleRight } from "react-icons/fa6";
 import para_2 from "../../assets/para_lvl2_2.svg";
 import double_2 from "../../assets/double_para_lv2.svg";
@@ -88,53 +83,7 @@ import s_9 from "../../assets/s_9.png";
 import s_10 from "../../assets/s_10.png";
 import s_11 from "../../assets/s_11.png";
 import s_12 from "../../assets/s_12.png";
-import cover_1_1 from "../../assets/cover_1_1.png";
-import cover_1_2 from "../../assets/cover_1_2.png";
-import cover_1_3 from "../../assets/cover_1_3.png";
-import cover_1_4 from "../../assets/cover_1_4.png";
-import cover_1_5 from "../../assets/cover_1_5.png";
-import cover_1_6 from "../../assets/cover_1_6.png";
-import cover_1_7 from "../../assets/cover_1_7.png";
-import cover_1_8 from "../../assets/cover_1_8.png";
-import cover_1_9 from "../../assets/cover_1_9.png";
-import cover_1_10 from "../../assets/cover_1_10.png";
-import cover_1_11 from "../../assets/cover_1_11.png";
-import cover_1_12 from "../../assets/cover_1_12.png";
 
-import cover_1_13 from "../../assets/cover_1_13.png";
-import cover_1_14 from "../../assets/cover_1_14.png";
-import cover_1_15 from "../../assets/cover_1_15.png";
-
-import cover_1_16 from "../../assets/cover_1_16.png";
-import cover_1_17 from "../../assets/cover_1_17.png";
-import cover_1_18 from "../../assets/cover_1_18.png";
-import cover_1_19 from "../../assets/cover_1_19.png";
-
-import cover_1_20 from "../../assets/cover_1_20.png";
-import cover_1_21 from "../../assets/cover_1_21.png";
-import cover_1_22 from "../../assets/cover_1_22.png";
-
-import cover_1_23 from "../../assets/cover_1_23.png";
-import cover_1_24 from "../../assets/cover_1_24.png";
-import cover_1_25 from "../../assets/cover_1_25.png";
-
-import cover_1_26 from "../../assets/cover_1_26.png";
-import cover_1_27 from "../../assets/cover_1_27.png";
-
-import cover_1_28 from "../../assets/cover_1_28.png";
-import cover_1_29 from "../../assets/cover_1_29.png";
-
-import cover_1_30 from "../../assets/cover_1_30.png";
-import cover_1_31 from "../../assets/cover_1_31.png";
-import cover_1_32 from "../../assets/cover_1_32.png";
-import cover_1_33 from "../../assets/cover_1_33.png";
-import cover_1_34 from "../../assets/cover_1_34.png";
-import cover_1_35 from "../../assets/cover_1_35.png";
-import cover_1_36 from "../../assets/cover_1_36.png";
-import cover_1_37 from "../../assets/cover_1_37.png";
-import cover_1_38 from "../../assets/cover_1_38.png";
-import cover_1_39 from "../../assets/cover_1_39.png";
-import cover_1_40 from "../../assets/cover_1_40.png";
 import { IoIosArrowDown } from "react-icons/io";
 import { DatabaseContext } from "../../context/DatabaseContext";
 import { FiFolder } from "react-icons/fi";
@@ -1554,6 +1503,47 @@ const Sidebar = ({
     });
 
     setThirdLevel("");
+  };
+
+  const handleCoverImageChange = async (e, coverPageId) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setLoading(true);
+    const cloudName = "dojwaepbj";
+    const uploadPreset = "simple_quotes";
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+
+    try {
+      // Upload image to Cloudinary
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const photo = await response.json();
+      const newImageUrl = photo.secure_url;
+
+      // Update the cover page in the database
+      await axios.put(`${databaseUrl}/api/cover-page/update/${coverPageId}`, {
+        image: newImageUrl,
+      });
+
+      // Refresh the cover pages list
+      const res = await axios.get(`${databaseUrl}/api/cover-page/all`);
+      setCoverPages(res.data);
+    } catch (error) {
+      console.error("Error updating cover page image:", error);
+      alert("Failed to update cover page image. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {});
@@ -3190,7 +3180,7 @@ const Sidebar = ({
                     <IoIosArrowDown className=" -rotate-90" />
                   )}
                 </p>
-                {openCover === "half" && (
+                {/* {openCover === "half" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
                     {coverPagesLoading ? (
                       <div className="text-sm text-gray-500">Loading...</div>
@@ -3207,9 +3197,48 @@ const Sidebar = ({
                         ))
                     )}
                   </div>
+                )} */}
+                {openCover === "half" && (
+                  <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
+                    {coverPagesLoading ? (
+                      <div className="text-sm text-gray-500">Loading...</div>
+                    ) : (
+                      coverPages
+                        .filter((cp) => cp.type === "half")
+                        .map((cp) => (
+                          <div key={cp._id} className="relative group w-[88%]">
+                            <img
+                              src={cp.image}
+                              onClick={() => insertCoverPage(cp.data)}
+                              className="w-full cursor-pointer rounded-md shadow-md shadow-gray-300"
+                            />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                document
+                                  .getElementById(`cover-upload-${cp._id}`)
+                                  .click();
+                              }}
+                              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Change image"
+                            >
+                              <Icon icon="mdi:pencil" width="16" height="16" />
+                            </button>
+                            <input
+                              id={`cover-upload-${cp._id}`}
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) =>
+                                handleCoverImageChange(e, cp._id)
+                              }
+                            />
+                          </div>
+                        ))
+                    )}
+                  </div>
                 )}
                 <div className="h-[1px] w-full -mx-4 bg-gray-300 -mt-1"></div>
-
                 <p
                   onClick={() => {
                     if (openCover === "full") {
@@ -3238,7 +3267,7 @@ const Sidebar = ({
                     <IoIosArrowDown className=" -rotate-90" />
                   )}
                 </p>
-                {openCover === "full" && (
+                {/* {openCover === "full" && (
                   <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
                     {coverPagesLoading ? (
                       <div className="text-sm text-gray-500">Loading...</div>
@@ -3252,6 +3281,44 @@ const Sidebar = ({
                             onClick={() => insertCoverPage(cp.data)}
                             className="w-[88%] cursor-pointer rounded-md shadow-md shadow-gray-300"
                           />
+                        ))
+                    )} */}
+                {openCover === "full" && (
+                  <div className="w-full flex flex-col items-center  gap-[16px] transition-all duration-500 ease-out opacity-0 animate-fadeIn ">
+                    {coverPagesLoading ? (
+                      <div className="text-sm text-gray-500">Loading...</div>
+                    ) : (
+                      coverPages
+                        .filter((cp) => cp.type === "full")
+                        .map((cp) => (
+                          <div key={cp._id} className="relative group w-[88%]">
+                            <img
+                              src={cp.image}
+                              onClick={() => insertCoverPage(cp.data)}
+                              className="w-full cursor-pointer rounded-md shadow-md shadow-gray-300"
+                            />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                document
+                                  .getElementById(`cover-upload-${cp._id}`)
+                                  .click();
+                              }}
+                              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Change image"
+                            >
+                              <Icon icon="mdi:pencil" width="16" height="16" />
+                            </button>
+                            <input
+                              id={`cover-upload-${cp._id}`}
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) =>
+                                handleCoverImageChange(e, cp._id)
+                              }
+                            />
+                          </div>
                         ))
                     )}
                   </div>

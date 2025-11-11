@@ -1382,6 +1382,44 @@ const deleteProfile = async (req, res) => {
   }
 };
 
+const getAnalyticsData = async (req, res) => {
+  try {
+    const analytics = await AnalyticsModel.aggregate([
+      {
+        $group: {
+          _id: "$country",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+    ]);
+
+    const total = analytics.reduce((sum, item) => sum + item.count, 0);
+
+    const colors = [
+      "#0088FE",
+      "#00C49F",
+      "#FFBB28",
+      "#FF8042",
+      "#8884D8",
+      "#82CA9D",
+    ];
+
+    const data = analytics.map((item, index) => ({
+      name: item._id || "Unknown",
+      value: Math.round((item.count / total) * 100),
+      color: colors[index % colors.length],
+    }));
+
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching analytics data:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 const GetRecyclebinByLimit = async (req, res) => {
   try {
     const skip = parseInt(req.query.skip);
@@ -1459,5 +1497,6 @@ module.exports = {
   getNotifications,
   deleteProfile,
   stripePaymentIntegration,
+  getAnalyticsData,
   GetRecyclebinByLimit,
 };
