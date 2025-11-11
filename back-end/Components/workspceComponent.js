@@ -1409,11 +1409,12 @@ const getAnalyticsData = async (req, res) => {
 
     const data = analytics.map((item, index) => ({
       name: item._id || "Unknown",
-      value: Math.round((item.count / total) * 100),
+      count: item.count,
+      percent: Math.round((item.count / total) * 100), // integer percent
       color: colors[index % colors.length],
     }));
 
-    res.json(data);
+    res.json({ total, data });
   } catch (error) {
     console.error("Error fetching analytics data:", error);
     res.status(500).json({ error: "Server error" });
@@ -1436,7 +1437,7 @@ const GetRecyclebinByLimit = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate({
         path: "proposals",
-        populate: { path: "workspaces" }, 
+        populate: { path: "workspaces" },
       });
 
     res.status(200).json({

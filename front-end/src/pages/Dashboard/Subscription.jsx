@@ -36,6 +36,11 @@ const Subscription = () => {
   const [sortOrder, setSortOrder] = useState("asc");
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
+  const [thankyou, setThankyou] = useState(false);
+
+  // If user context isn't ready, don't render the page yet.
+  // This prevents accessing user.id/props before they're available.
+  if (!user) return null;
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -112,7 +117,6 @@ const Subscription = () => {
       const plan = query.get("plan");
       const userId = query.get("user");
       const teamSize = query.get("teamSize");
-      const [thankyou, setThankyou] = React.useState(false);
 
       // ✅ Prevent re-execution if already handled
       if (sessionStorage.getItem("subscriptionHandled")) return;
@@ -200,7 +204,7 @@ const Subscription = () => {
       const stripe_res = await axios.post(
         `${databaseUrl}/api/workspace/payment-integration`,
         {
-          amount: finalTeamSize * 10 * 100, // convert to cents
+          amount: finalTeamSize * (currentPlan === "yearly" ? 120 : 10) * 100, // convert to cents
           user_id: user.id,
           plan: currentPlan,
           teamSize: finalTeamSize,
@@ -216,12 +220,24 @@ const Subscription = () => {
 
   const handleNewSubscription = (plan) => {
     setSubscribePlan(plan);
+    // Set minimum team size to current team size when switching, or 1 for new subscriptions
+    const minTeamSize =
+      user.subscription === "monthly" || user.subscription === "yearly"
+        ? user.teamSize || 1
+        : 1;
+    setSubscribeTeamSize(minTeamSize);
     setSubscribeModal(true);
   };
 
   const confirmSubscription = () => {
-    if (subscribeTeamSize < 1) {
-      toast.error("Team size must be at least 1");
+    const minTeamSize =
+      user.subscription === "monthly" || user.subscription === "yearly"
+        ? user.teamSize || 1
+        : 1;
+    if (subscribeTeamSize < minTeamSize) {
+      toast.error(
+        `Team size must be at least ${minTeamSize} when switching plans`
+      );
       return;
     }
     setSubscribeModal(false);
@@ -307,9 +323,12 @@ const Subscription = () => {
     createSubscription(newPlan);
   };
   useEffect(() => {
-    getMembers();
-    console.log("User data fetched from database:", user);
-  }, []);
+    // Only fetch members once we have a user id
+    if (user?.id) {
+      getMembers();
+      console.log("User data fetched from database:", user);
+    }
+  }, [user?.id]);
   useEffect(() => {
     if (user.subscriptionDate) {
       const start = new Date(user.subscriptionDate);
@@ -467,11 +486,16 @@ const Subscription = () => {
                       <div className="flex items-center gap-2">
                         <button
                           className="p-2 rounded-md hover:bg-gray-100"
-                          onClick={() =>
+                          onClick={() => {
+                            const minTeamSize =
+                              user.subscription === "monthly" ||
+                              user.subscription === "yearly"
+                                ? user.teamSize || 1
+                                : 1;
                             setSubscribeTeamSize(
-                              Math.max(1, subscribeTeamSize - 1)
-                            )
-                          }
+                              Math.max(minTeamSize, subscribeTeamSize - 1)
+                            );
+                          }}
                         >
                           <svg
                             width={20}
@@ -981,10 +1005,7 @@ const Subscription = () => {
         </div>
       </div>
 
-      {thankyou && (
-        <Paymentverification
-        />
-      )}
+      {thankyou && <Paymentverification />}
     </>
   );
 };
