@@ -31,8 +31,17 @@ const DashboardAnalytics = () => {
       // Check if analytics exists and is an array
       if (res.data.analytics && Array.isArray(res.data.analytics)) {
         res.data.analytics.forEach((item) => {
-          if (item.totalTime < 20000) {
-            totalTime += item.totalTime;
+          // Calculate section time sum
+          let sectionTimeSum = 0;
+          if (item.sectionWise && typeof item.sectionWise === "object") {
+            sectionTimeSum = Object.values(item.sectionWise).reduce(
+              (sum, val) => sum + val,
+              0
+            );
+          }
+
+          if (sectionTimeSum < 20000) {
+            totalTime += sectionTimeSum;
           }
 
           // Check if sectionWise exists before trying to iterate over it
@@ -245,7 +254,15 @@ const DashboardAnalytics = () => {
                         {formatFullDateTime(item.createdAt)}
                       </td>
                       <td className="text-center text-gray-600">
-                        {Math.floor(item.totalTime)} sec
+                        {item.sectionWise
+                          ? Math.floor(
+                              Object.values(item.sectionWise).reduce(
+                                (sum, val) => sum + val,
+                                0
+                              )
+                            )
+                          : 0}{" "}
+                        sec
                       </td>
                       <td className="text-center text-gray-600">
                         {item.country} <span>|</span> {item.sta}
