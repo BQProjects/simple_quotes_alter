@@ -78,26 +78,28 @@ const Subscription = () => {
     }
   };
 
-  const sortedBillingHistory = [...billingHistory].sort((a, b) => {
-    if (!sortColumn) return 0;
-    let aValue = a[sortColumn];
-    let bValue = b[sortColumn];
+  const sortedBillingHistory = [...billingHistory]
+    .filter((item) => item !== null)
+    .sort((a, b) => {
+      if (!sortColumn) return 0;
+      let aValue = a[sortColumn];
+      let bValue = b[sortColumn];
 
-    if (sortColumn === "billingDate" || sortColumn === "endDate") {
-      aValue = new Date(aValue);
-      bValue = new Date(bValue);
-    } else if (sortColumn === "amount") {
-      aValue = parseFloat(aValue.replace("$", "").replace(",", ""));
-      bValue = parseFloat(bValue.replace("$", "").replace(",", ""));
-    } else if (sortColumn === "users") {
-      aValue = parseInt(aValue);
-      bValue = parseInt(bValue);
-    }
+      if (sortColumn === "billingDate" || sortColumn === "endDate") {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      } else if (sortColumn === "amount") {
+        aValue = parseFloat(aValue.replace("$", "").replace(",", ""));
+        bValue = parseFloat(bValue.replace("$", "").replace(",", ""));
+      } else if (sortColumn === "users") {
+        aValue = parseInt(aValue);
+        bValue = parseInt(bValue);
+      }
 
-    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
 
   ////
   ////
@@ -117,6 +119,7 @@ const Subscription = () => {
       const plan = query.get("plan");
       const userId = query.get("user");
       const teamSize = query.get("teamSize");
+      const sessionId = query.get("session_id");
 
       // ✅ Prevent re-execution if already handled
       if (sessionStorage.getItem("subscriptionHandled")) return;
@@ -132,6 +135,18 @@ const Subscription = () => {
             endDate.setFullYear(endDate.getFullYear() + 1);
           }
 
+          let subscriptionId = null;
+          if (sessionId) {
+            // Retrieve payment details from Stripe
+            const sessionRes = await axios.get(
+              `${databaseUrl}/api/workspace/stripe-session`,
+              {
+                params: { session_id: sessionId },
+              }
+            );
+            subscriptionId = sessionRes.data.subscription;
+          }
+
           // 🔹 Update backend with new subscription details
           const res = await axios.post(
             `${databaseUrl}/api/auth/changeSubscription`,
@@ -140,6 +155,7 @@ const Subscription = () => {
               subscriptionDate: startDate,
               user_id: userId,
               teamSize: parseInt(teamSize),
+              subscriptionId,
             }
           );
 
@@ -248,10 +264,8 @@ const Subscription = () => {
     try {
       sessionStorage.removeItem("subscriptionHandled");
       const res = await axios.post(
-        `${databaseUrl}/api/auth/changeSubscription`,
+        `${databaseUrl}/api/workspace/cancel-subscription`,
         {
-          subscription: "canceled",
-          subscriptionDate: new Date(),
           user_id: user.id,
         }
       );
@@ -259,6 +273,81 @@ const Subscription = () => {
       console.log(res.data);
     } catch (error) {
       console.error("Error fetching workspaces:", error);
+    }
+  };
+
+  const downloadInvoice = async (invoiceData) => {
+    try {
+      // Create invoice content
+      const invoiceHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Invoice - ${invoiceData.invoice}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .invoice-details { margin-bottom: 20px; }
+            .invoice-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            .invoice-table th, .invoice-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            .invoice-table th { background-color: #f2f2f2; }
+            .total { font-weight: bold; font-size: 18px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>BrainQuest Invoice</h1>
+            <h2>${invoiceData.invoice}</h2>
+          </div>
+          
+          <div class="invoice-details">
+            <p><strong>Billing Date:</strong> ${new Date(
+              invoiceData.billingDate
+            ).toLocaleDateString()}</p>
+            <p><strong>End Date:</strong> ${new Date(
+              invoiceData.endDate
+            ).toLocaleDateString()}</p>
+            <p><strong>Plan:</strong> ${invoiceData.plan}</p>
+            <p><strong>Users:</strong> ${invoiceData.users}</p>
+          </div>
+          
+          <table class="invoice-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${invoiceData.plan} Plan (${invoiceData.users} users)</td>
+                <td>${invoiceData.amount}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div style="text-align: right; margin-top: 20px;">
+            <p class="total">Total: ${invoiceData.amount}</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Create blob and download
+      const blob = new Blob([invoiceHTML], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${invoiceData.invoice}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success("Invoice downloaded successfully!");
+    } catch (error) {
+      console.error("Error downloading invoice:", error);
+      toast.error("Failed to download invoice");
     }
   };
 
@@ -924,81 +1013,80 @@ const Subscription = () => {
                 </tr>
               </thead>
               <tbody>
-                {sortedBillingHistory.map((item, index) =>
-                  item === null ? (
-                    <></>
-                  ) : (
-                    <tr
-                      key={index}
-                      className={`border-b border-b-[#e0e0e0] ${
-                        index % 2 === 0 ? "bg-[#fefefe]" : "bg-[#f7f7f7]"
-                      }`}
-                    >
-                      <td className="py-1 pl-3 pr-5">
-                        <div className="flex items-center gap-2 w-[12.5rem]">
-                          <span className="text-sm text-[#1f1f1f]">
-                            {item.invoice}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-1 px-2">
-                        <div className="flex items-center gap-0.5 w-[9.25rem]">
-                          <span className="text-sm text-[#1f1f1f]">
-                            {new Date(item.billingDate).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-1 px-2">
-                        <div className="flex items-center gap-0.5 w-[9.25rem]">
-                          <span className="text-sm text-[#1f1f1f]">
-                            {new Date(item.endDate).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-1 px-2">
-                        <div className="flex items-center gap-0.5 w-[8.25rem]">
-                          <span className="text-sm text-[#1f1f1f]">
-                            {item.plan}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-1 px-2">
-                        <div className="flex items-center gap-0.5 w-[6.25rem]">
-                          <span className="text-sm text-[#1f1f1f]">
-                            {item.amount}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-1 px-2">
-                        <div className="flex items-center gap-0.5 w-[6.25rem]">
-                          <span className="text-sm text-[#1f1f1f]">
-                            {item.users}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-1 px-5 text-right">
-                        <div className="flex items-center gap-4 justify-end">
-                          <svg
-                            width={16}
-                            height={16}
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M15 9V8H12V13H13V11H14.5V10H13V9H15ZM9.5 13H7.5V8H9.5C9.8977 8.0004 10.279 8.15856 10.5602 8.43978C10.8414 8.721 10.9996 9.1023 11 9.5V11.5C10.9996 11.8977 10.8414 12.279 10.5602 12.5602C10.279 12.8414 9.8977 12.9996 9.5 13ZM8.5 12H9.5C9.63261 12 9.75979 11.9473 9.85355 11.8536C9.94732 11.7598 10 11.6326 10 11.5V9.5C10 9.36739 9.94732 9.24021 9.85355 9.14645C9.75979 9.05268 9.63261 9 9.5 9H8.5V12ZM5.5 8H3V13H4V11.5H5.5C5.76509 11.4996 6.01922 11.3941 6.20667 11.2067C6.39412 11.0192 6.4996 10.7651 6.5 10.5V9C6.5 8.73478 6.39464 8.48043 6.20711 8.29289C6.01957 8.10536 5.76522 8 5.5 8ZM4 10.5V9H5.5L5.5005 10.5H4Z"
-                              fill="#525252"
-                            />
-                            <path
-                              d="M11 7.00023V5.00023C11.0018 4.93452 10.9893 4.8692 10.9634 4.80878C10.9375 4.74836 10.8988 4.69427 10.85 4.65023L7.35 1.15023C7.30617 1.10116 7.25212 1.0623 7.19165 1.03638C7.13118 1.01047 7.06576 0.998127 7 1.00023H2C1.73503 1.00102 1.48113 1.10663 1.29377 1.294C1.1064 1.48136 1.00079 1.73526 1 2.00023V14.0002C1 14.2654 1.10536 14.5198 1.29289 14.7073C1.48043 14.8949 1.73478 15.0002 2 15.0002H10V14.0002H2V2.00023H6V5.00023C6.00079 5.2652 6.1064 5.5191 6.29377 5.70646C6.48113 5.89383 6.73503 5.99944 7 6.00023H10V7.00023H11ZM7 5.00023V2.20023L9.8 5.00023H7Z"
-                              fill="#525252"
-                            />
-                          </svg>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                )}
+                {sortedBillingHistory.map((item, index) => (
+                  <tr
+                    key={item.invoice || index}
+                    className={`border-b border-b-[#e0e0e0] ${
+                      index % 2 === 0 ? "bg-[#fefefe]" : "bg-[#f7f7f7]"
+                    }`}
+                  >
+                    <td className="py-1 pl-3 pr-5">
+                      <div className="flex items-center gap-2 w-[12.5rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.invoice}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[9.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {new Date(item.billingDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[9.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {new Date(item.endDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[8.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.plan}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[6.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.amount}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-2">
+                      <div className="flex items-center gap-0.5 w-[6.25rem]">
+                        <span className="text-sm text-[#1f1f1f]">
+                          {item.users}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-1 px-5 text-right">
+                      <div className="flex items-center gap-4 justify-end">
+                        <svg
+                          width={16}
+                          height={16}
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="cursor-pointer hover:opacity-70"
+                          onClick={() => downloadInvoice(item)}
+                          title="Download Invoice"
+                        >
+                          <path
+                            d="M15 9V8H12V13H13V11H14.5V10H13V9H15ZM9.5 13H7.5V8H9.5C9.8977 8.0004 10.279 8.15856 10.5602 8.43978C10.8414 8.721 10.9996 9.1023 11 9.5V11.5C10.9996 11.8977 10.8414 12.279 10.5602 12.5602C10.279 12.8414 9.8977 12.9996 9.5 13ZM8.5 12H9.5C9.63261 12 9.75979 11.9473 9.85355 11.8536C9.94732 11.7598 10 11.6326 10 11.5V9.5C10 9.36739 9.94732 9.24021 9.85355 9.14645C9.75979 9.05268 9.63261 9 9.5 9H8.5V12ZM5.5 8H3V13H4V11.5H5.5C5.76509 11.4996 6.01922 11.3941 6.20667 11.2067C6.39412 11.0192 6.4996 10.7651 6.5 10.5V9C6.5 8.73478 6.39464 8.48043 6.20711 8.29289C6.01957 8.10536 5.76522 8 5.5 8ZM4 10.5V9H5.5L5.5005 10.5H4Z"
+                            fill="#525252"
+                          />
+                          <path
+                            d="M11 7.00023V5.00023C11.0018 4.93452 10.9893 4.8692 10.9634 4.80878C10.9375 4.74836 10.8988 4.69427 10.85 4.65023L7.35 1.15023C7.30617 1.10116 7.25212 1.0623 7.19165 1.03638C7.13118 1.01047 7.06576 0.998127 7 1.00023H2C1.73503 1.00102 1.48113 1.10663 1.29377 1.294C1.1064 1.48136 1.00079 1.73526 1 2.00023V14.0002C1 14.2654 1.10536 14.5198 1.29289 14.7073C1.48043 14.8949 1.73478 15.0002 2 15.0002H10V14.0002H2V2.00023H6V5.00023C6.00079 5.2652 6.1064 5.5191 6.29377 5.70646C6.48113 5.89383 6.73503 5.99944 7 6.00023H10V7.00023H11ZM7 5.00023V2.20023L9.8 5.00023H7Z"
+                            fill="#525252"
+                          />
+                        </svg>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

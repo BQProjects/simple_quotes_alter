@@ -7,18 +7,39 @@ import axios from "axios";
 
 const ForgotPassWord = () => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const { databaseUrl } = useContext(DatabaseContext);
 
-  const getUser = async () => {
+  const sendResetEmail = async () => {
+    if (!email) {
+      setMessage("Please enter your email address");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
     try {
-      const res = await axios.get(`${databaseUrl}/api/auth/getuseremail`, {
-        params: { email: email },
+      const res = await axios.post(`${databaseUrl}/api/auth/sendresetemail`, {
+        email: email,
       });
-      console.log(res.data);
-      navigate(`/changepass/${res.data.id}`);
+
+      if (res.data.message) {
+        setMessage(
+          "Password reset email sent successfully! Please check your inbox."
+        );
+      }
     } catch (error) {
       console.log(error);
+      if (error.response?.data?.error) {
+        setMessage(error.response.data.error);
+      } else {
+        setMessage("Failed to send reset email. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,14 +74,25 @@ const ForgotPassWord = () => {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+            {message && (
+              <div
+                className={`w-[80%] p-2 rounded-sm text-center text-sm ${
+                  message.includes("successfully")
+                    ? "bg-green-100 text-green-700 border border-green-200"
+                    : "bg-red-100 text-red-700 border border-red-200"
+                }`}
+              >
+                {message}
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-center justify-center w-full mt-4">
             <button
-              //   onClick={handleLogin}
-              onClick={getUser}
-              className="pl-3 pr-3 pt-2 pb-2 mt-2 mb-2 w-[80%]  bg-graidient_bottom text-white rounded-md flex items-center justify-center"
+              onClick={sendResetEmail}
+              disabled={loading}
+              className="pl-3 pr-3 pt-2 pb-2 mt-2 mb-2 w-[80%] bg-graidient_bottom text-white rounded-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Send Reset Email
+              {loading ? "Sending..." : "Send Reset Email"}
             </button>
           </div>
           <a className="text-gray-500 text-sm">

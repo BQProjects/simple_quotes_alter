@@ -120,7 +120,7 @@ const TrafficPieChart = ({
     if (rest.length > 0) {
       const othersSum = rest.reduce((s, it) => s + (it.value || 0), 0);
       if (othersSum > 0) {
-        top.push({ name: "Others", value: othersSum, color: "#94a3b8" });
+        top.push({ name: "Others", value: othersSum, color: "#d3d3d3" });
       }
     }
 
@@ -227,7 +227,7 @@ const TrafficPieChart = ({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 overflow-y-auto overflow-x-hidden max-h-[160px]">
+            <div className="flex flex-col gap-1 overflow-y-auto overflow-x-hidden max-h-[160px] scrollbar-thin">
               {processedWithPercents.map((item, index) => (
                 <div
                   key={index}

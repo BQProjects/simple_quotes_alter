@@ -15,6 +15,7 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import toast from "react-hot-toast";
 import Select from "react-select"; // Add this import for React Select
 import { useNavigate } from "react-router-dom";
+import { FaEye } from "react-icons/fa6";
 
 const Profile = () => {
   const { user, setUser } = useContext(UserContext);
@@ -30,6 +31,13 @@ const Profile = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showChangePassModal, setShowChangePassModal] = useState(false);
+  const [pass1, setPass1] = useState(false);
+  const [pass2, setPass2] = useState(false);
+  const [cpassword, setCPassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [newPassError, setNewPassError] = useState("");
+  const [confirmPassError, setConfirmPassError] = useState("");
 
   const fileInputRef = useRef(null);
 
@@ -214,7 +222,6 @@ const Profile = () => {
     }
   };
 
-
   // Called when user confirms deletion in the modal
   const deleteProfileConfirmed = async () => {
     try {
@@ -231,6 +238,77 @@ const Profile = () => {
     } catch (error) {
       console.error("Error deleting profile:", error);
       toast.error("Failed to delete profile");
+    }
+  };
+
+  const handleChangePassword = async () => {
+    // reset errors
+    setNewPassError("");
+    setConfirmPassError("");
+
+    const newPass = password;
+    const confirm = cpassword;
+
+    if (!newPass) {
+      setNewPassError("Please enter a new password");
+      return;
+    }
+    if (!confirm) {
+      setConfirmPassError("Please confirm your new password");
+      return;
+    }
+
+    // Enhanced password validation (same as other components)
+    const strength = {
+      length: newPass.length >= 8,
+      uppercase: /[A-Z]/.test(newPass),
+      lowercase: /[a-z]/.test(newPass),
+      number: /\d/.test(newPass),
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPass),
+    };
+
+    const isPasswordValid =
+      strength.length &&
+      strength.uppercase &&
+      strength.lowercase &&
+      strength.number &&
+      strength.special;
+
+    if (!isPasswordValid) {
+      const requirements = [];
+      if (!strength.length) requirements.push("at least 8 characters");
+      if (!strength.uppercase) requirements.push("one uppercase letter");
+      if (!strength.lowercase) requirements.push("one lowercase letter");
+      if (!strength.number) requirements.push("one number");
+      if (!strength.special) requirements.push("one special character");
+
+      setNewPassError(`Password must contain ${requirements.join(", ")}`);
+      return;
+    }
+
+    if (newPass !== confirm) {
+      setConfirmPassError("New password and confirm password do not match");
+      return;
+    }
+
+    try {
+      const res = await axios.post(`${databaseUrl}/api/auth/changepass`, {
+        id: user.id,
+        password: newPass,
+      });
+      if (res.data && res.data.success === false) {
+        toast.error(res.data.message || "Failed to change password");
+        return;
+      }
+      toast.success("Password changed successfully");
+      setShowChangePassModal(false);
+      setPassword("");
+      setCPassword("");
+      setNewPassError("");
+      setConfirmPassError("");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to change password");
     }
   };
 
@@ -384,7 +462,7 @@ const Profile = () => {
           <div className="w-full flex items-center justify-around mb-10">
             <button
               className="text-graidient_bottom hover:text-pink-600 transition-colors"
-              onClick={() => navigate(`/changepass/${user.id}`)}
+              onClick={() => setShowChangePassModal(true)}
             >
               Change Password
             </button>
@@ -403,6 +481,92 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      {showChangePassModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+          onClick={() => {
+            // close modal when clicking outside
+            setShowChangePassModal(false);
+            setNewPassError("");
+            setConfirmPassError("");
+            setPassword("");
+            setCPassword("");
+          }}
+        >
+          <div
+            className="bg-white rounded-[24px] p-10 flex flex-col items-center gap-6 "
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center gap-2 w-[457px]">
+              <h2 className="text-[32px] font-normal text-[#525252] text-center">
+                Change password
+              </h2>
+              <p className="text-[14px] text-[#717171] text-center">
+                Your password must be at least 8 characters and should include
+                uppercase letters, lowercase letters, numbers, and special
+                characters.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-6 w-[457px]">
+              <div className="flex flex-col gap-2 w-[399px] relative">
+                <label className="text-[14px] text-[#525252]">
+                  New password *
+                </label>
+                <input
+                  type={pass1 ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (newPassError) setNewPassError("");
+                  }}
+                  className="w-full h-10 px-3 border border-[#E0E0E0] rounded-md shadow-sm outline-none"
+                  placeholder="Enter new password"
+                />
+                <FaEye
+                  onClick={() => setPass1(!pass1)}
+                  className="absolute right-3 top-9 text-[#8C8C8C] cursor-pointer"
+                />
+                {newPassError && (
+                  <p className="text-sm text-red-500 mt-1">{newPassError}</p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2 w-[399px] relative">
+                <label className="text-[14px] text-[#525252]">
+                  Confirm password *
+                </label>
+                <input
+                  type={pass2 ? "text" : "password"}
+                  value={cpassword}
+                  onChange={(e) => {
+                    setCPassword(e.target.value);
+                    if (confirmPassError) setConfirmPassError("");
+                  }}
+                  className="w-full h-10 px-3 border border-[#E0E0E0] rounded-md shadow-sm outline-none"
+                  placeholder="Confirm new password"
+                />
+                <FaEye
+                  onClick={() => setPass2(!pass2)}
+                  className="absolute right-3 top-9 text-[#8C8C8C] cursor-pointer"
+                />
+                {confirmPassError && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {confirmPassError}
+                  </p>
+                )}
+              </div>
+
+              <button
+                className="w-[399px] h-10 bg-[#DF064E] text-white rounded-md flex items-center justify-center"
+                onClick={handleChangePassword}
+              >
+                Change Password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-[24px] p-6 flex flex-col items-center justify-center gap-8">

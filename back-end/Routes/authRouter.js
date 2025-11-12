@@ -12,6 +12,7 @@ const {
   getUserBGmail,
   chnagePassword,
   getAllUsers,
+  sendPasswordResetEmail,
 } = require("../Components/authComponents");
 
 const authRouter = express.Router();
@@ -28,6 +29,7 @@ authRouter.post("/addmem", addMemeber);
 authRouter.post("/removemem", removeSharedUser);
 authRouter.get("/getuseremail", getUserBGmail);
 authRouter.post("/changepass", chnagePassword);
+authRouter.post("/sendresetemail", sendPasswordResetEmail);
 authRouter.get("/getallusers", getAllUsers);
 
 module.exports = authRouter;
