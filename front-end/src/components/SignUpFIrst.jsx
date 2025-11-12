@@ -25,21 +25,70 @@ const SignUpFIrst = () => {
   const [pass1, setPass1] = useState(false);
   const [pass2, setPass2] = useState(false);
   const [cpassword, setCPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false,
+  });
   const passwordErrors = getPasswordErrors(password);
+
+  // Enhanced password validation
+  const validatePasswordStrength = (password) => {
+    const strength = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+    };
+    setPasswordStrength(strength);
+    return strength;
+  };
 
   const getPasswordStrength = (password) => {
     let score = 0;
     if (password.length >= 8) score++;
     if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
     if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
 
-    if (score <= 1) return { label: "Weak", color: "#DF064E" };
-    if (score === 2 || score === 3)
+    if (score <= 2) return { label: "Weak", color: "#DF064E" };
+    if (score === 3 || score === 4)
       return { label: "Medium", color: "#FFD600" };
-    if (score === 4) return { label: "Strong", color: "#00C853" };
+    if (score === 5) return { label: "Strong", color: "#00C853" };
     return { label: "", color: "" };
   };
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    validatePasswordStrength(newPassword);
+  };
+
+  function getPasswordErrors(password) {
+    const errors = [];
+
+    if (!/[A-Z]/.test(password)) {
+      errors.push("1 capital letter");
+    }
+
+    if (!/[a-z]/.test(password)) {
+      errors.push("1 lowercase letter");
+    }
+
+    if (!/[0-9]/.test(password)) {
+      errors.push("1 numeric");
+    }
+
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) {
+      errors.push("1 special character");
+    }
+
+    return errors;
+  }
 
   useEffect(() => {
     if (cpassword.length > 0 && password !== cpassword) {
@@ -55,11 +104,28 @@ const SignUpFIrst = () => {
       toast.error("Please enter all the details");
       return;
     }
+
+    // Enhanced password validation
+    const strength = validatePasswordStrength(password);
+    const isPasswordValid =
+      strength.length &&
+      strength.uppercase &&
+      strength.lowercase &&
+      strength.number &&
+      strength.special;
+
+    if (!isPasswordValid) {
+      setError(true);
+      toast.error("Please ensure your password meets all requirements");
+      return;
+    }
+
     if (password !== cpassword) {
       setError(true);
       toast.error("Password and confirm password didn't match");
       return;
     }
+
     setNext(true);
   };
 
@@ -129,24 +195,24 @@ const SignUpFIrst = () => {
                 >
                   <input
                     type={pass1 ? "text" : "password"}
-                    className="w-[95%] p-2 outline-none "
+                    className="w-[85%] p-2 outline-none "
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <FaEye
-                    onClick={() => setPass1(!pass1)}
-                    className=" cursor-pointer"
+                    onChange={handlePasswordChange}
                   />
                   {/* Password strength indicator */}
                   {password.length > 0 && (
                     <span
-                      className="absolute right-10 text-xs font-medium"
+                      className="text-xs font-medium mr-2"
                       style={{ color: getPasswordStrength(password).color }}
                     >
                       {getPasswordStrength(password).label}
                     </span>
                   )}
+                  <FaEye
+                    onClick={() => setPass1(!pass1)}
+                    className="cursor-pointer"
+                  />
                 </div>
                 {/* Error message */}
                 {password.length > 0 && passwordErrors.length > 0 && (
@@ -174,7 +240,7 @@ const SignUpFIrst = () => {
                   />
                   <FaEye
                     onClick={() => setPass2(!pass2)}
-                    className=" cursor-pointer"
+                    className="cursor-pointer"
                   />
                 </div>
                 {/* Error text */}

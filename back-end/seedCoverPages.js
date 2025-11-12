@@ -12,8 +12,8 @@ mongoose.connect(
 
 const seedCoverPages = async () => {
   try {
-    // Clear existing data
-    await CoverPage.deleteMany({});
+    // Clear existing data (comment out if you want to preserve existing cover pages)
+    // await CoverPage.deleteMany({});
 
     // Full-page cover data (from your existing arrays)
     const fullPageCovers = [

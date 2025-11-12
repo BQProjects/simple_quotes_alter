@@ -48,8 +48,10 @@ const {
   getNotifications,
   deleteProfile,
   stripePaymentIntegration,
+  getStripeSession,
   getAnalyticsData,
   GetRecyclebinByLimit,
+  cancelSubscription,
 } = require("../Components/workspceComponent");
 
 const workspace = express.Router();
@@ -57,6 +59,8 @@ const workspace = express.Router();
 workspace.use(cors());
 
 workspace.post("/payment-integration", stripePaymentIntegration);
+workspace.get("/stripe-session", getStripeSession);
+workspace.post("/cancel-subscription", cancelSubscription);
 
 workspace.get("/getall", workspaceGetAll);
 workspace.get("/getnotification", getNotifications);

@@ -16,7 +16,7 @@ const stripePaymentIntegration = async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      mode: "payment",
+      mode: "subscription",
       line_items: [
         {
           price_data: {
@@ -25,11 +25,14 @@ const stripePaymentIntegration = async (req, res) => {
               name: `Subscription Plan - ${plan}`,
             },
             unit_amount: amount, // in cents
+            recurring: {
+              interval: plan === "yearly" ? "year" : "month",
+            },
           },
           quantity: 1,
         },
       ],
-      success_url: `https://simple-quotes-alter.vercel.app/#/subscription?success=true&plan=${plan}&user=${user_id}&teamSize=${teamSize}`,
+      success_url: `https://simple-quotes-alter.vercel.app/#/subscription?success=true&plan=${plan}&user=${user_id}&teamSize=${teamSize}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `https://simple-quotes-alter.vercel.app/#/subscription?cancelled=true&plan=${plan}&user=${user_id}&teamSize=${teamSize}`,
       metadata: {
         user_id,
@@ -1399,12 +1402,12 @@ const getAnalyticsData = async (req, res) => {
     const total = analytics.reduce((sum, item) => sum + item.count, 0);
 
     const colors = [
-      "#0088FE",
-      "#00C49F",
-      "#FFBB28",
-      "#FF8042",
-      "#8884D8",
-      "#82CA9D",
+      "#4a4a4a",
+      "#6b6b6b",
+      "#8c8c8c",
+      "#adadad",
+      "#cecece",
+      "#efefef",
     ];
 
     const data = analytics.map((item, index) => ({
@@ -1447,6 +1450,41 @@ const GetRecyclebinByLimit = async (req, res) => {
   } catch (err) {
     console.error("Error fetching recycle bin:", err);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const getStripeSession = async (req, res) => {
+  const { session_id } = req.query;
+  try {
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+    res.json(session);
+  } catch (err) {
+    console.error("Error retrieving session:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const cancelSubscription = async (req, res) => {
+  const { user_id } = req.body;
+  try {
+    const user = await UserModel.findById(user_id);
+    if (!user || !user.subscriptionId) {
+      return res.status(400).json({ error: "No active subscription found" });
+    }
+
+    // Cancel the subscription in Stripe (cancel at period end)
+    await stripe.subscriptions.update(user.subscriptionId, {
+      cancel_at_period_end: true,
+    });
+
+    // Update local status to canceled
+    user.subscription = "canceled";
+    await user.save();
+
+    res.json({ message: "Subscription canceled successfully" });
+  } catch (err) {
+    console.error("Error canceling subscription:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -1500,4 +1538,6 @@ module.exports = {
   stripePaymentIntegration,
   getAnalyticsData,
   GetRecyclebinByLimit,
+  getStripeSession,
+  cancelSubscription,
 };

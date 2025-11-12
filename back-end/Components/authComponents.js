@@ -174,7 +174,7 @@ const getUser = async (req, res) => {
 };
 
 const setSubscription = async (req, res) => {
-  const { subscription, subscriptionDate, user_id, teamSize, invoice } =
+  const { subscription, subscriptionDate, user_id, teamSize, subscriptionId } =
     req.body;
 
   try {
@@ -250,6 +250,11 @@ const setSubscription = async (req, res) => {
       profile.teamSize = teamSize;
     }
 
+    // Store subscriptionId if provided
+    if (subscriptionId) {
+      profile.subscriptionId = subscriptionId;
+    }
+
     // Create invoice if subscription is active
     if (subscription === "monthly" || subscription === "yearly") {
       if (!profile.Invoices) {
@@ -268,6 +273,7 @@ const setSubscription = async (req, res) => {
           (subscription === "monthly" ? 10 : 120) *
           (teamSize || profile.teamSize || 1),
         users: teamSize || profile.teamSize || 1,
+        subscriptionId,
       };
 
       profile.Invoices.push(newInvoice);
@@ -384,6 +390,59 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const sendPasswordResetEmail = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await UserModel.findOne({ email: email });
+    if (!user) {
+      return res.status(404).json({
+        error: "No user found with this email address",
+      });
+    }
+
+    // Send password reset email
+    const { Resend } = require("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    const resetLink = `https://simple-quotes-alter.vercel.app/#/changepass/${user._id}`;
+
+    try {
+      await resend.emails.send({
+        from: "noreply@updates.jashkumar.dev",
+        to: email,
+        subject: "Password Reset - Simple Quotes",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
+            <p>Hello ${user.fullName},</p>
+            <p>You have requested to reset your password for your Simple Quotes account.</p>
+            <p>Please click the link below to reset your password:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" style="background-color: #df064e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Reset Password
+              </a>
+            </div>
+            <p>If you didn't request this password reset, please ignore this email.</p>
+            <p>This link will expire in 24 hours for security reasons.</p>
+            <p>Best regards,<br>Simple Quotes Team</p>
+          </div>
+        `,
+      });
+
+      console.log("Password reset email sent successfully");
+      return res.status(200).json({
+        message: "Password reset email sent successfully",
+      });
+    } catch (emailError) {
+      console.error("Error sending password reset email:", emailError);
+      return res.status(500).json({ error: "Failed to send email" });
+    }
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   login,
   logout,
@@ -396,4 +455,5 @@ module.exports = {
   getUserBGmail,
   chnagePassword,
   getAllUsers,
+  sendPasswordResetEmail,
 };

@@ -32,6 +32,9 @@ const UserSchema = new Schema({
   subscription: {
     type: String,
   },
+  subscriptionId: {
+    type: String,
+  },
   subscriptionDate: {
     type: Date,
   },
