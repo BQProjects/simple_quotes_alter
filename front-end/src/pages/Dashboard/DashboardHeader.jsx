@@ -6,13 +6,21 @@ import { CiSearch, CiFileOn, CiFolderOn } from "react-icons/ci";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { UserContext } from "../../context/UserContext";
 import { StateManageContext } from "../../context/StateManageContext";
+import { DatabaseContext } from "../../context/DatabaseContext";
 import axios from "axios";
 import { FaChevronRight } from "react-icons/fa";
 
 const DashboardHeader = () => {
   const { user } = useContext(UserContext);
-  const { workspaces, proposals, notifications, notifi, setNotifi } =
-    useContext(StateManageContext);
+  const {
+    workspaces,
+    proposals,
+    notifications,
+    setNotifications,
+    notifi,
+    setNotifi,
+  } = useContext(StateManageContext);
+  const { databaseUrl } = useContext(DatabaseContext);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -25,6 +33,11 @@ const DashboardHeader = () => {
   const bellRef = useRef(null);
   const notificationRef = useRef(null);
   const searchRef = useRef(null);
+  // Count unread notifications. If `read` is missing, treat as unread.
+  const unreadCount = notifications
+    ? notifications.filter((n) => n.read === false || n.read === undefined)
+        .length
+    : 0;
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
@@ -132,8 +145,38 @@ const DashboardHeader = () => {
     }
   };
 
-  const toggleNotifications = () => {
-    setNotifi(!notifi);
+  const toggleNotifications = async () => {
+    // toggle the dropdown
+    const willOpen = !notifi;
+    setNotifi(willOpen);
+
+    // if we're opening the dropdown, mark notifications as read locally and in backend
+    if (
+      willOpen &&
+      notifications &&
+      notifications.length > 0 &&
+      setNotifications &&
+      user?.id &&
+      databaseUrl
+    ) {
+      // Mark as read locally first for immediate UI feedback
+      setNotifications(
+        notifications.map((n) => ({
+          ...n,
+          read: true,
+        }))
+      );
+
+      // Mark as read in backend
+      try {
+        await axios.post(`${databaseUrl}/api/workspace/marknotificationsread`, {
+          user_id: user.id,
+        });
+      } catch (error) {
+        console.error("Error marking notifications as read:", error);
+        // Optionally revert local state if backend fails
+      }
+    }
   };
 
   // Navigate to action link when notification action is clicked
@@ -475,7 +518,10 @@ const DashboardHeader = () => {
             }`}
             onClick={toggleNotifications}
           >
-            <div className="h-[6px] w-[6px] bg-gradient_bottom absolute top-[8px] right-[8px] rounded-[50%]"></div>
+            {/* show small pink unread dot only when there are unread notifications */}
+            {unreadCount > 0 && (
+              <div className="h-2 w-2 bg-graidient_bottom absolute top-2 right-2 rounded-full shadow-sm"></div>
+            )}
             <IoNotificationsOutline className="h-5 w-5 text-gray-500" />
           </button>
 
@@ -564,7 +610,10 @@ const DashboardHeader = () => {
                     return (
                       <div className="flex justify-between w-full mt-3 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
                         <div className="w-[10%] h-full flex items-start justify-center">
-                          <div className="mt-2 w-1.5 h-1.5 rounded-full bg-gradient_bottom"></div>
+                          {/* show per-item unread dot only when the notification is unread */}
+                          {item.read !== true && (
+                            <div className="mt-2 w-1.5 h-1.5 rounded-full bg-graidient_bottom"></div>
+                          )}
                         </div>
                         <div className="w-[90%]">
                           <p className="font-semibold text-gray-600 text-sm flex justify-between pr-7">

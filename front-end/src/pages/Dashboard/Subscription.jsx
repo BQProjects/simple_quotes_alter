@@ -443,7 +443,14 @@ const Subscription = () => {
           users: "1",
         });
       }
-      setBillingHistory(user.invoices ? user.invoices : []);
+      // Deduplicate invoices by invoice name, filtering out nulls
+      const uniqueInvoices = (user.invoices || [])
+        .filter((item) => item && item.invoice)
+        .filter(
+          (item, index, self) =>
+            index === self.findIndex((i) => i.invoice === item.invoice)
+        );
+      setBillingHistory(uniqueInvoices);
       // console.log(user.invoices);
     }
   }, [user]);
@@ -472,7 +479,10 @@ const Subscription = () => {
                         .toLowerCase()
                         .includes(search?.toLowerCase() || "") &&
                       item._id !== user.id &&
-                      !members.some((member) => member._id === item._id)
+                      !members.some((member) => member._id === item._id) &&
+                      item.subscription !== "monthly" &&
+                      item.subscription !== "yearly" &&
+                      item.subscription !== "shared"
                   )
                   .map((item) => (
                     <div
@@ -1015,7 +1025,7 @@ const Subscription = () => {
               <tbody>
                 {sortedBillingHistory.map((item, index) => (
                   <tr
-                    key={item.invoice || index}
+                    key={item.invoice}
                     className={`border-b border-b-[#e0e0e0] ${
                       index % 2 === 0 ? "bg-[#fefefe]" : "bg-[#f7f7f7]"
                     }`}

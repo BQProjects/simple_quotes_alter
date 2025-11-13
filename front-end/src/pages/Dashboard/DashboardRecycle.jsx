@@ -216,13 +216,28 @@ const DashboardRecycle = () => {
                         </tr>
                       );
                     })}
+                    {loadingMore &&
+                      Array.from({ length: 4 }).map((_, index) => (
+                        <tr
+                          key={`loading-${index}`}
+                          className="border-b border-gray-200 mt-1 h-12"
+                        >
+                          <td className="px-4 py-3">
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                          </td>
+                          <td className="px-1">
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                          </td>
+                          <td>
+                            <div className="flex gap-2 ml-14">
+                              <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                              <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
-                {loadingMore && (
-                  <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
-                  </div>
-                )}
                 {!hasMore && !loadingMore && (
                   <div className="flex justify-center py-6">
                     <p className="text-gray-500 text-sm">

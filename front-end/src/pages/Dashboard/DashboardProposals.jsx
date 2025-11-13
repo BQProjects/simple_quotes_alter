@@ -19,7 +19,6 @@ import toast from "react-hot-toast";
 import { StateManageContext } from "../../context/StateManageContext";
 import { RiArrowUpDownLine } from "react-icons/ri";
 
-
 const DashboardProposals = () => {
   const [deleteModal, setDeleteModal] = useState({
     open: false,
@@ -50,10 +49,8 @@ const DashboardProposals = () => {
   const [hasMore, setHasMore] = useState(true);
   const scrollContainerRef = useRef(null);
 
-
   const [skip, setSkip] = React.useState(0);
   const limit = 10;
-
 
   const handleMove = async () => {
     try {
@@ -73,7 +70,6 @@ const DashboardProposals = () => {
     }
   };
 
-
   const handleDelete = async (id) => {
     try {
       const res = await axios.post(`${databaseUrl}/api/workspace/delete`, {
@@ -90,7 +86,6 @@ const DashboardProposals = () => {
     }
   };
 
-
   const handleDuplicate = async (id) => {
     try {
       const res = await axios.post(`${databaseUrl}/api/workspace/duplicate`, {
@@ -98,14 +93,12 @@ const DashboardProposals = () => {
         user_id: user.id,
       });
 
-
       setProposals([res.data, ...proposals]);
       toast.success("Duplicate Proposal has been created");
     } catch (error) {
       console.log(error);
     }
   };
-
 
   const handleRename = async (id, index) => {
     try {
@@ -124,7 +117,6 @@ const DashboardProposals = () => {
     }
   };
 
-
   const getProposalByLimit = async () => {
     try {
       const res = await axios.get(
@@ -134,11 +126,10 @@ const DashboardProposals = () => {
         }
       );
 
-
       setProposals(res.data.proposals || []);
       setSkip(limit);
       console.log("Proposals Bin Data:", res.data.proposals);
-      
+
       // Check if initial load has less data than limit
       if (!res.data.proposals || res.data.proposals.length < limit) {
         setHasMore(false);
@@ -149,15 +140,13 @@ const DashboardProposals = () => {
     }
   };
 
-
   useEffect(() => {
     getProposalByLimit();
   }, []);
 
-
   const handleLoad = async () => {
     if (loadingMore || !hasMore) return;
-    
+
     try {
       setLoadingMore(true);
       const res = await axios.get(
@@ -170,7 +159,7 @@ const DashboardProposals = () => {
       if (res.data.proposals && res.data.proposals.length > 0) {
         setProposals((prev) => [...prev, ...res.data.proposals]);
         setSkip((prev) => prev + limit);
-        
+
         // Check if we received less data than requested
         if (res.data.proposals.length < limit) {
           setHasMore(false);
@@ -187,26 +176,25 @@ const DashboardProposals = () => {
 
   const handleScroll = (e) => {
     const element = e.target;
-    const bottom = Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop) < 1;
-    
+    const bottom =
+      Math.abs(
+        element.scrollHeight - element.clientHeight - element.scrollTop
+      ) < 1;
+
     if (bottom && !loadingMore && hasMore) {
       handleLoad();
     }
   };
 
-
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-
 
   const getLastSeen = (date) => {
     if (!date) return "No data";
 
-
     const now = new Date();
     const lastSeenDate = new Date(date);
     const diffInSeconds = Math.floor((now - lastSeenDate) / 1000);
-
 
     if (diffInSeconds < 60) {
       return `${diffInSeconds} seconds ago`;
@@ -219,25 +207,19 @@ const DashboardProposals = () => {
     }
   };
 
-
   const formatDate = (dateInput) => {
     if (!dateInput) return "Invalid Date";
 
-
     const date = new Date(dateInput);
 
-
     if (isNaN(date.getTime())) return "Invalid Date"; // Handle invalid dates
-
 
     const day = date.getDate();
     const month = date.toLocaleString("en-US", { month: "short" }); // Get short month name (e.g., "Jan")
     const year = date.getFullYear();
 
-
     return `${day} ${month} ${year}`;
   };
-
 
   const handleLocked = async (data, id) => {
     try {
@@ -250,12 +232,10 @@ const DashboardProposals = () => {
     }
   };
 
-
   const getBaseUrl = () => {
     const url = window.location.origin; // Gets up to .com, .net, etc.
     return url;
   };
-
 
   const copyToClipboard = (id) => {
     const domain = getBaseUrl();
@@ -269,7 +249,6 @@ const DashboardProposals = () => {
       });
   };
 
-
   const handleFavorate = async (favorate, id) => {
     try {
       await axios.put(`${databaseUrl}/api/editor/favorate`, {
@@ -280,7 +259,6 @@ const DashboardProposals = () => {
       console.log(error);
     }
   };
-
 
   const handleClickOutsideBlock = (event) => {
     if (
@@ -293,18 +271,17 @@ const DashboardProposals = () => {
     }
   };
 
-
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutsideBlock);
     return () => {
       document.removeEventListener("mousedown", handleClickOutsideBlock);
     };
   }, []);
-  
+
   const [openSort, setOpenSort] = useState(false);
   const sortButtonRef = useRef();
   const sortRef = useRef();
-  
+
   const handleClickOutsideSort = (event) => {
     if (
       sortRef.current &&
@@ -316,7 +293,6 @@ const DashboardProposals = () => {
     }
   };
 
-
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutsideSort);
     return () => {
@@ -324,12 +300,10 @@ const DashboardProposals = () => {
     };
   }, []);
 
-
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
-
 
   // ConfirmProposalDeletion modal component
   const ConfirmProposalDeletion = ({
@@ -383,7 +357,6 @@ const DashboardProposals = () => {
       </div>
     );
   };
-
 
   return (
     <>
@@ -500,7 +473,7 @@ const DashboardProposals = () => {
               )}
             </span>
           </div>
-          <div 
+          <div
             ref={scrollContainerRef}
             onScroll={handleScroll}
             className="w-full h-[75vh] overflow-y-auto scrollbar-hide relative overflow-x-hidden"
@@ -710,7 +683,6 @@ const DashboardProposals = () => {
                                 </span>
                               </span>
 
-
                               <span className="group relative flex items-center">
                                 <FaRegCopy
                                   className="text-gray-600 hover:text-graidient_bottom cursor-pointer"
@@ -780,13 +752,42 @@ const DashboardProposals = () => {
                         </tr>
                       );
                     })}
+                {loadingMore &&
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <tr
+                      key={`loading-${index}`}
+                      className="border-b border-gray-100 mt-1 h-14 pl-10 pr-10"
+                    >
+                      <td className="px-2 flex flex-col items-start justify-center text-left pt-1 pl-4">
+                        <div className="flex items-center gap-2 w-full">
+                          <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                        </div>
+                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2 mt-1 ml-7"></div>
+                      </td>
+                      <td className="pl-5 pr-3">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
+                      </td>
+                      <td className="pl-5 pr-3">
+                        <div className="flex flex-col gap-1">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div>
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3"></div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex gap-4 ml-8 pr-4">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className="w-4 h-4 bg-gray-200 rounded animate-pulse"
+                            ></div>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
-            {loadingMore && (
-              <div className="flex justify-center py-4">
-                <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
-              </div>
-            )}
             {!hasMore && !loadingMore && proposals.length > 0 && (
               <div className="flex justify-center py-6">
                 <p className="text-gray-500 text-sm">You've reached the end</p>
@@ -798,6 +799,5 @@ const DashboardProposals = () => {
     </>
   );
 };
-
 
 export default DashboardProposals;

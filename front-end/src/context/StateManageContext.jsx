@@ -73,7 +73,7 @@ export function StateManageContextProvider({ children }) {
     if (user?.id && databaseUrl) {
       getNotifications();
     }
-  }, [user?.id, databaseUrl, notifi]);
+  }, [user?.id, databaseUrl]);
 
   const getNotifications = async () => {
     try {

@@ -505,6 +505,96 @@ const EditorDnD = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #print-canvas, #print-canvas * {
+            visibility: visible;
+          }
+          #print-canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: visible !important;
+          }
+          .canvas {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            margin-top: 0 !important;
+            padding: 0 !important;
+            padding-top: 0 !important;
+            box-shadow: none !important;
+            min-height: auto !important;
+            position: relative !important;
+          }
+          .canvas > div {
+            position: static !important;
+            left: auto !important;
+            top: auto !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-before: auto !important;
+            page-break-after: auto !important;
+          }
+          .canvas > div > div {
+            position: static !important;
+            left: auto !important;
+            top: auto !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .canvas .flex {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .canvas img {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: auto !important;
+            max-height: 100vh !important;
+            min-height: auto !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-after: auto !important;
+            display: block !important;
+            object-fit: contain !important;
+          }
+          .absolute {
+            position: static !important;
+          }
+          /* Hide interactive elements during print */
+          button, .hover\\:bg-graidient_bottom {
+            display: none !important;
+          }
+          /* Ensure content blocks stay together */
+          .canvas > div:has(.flex) {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .canvas > div:has(img) {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          /* Template-specific page breaks */
+          .canvas > div:nth-child(1) {
+            page-break-after: always !important;
+          }
+          .canvas > div:nth-child(2),
+          .canvas > div:nth-child(3) {
+            page-break-before: avoid !important;
+            page-break-inside: avoid !important;
+          }
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
+        }
+      `}</style>
       <div className="w-full  ">
         {loading ? (
           <div className="w-full flex items-center justify-evenly h-[64px] px-7 border-b-[1px] border-gray-200 shadow-sm shadow-gray-300 be-vietnam-pro-regular relative">
@@ -814,6 +904,7 @@ const EditorDnD = () => {
 
         {/* Canvas Section */}
         <div
+          id="print-canvas"
           className="flex justify-center overflow-y-auto"
           style={{
             flex: 1,

@@ -294,9 +294,13 @@ const addMemeber = async (req, res) => {
     if (!profile.sharedSubscription.includes(new_user)) {
       profile.sharedSubscription.push(new_user);
     }
-    const result = await UserModel.findById(new_user);
+    const newUser = await UserModel.findById(new_user);
+    newUser.subscription = "shared";
+    newUser.subscriptionDate = profile.subscriptionDate;
+    newUser.subscriptionEnd = profile.subscriptionEnd;
+    await newUser.save();
     await profile.save();
-    res.json(result);
+    res.json(newUser);
   } catch (error) {
     console.error("Error updating subscription:", error);
     return res.status(500).json({ error: "Internal server error" });

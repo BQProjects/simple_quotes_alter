@@ -147,7 +147,7 @@ const DashboardHome = () => {
     setTrafficLoading(true);
     try {
       const res = await axios.get(
-        `${databaseUrl}/api/workspace/analytics-data`
+        `${databaseUrl}/api/workspace/analytics-data?user_id=${user.id}`
       );
       setTrafficData(res.data || []);
     } catch (error) {

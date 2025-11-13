@@ -279,44 +279,86 @@ const DashboardAnalytics = () => {
                 proposal.analytics[slected] &&
                 proposal.analytics[slected].sectionWise && (
                   <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm"
                     onClick={() => setSelected(null)}
                   >
                     <div
-                      className="bg-white rounded-xl shadow-lg max-w-sm relative"
+                      className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 relative max-h-[80vh] flex flex-col"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <table className="w-full table-fixed">
-                        <thead className="sticky top-0 z-50 h-10 bg-gray-100 rounded-t-xl">
-                          <tr className="rounded-t-xl overflow-hidden">
-                            <th className="w-1/2 text-left pl-20 font-normal rounded-tl-xl bg-gray-100">
-                              Section
-                            </th>
-                            <th className="w-1/2 text-center font-normal rounded-tr-xl bg-gray-100">
-                              Time
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {Object.entries(
-                            proposal.analytics[slected].sectionWise
-                          ).map(([key, value]) => (
-                            <tr
-                              key={key}
-                              className="h-10 text-gray-500 text-sm"
-                            >
-                              <td className="w-1/2 text-left pl-10">
-                                <div className="max-w-28 mx-auto overflow-hidden text-ellipsis whitespace-nowrap">
-                                  {key}
-                                </div>
-                              </td>
-                              <td className="w-1/2 text-center">
-                                {value < 0.01 ? "00" : value.toFixed(2)} sec
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      {/* Close button */}
+                      <button
+                        onClick={() => setSelected(null)}
+                        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1 hover:bg-gray-100 rounded-full z-10"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+
+                      {/* Header */}
+                      <div className="bg-gray-200 text-black p-4 rounded-t-xl flex-shrink-0">
+                        <h3 className="text-lg font-semibold">
+                          Section Time Breakdown
+                        </h3>
+                        <p className="text-black text-sm">
+                          Detailed time spent per section
+                        </p>
+                      </div>
+
+                      {/* Table */}
+                      <div className="flex-1 overflow-hidden">
+                        <div className="p-4 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                          <table className="w-full">
+                            <thead className="sticky top-0 bg-white border-b border-gray-200">
+                              <tr>
+                                <th className="text-left py-2 px-3 text-gray-700 font-medium">
+                                  Section
+                                </th>
+                                <th className="text-right py-2 px-3 text-gray-700 font-medium">
+                                  Time (sec)
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {Object.entries(
+                                proposal.analytics[slected].sectionWise
+                              ).map(([key, value], index) => (
+                                <tr
+                                  key={key}
+                                  className={`border-b border-gray-100 hover:bg-pink-50 transition-colors duration-150 ${
+                                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                  }`}
+                                >
+                                  <td className="py-3 px-3 text-gray-800 font-medium">
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-6 h-6 bg-gray-200 text-black rounded-full flex items-center justify-center text-xs font-bold">
+                                        {index + 1}
+                                      </div>
+                                      <span className="truncate max-w-xs">
+                                        {key}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 px-3 text-right text-gray-600 font-semibold">
+                                    {value < 0.01 ? "0.00" : value.toFixed(2)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

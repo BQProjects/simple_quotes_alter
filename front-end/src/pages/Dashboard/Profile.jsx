@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import Select from "react-select"; // Add this import for React Select
 import { useNavigate } from "react-router-dom";
 import { FaEye } from "react-icons/fa6";
+import { FaArrowLeft } from "react-icons/fa";
 
 const Profile = () => {
   const { user, setUser } = useContext(UserContext);
@@ -556,13 +557,20 @@ const Profile = () => {
                   </p>
                 )}
               </div>
-
-              <button
-                className="w-[399px] h-10 bg-[#DF064E] text-white rounded-md flex items-center justify-center"
-                onClick={handleChangePassword}
-              >
-                Change Password
-              </button>
+              <div className="flex items-center gap-4 mt-4">
+                <button
+                  className=" px-4 py-2 h-10 bg-gray-300 text-gray-700 rounded-md flex items-center justify-center hover:bg-gray-400"
+                  onClick={() => setShowChangePassModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="w-full px-4 py-2  h-10 bg-[#DF064E] text-white rounded-md flex items-center justify-center hover:bg-red-700"
+                  onClick={handleChangePassword}
+                >
+                  Change Password
+                </button>
+              </div>
             </div>
           </div>
         </div>
