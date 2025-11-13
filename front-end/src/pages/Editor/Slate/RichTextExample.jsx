@@ -350,7 +350,6 @@ const RichTextEditor = ({
   const handleClickOutsideAlign = (event) => {
     if (alignRef.current && !alignRef.current.contains(event.target)) {
       setShowAlign(false);
-      setAlignH(false);
     }
   };
   useEffect(() => {

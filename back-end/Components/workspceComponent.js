@@ -93,8 +93,13 @@ const createAnalytics = async (req, res) => {
       proposal.sectionWise = {};
     }
 
+    const totalFromSections = Object.values(temp).reduce(
+      (sum, val) => sum + val,
+      0
+    );
+
     const view = new ViewModel({
-      averageTime: timespent,
+      averageTime: totalFromSections,
       user: proposal.Users[0],
     });
 
@@ -107,14 +112,14 @@ const createAnalytics = async (req, res) => {
       browser: browser,
       country: country,
       sta: sta,
-      totalTime: timespent,
+      totalTime: totalFromSections,
       seen: seen,
     });
 
     await singleAnalystics.save();
 
     proposal.analytics.push(singleAnalystics._id);
-    proposal.totalTime = proposal.totalTime + timespent;
+    proposal.totalTime = proposal.totalTime + totalFromSections;
 
     for (let key in temp) {
       if (proposal.sectionWise[key] === undefined) {
@@ -302,6 +307,34 @@ const getNotifications = async (req, res) => {
     return res.status(200).json(proposals.notifications);
   } catch (error) {
     console.error("Error fetching Proposals:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const markNotificationsAsRead = async (req, res) => {
+  const { user_id } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    const user = await UserModel.findById(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.notifications && user.notifications.length > 0) {
+      user.notifications = user.notifications.map((notification) => ({
+        ...notification,
+        read: true,
+      }));
+      await user.save();
+    }
+
+    return res.status(200).json({ message: "Notifications marked as read" });
+  } catch (error) {
+    console.error("Error marking notifications as read:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -1374,10 +1407,45 @@ const deleteProfile = async (req, res) => {
   const { user_id } = req.body;
 
   try {
-    const user = await UserModel.findByIdAndDelete(user_id);
+    const user = await UserModel.findById(user_id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    // Cancel subscription if exists
+    if (user.subscriptionId) {
+      try {
+        await stripe.subscriptions.cancel(user.subscriptionId);
+      } catch (stripeError) {
+        console.error("Error canceling Stripe subscription:", stripeError);
+        // Continue with deletion even if Stripe cancel fails
+      }
+    }
+
+    // If user has shared subscriptions, cancel them
+    if (
+      Array.isArray(user.sharedSubscription) &&
+      user.sharedSubscription.length > 0
+    ) {
+      await Promise.all(
+        user.sharedSubscription.map(async (sharedUserId) => {
+          const sharedUser = await UserModel.findById(sharedUserId);
+          if (sharedUser) {
+            sharedUser.subscription = "canceled";
+            await sharedUser.save();
+          }
+        })
+      );
+    }
+
+    // Remove from any admin's sharedSubscription
+    const admins = await UserModel.find({ sharedSubscription: user_id });
+    for (const admin of admins) {
+      admin.sharedSubscription.pull(user_id);
+      await admin.save();
+    }
+
+    await UserModel.findByIdAndDelete(user_id);
     return res.status(200).json({ message: "Profile deleted successfully" });
   } catch (error) {
     console.error("Error deleting profile:", error);
@@ -1386,8 +1454,30 @@ const deleteProfile = async (req, res) => {
 };
 
 const getAnalyticsData = async (req, res) => {
+  const { user_id } = req.query;
+
+  if (!user_id) {
+    return res.status(400).json({ error: "user_id is required" });
+  }
+
   try {
     const analytics = await AnalyticsModel.aggregate([
+      {
+        $lookup: {
+          from: "proposals",
+          localField: "proposal",
+          foreignField: "_id",
+          as: "proposalData",
+        },
+      },
+      {
+        $unwind: "$proposalData",
+      },
+      {
+        $match: {
+          "proposalData.Users": new mongoose.Types.ObjectId(user_id),
+        },
+      },
       {
         $group: {
           _id: "$country",
@@ -1534,6 +1624,7 @@ module.exports = {
   editCollab,
   deleteCollabUser,
   getNotifications,
+  markNotificationsAsRead,
   deleteProfile,
   stripePaymentIntegration,
   getAnalyticsData,

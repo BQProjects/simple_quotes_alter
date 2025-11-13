@@ -5,6 +5,7 @@ const TrafficPieChart = ({
   data,
   title = "Traffic by Location",
   loading = false,
+  totalViews = null,
 }) => {
   const [activeIndex, setActiveIndex] = useState(null);
   // Accept multiple API shapes:
@@ -110,9 +111,12 @@ const TrafficPieChart = ({
       color: item.color || palette[i % palette.length],
     }));
 
-    const total = canonical.reduce((s, it) => s + (it.value || 0), 0);
+    const total =
+      totalViews !== null
+        ? totalViews
+        : canonical.reduce((s, it) => s + (it.value || 0), 0);
 
-    if (canonical.length === 0) return { processedData: [], totalCount: 0 };
+    if (canonical.length === 0) return { processedData: [], totalCount: total };
 
     const sorted = [...canonical].sort((a, b) => b.value - a.value);
     const top = sorted.slice(0, 4);
@@ -125,7 +129,7 @@ const TrafficPieChart = ({
     }
 
     return { processedData: top, totalCount: total };
-  }, [chartData]);
+  }, [chartData, totalViews]);
 
   // Compute normalized percentages to 1 decimal using largest-remainder (to sum to 100.0)
   const processedWithPercents = React.useMemo(() => {

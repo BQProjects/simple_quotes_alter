@@ -7,6 +7,9 @@ import { FaAlignLeft, FaAlignCenter, FaAlignRight } from "react-icons/fa";
 import image_alter from "../../../assets/ImageAlter.png";
 import { TfiReload } from "react-icons/tfi";
 import Select from "react-select";
+import { PiAlignLeft } from "react-icons/pi";
+import { PiAlignCenterHorizontalLight } from "react-icons/pi";
+import { PiAlignRight } from "react-icons/pi";
 
 const ForDouble = ({
   data,
@@ -184,6 +187,43 @@ const ForDouble = ({
           </div>
 
           {/* Alignment Buttons */}
+          {width !== "100" && (
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => onAliegn("left")}
+                className={`p-1 rounded ${
+                  aliegn === "left"
+                    ? "bg-graidient_bottom text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                title="Align Left"
+              >
+                <PiAlignLeft className="text-sm" />
+              </button>
+              <button
+                onClick={() => onAliegn("center")}
+                className={`p-1 rounded ${
+                  aliegn === "center"
+                    ? "bg-graidient_bottom text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                title="Align Center"
+              >
+                <PiAlignCenterHorizontalLight className="text-sm" />
+              </button>
+              <button
+                onClick={() => onAliegn("right")}
+                className={`p-1 rounded ${
+                  aliegn === "right"
+                    ? "bg-graidient_bottom text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                title="Align Right"
+              >
+                <PiAlignRight className="text-sm" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 

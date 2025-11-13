@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import Logo from "../assets/Web_logo.png";
 import Arrow from "../assets/arraw.png";
+import { UserContext } from "../context/UserContext";
 
 const WebHeader = () => {
   const navigate = useNavigate();
+  const { user } = useContext(UserContext);
   return (
     <div className=" py-3 w-full px-20 border border-[#ee0e0e0] flex h-fit  items-center justify-between fixed top-0 bg-gray-50 z-[5000] ">
       <div className=" w-[20%]  ">
@@ -26,12 +28,21 @@ const WebHeader = () => {
         </NavLink>
       </div>
       <div className="flex gap-4 w-[20%] items-center justify-end  mr-10">
-        <button
-          onClick={() => navigate("/login")}
-          className="pl-3 pr-3 hidden lg:block pt-2 pb-2 text-gray-500 hover:font-bold"
-        >
-          Login
-        </button>
+        {user ? (
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="pl-3 pr-3 w-24 hidden lg:block pt-2 pb-2 text-gray-500 hover:font-bold"
+          >
+            Dashboard
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate("/login")}
+            className="pl-3 pr-3 w-24 hidden lg:block pt-2 pb-2 text-gray-500 hover:font-bold"
+          >
+            Login
+          </button>
+        )}
         <Link to="/signup">
           <button className=" bg-white text-botton_white_text border-[1px] border-botton_white_text flex text-center py-3 px-4 items-center justify-center gap-2 rounded-md hover:bg-graidient_bottom hover:text-white">
             Start for free

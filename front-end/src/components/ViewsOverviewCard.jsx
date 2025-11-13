@@ -270,19 +270,17 @@ const ViewsOverviewCard = ({ views }) => {
         {/* Avg Time Spent */}
         <div className="mt-3 mr-3 h-[100px] px-3 py-2 border border-gray-100 rounded-md flex flex-col items-start justify-start gap-2 cursor-pointer">
           <h3 className="text-xs text-gray-400">Avg Time Spent</h3>
-          {/* <p className="text-2xl text-gray-600 pl-2">
-            {Math.floor(views?.timespent || 0)}{" "}
-            <span className="text-sm text-graidient_bottom">sec</span>
-          </p> */}
           <p className="text-2xl text-gray-600 pl-2">
             {(() => {
-              const time = views?.timespent || 0;
-              if (time < 60) {
-                return `${Math.floor(time)} sec`;
-              } else if (time < 3600) {
-                return `${Math.floor(time / 60)} min`;
+              const totalTime = views?.timespent || 0;
+              const totalViews = views?.totalViews || 0;
+              const avgTime = totalViews > 0 ? totalTime / totalViews : 0;
+              if (avgTime < 60) {
+                return `${Math.floor(avgTime)} sec`;
+              } else if (avgTime < 3600) {
+                return `${Math.floor(avgTime / 60)} min`;
               } else {
-                return `${Math.floor(time / 3600)} hr`;
+                return `${Math.floor(avgTime / 3600)} hr`;
               }
             })()}
           </p>

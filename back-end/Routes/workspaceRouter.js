@@ -46,6 +46,7 @@ const {
   editCollab,
   deleteCollabUser,
   getNotifications,
+  markNotificationsAsRead,
   deleteProfile,
   stripePaymentIntegration,
   getStripeSession,
@@ -64,6 +65,7 @@ workspace.post("/cancel-subscription", cancelSubscription);
 
 workspace.get("/getall", workspaceGetAll);
 workspace.get("/getnotification", getNotifications);
+workspace.post("/marknotificationsread", markNotificationsAsRead);
 workspace.get("/single", workspaceGet);
 workspace.post("/new", workspaceCreate);
 workspace.put("/update", workspaceUpdate);

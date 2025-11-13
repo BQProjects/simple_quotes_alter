@@ -69,6 +69,7 @@ const EditorHeader = ({
   setView,
 }) => {
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const [isDisabledL, setIsDisabledL] = useState(false);
   const [isDisabledF, setIsDisabledF] = useState(false);
   const [headerName, setHeaderName] = useState(proposalName);
@@ -86,6 +87,7 @@ const EditorHeader = ({
   const [created, setCreated] = useState("");
   const [changing, setChanging] = useState(false);
   const [tool, setTool] = useState(null);
+  const [showLink, setShowLink] = useState(false);
   const { que, setQue, count, setCount, notifications, notifi, setNotifi } =
     useContext(StateManageContext);
   const date = new Date(createdAt);
@@ -298,14 +300,20 @@ const EditorHeader = ({
     try {
       if (rows.length !== 0) {
         setSaving(true);
+        setSaveError(false);
         await axios.put(`${databaseUrl}/api/editor/updateProposal`, {
           id: id,
           rows: rows,
           settings: settings,
         });
+        // Clear any previous error on successful save
+        setSaveError(false);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Auto-save error:", error);
+      setSaveError(true);
+      // Auto-clear error after 5 seconds
+      setTimeout(() => setSaveError(false), 5000);
     } finally {
       setSaving(false);
       setCount(count + 1);
@@ -439,6 +447,10 @@ const EditorHeader = ({
             {saving ? (
               <p className="text-[9px] mt-[3px] text-graidient_bottom ml-[3px] ">
                 Saving...
+              </p>
+            ) : saveError ? (
+              <p className="text-[9px] mt-[3px] text-red-500 ml-[3px] ">
+                Save failed
               </p>
             ) : (
               <IoMdCloudDone className="text-graidient_bottom w-[22px] h-[18px] ml-[3px]" />
@@ -731,23 +743,32 @@ const EditorHeader = ({
                 Easily share your proposal link or download it in your preferred
                 format.
               </p>
-              <div className="border-[1px] w-[90%] rounded-md border-gray-200 flex items-center justify-between pl-2  gap-2 mt-2">
-                <Link to={`/view/${id}`}>
-                  <p className="text-xs text-blue-600">
-                    http://localhost:5173/view
-                  </p>
-                </Link>
+              {!showLink ? (
                 <button
-                  onClick={handleCopy}
-                  className="relative flex items-center justify-center gap-1 text-graidient_bottom h-full px-2 py-2 text-sm rounded-r-md"
-                  style={{
-                    backgroundColor: "rgba(247, 231, 237, 1)",
-                  }}
+                  onClick={() => setShowLink(true)}
+                  className="border-[1px] w-[90%] rounded-md border-gray-200 flex items-center justify-center py-2 mt-2 text-sm text-gray-500 hover:bg-gray-100"
                 >
-                  {copySuccess ? copySuccess : "Copy"}
-                  <RiLink className="w-4 h-4" />
+                  Generate Share Link
                 </button>
-              </div>
+              ) : (
+                <div className="border-[1px] w-[90%] rounded-md border-gray-200 flex items-center justify-between pl-2  gap-2 mt-2">
+                  <Link to={`/view/${id}`}>
+                    <p className="text-xs text-blue-600">
+                      http://localhost:5173/view
+                    </p>
+                  </Link>
+                  <button
+                    onClick={handleCopy}
+                    className="relative flex items-center justify-center gap-1 text-graidient_bottom h-full px-2 py-2 text-sm rounded-r-md"
+                    style={{
+                      backgroundColor: "rgba(247, 231, 237, 1)",
+                    }}
+                  >
+                    {copySuccess ? copySuccess : "Copy"}
+                    <RiLink className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
               <div
                 onClick={handleGenerateWord}
                 className="relative border-[1px] rounded-md w-[90%] py-2 border-gray-200 flex items-center justify-start pl-2 cursor-pointer  gap-3 mt-2"
