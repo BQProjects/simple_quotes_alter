@@ -198,6 +198,36 @@ const GeneratePDF = async (jsonData, settings) => {
     }
   };
 
+  // Validate image URL
+  const validateImageUrl = (url) => {
+    if (!url || typeof url !== "string") return false;
+
+    try {
+      const urlObj = new URL(url);
+      // Only allow http/https protocols
+      if (!["http:", "https:"].includes(urlObj.protocol)) return false;
+
+      // Check for image file extensions (basic validation)
+      const pathname = urlObj.pathname.toLowerCase();
+      const imageExtensions = [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".bmp",
+        ".webp",
+      ];
+      const hasImageExtension = imageExtensions.some(
+        (ext) => pathname.endsWith(ext) || pathname.includes(ext)
+      );
+
+      // Allow if has image extension OR if it's a dynamic URL (no extension)
+      return hasImageExtension || !pathname.includes(".");
+    } catch {
+      return false;
+    }
+  };
+
   // Improved image dimensions to maintain proper aspect ratios
   const getImageDimensions = (
     width,
@@ -814,7 +844,7 @@ const GeneratePDF = async (jsonData, settings) => {
     setColorFromHex("000000");
 
     headerLabels.forEach((header, i) => {
-    setFillColorFromHex("F5F5F5");
+      setFillColorFromHex("F5F5F5");
       doc.rect(x, currentY, columnWidths[i], rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, columnWidths[i], rowHeight);
@@ -1000,7 +1030,7 @@ const GeneratePDF = async (jsonData, settings) => {
 
     headerLabels.forEach((header, i) => {
       const colWidth = i === 0 ? firstColWidth : otherColWidth;
-    setFillColorFromHex("F5F5F5");
+      setFillColorFromHex("F5F5F5");
       doc.rect(x, currentY, colWidth, rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, colWidth, rowHeight);
@@ -1042,7 +1072,7 @@ const GeneratePDF = async (jsonData, settings) => {
         const colWidth = i === 0 ? firstColWidth : otherColWidth;
 
         if (i === 0) {
-         setFillColorFromHex("F5F5F5");
+          setFillColorFromHex("F5F5F5");
           doc.rect(x, currentY, colWidth, rowHeight, "F");
         }
         doc.setDrawColor(222, 226, 230);
@@ -1074,11 +1104,11 @@ const GeneratePDF = async (jsonData, settings) => {
     x = 10;
     doc.setFont(defaultFont, "bold");
     doc.setFontSize(10);
-         setFillColorFromHex("F5F5F5");
+    setFillColorFromHex("F5F5F5");
 
     totalRow.forEach((cell, i) => {
       const colWidth = i === 0 ? firstColWidth : otherColWidth;
-         setFillColorFromHex("F5F5F5");
+      setFillColorFromHex("F5F5F5");
       doc.rect(x, currentY, colWidth, rowHeight, "F");
       doc.setDrawColor(222, 226, 230);
       doc.rect(x, currentY, colWidth, rowHeight);
@@ -1114,7 +1144,272 @@ const GeneratePDF = async (jsonData, settings) => {
 
       switch (item.type) {
         case "cover":
-          // Create a text-only cover page, matching web UI formatting
+          // Handle background image if present
+          if (item.content && validateImageUrl(item.content)) {
+            try {
+              const imageBuffer = await fetchImageAsArrayBuffer(item.content);
+              if (imageBuffer) {
+                // Detect image format
+                const uint8Array = new Uint8Array(imageBuffer);
+                let format = "PNG"; // default
+                if (
+                  uint8Array[0] === 0xff &&
+                  uint8Array[1] === 0xd8 &&
+                  uint8Array[2] === 0xff
+                ) {
+                  format = "JPEG";
+                } else if (
+                  uint8Array[0] === 0x89 &&
+                  uint8Array[1] === 0x50 &&
+                  uint8Array[2] === 0x4e &&
+                  uint8Array[3] === 0x47
+                ) {
+                  format = "PNG";
+                } else if (
+                  uint8Array[0] === 0x47 &&
+                  uint8Array[1] === 0x49 &&
+                  uint8Array[2] === 0x46
+                ) {
+                  format = "GIF";
+                } else if (
+                  uint8Array[0] === 0x52 &&
+                  uint8Array[1] === 0x49 &&
+                  uint8Array[2] === 0x46 &&
+                  uint8Array[3] === 0x46
+                ) {
+                  format = "WEBP";
+                } else if (uint8Array[0] === 0x42 && uint8Array[1] === 0x4d) {
+                  format = "BMP";
+                }
+
+                // Create image to get dimensions
+                const image = new Image();
+                image.crossOrigin = "anonymous";
+                const imageUrl = URL.createObjectURL(new Blob([imageBuffer]));
+                image.src = imageUrl;
+
+                await new Promise((resolve, reject) => {
+                  image.onload = resolve;
+                  image.onerror = reject;
+                });
+
+                const originalWidth = image.naturalWidth;
+                const originalHeight = image.naturalHeight;
+                URL.revokeObjectURL(imageUrl);
+
+                // Calculate aspect ratio
+                const imageAspect = originalWidth / originalHeight;
+                const pageAspect = pageWidth / pageHeight;
+
+                let imageWidth, imageHeight;
+
+                // Fit the entire image within page bounds (contain)
+                if (imageAspect > pageAspect) {
+                  // Image is wider - fit to width
+                  imageWidth = pageWidth;
+                  imageHeight = imageWidth / imageAspect;
+                } else {
+                  // Image is taller - fit to height
+                  imageHeight = pageHeight;
+                  imageWidth = imageHeight * imageAspect;
+                }
+
+                // Center the image horizontally at the top of the page
+                const x = (pageWidth - imageWidth) / 2;
+                const y = 0;
+
+                doc.addImage(uint8Array, format, x, y, imageWidth, imageHeight);
+              }
+            } catch (error) {
+              console.error("Failed to process cover background image:", error);
+            }
+          }
+
+          // Handle cover's own image content if present
+          if (item.ImageLink) {
+            // Handle as image-para on cover
+            const text =
+              item.content
+                ?.map((block) => block?.children?.[0]?.text || "")
+                .join(" ") || "";
+            const isLeftAligned = item.align === "left";
+
+            try {
+              const imageBuffer = await fetchImageAsArrayBuffer(item.ImageLink);
+              if (imageBuffer) {
+                const dimensions = getImageDimensions(
+                  parseInt(item.width) || 80,
+                  parseInt(item.height) || 60,
+                  80,
+                  60,
+                  "inline"
+                );
+
+                checkPageBreak(dimensions.height + 20);
+
+                const halfWidth = availableWidth / 2;
+                const margin = 10;
+
+                if (isLeftAligned) {
+                  const imageX = 10;
+                  const textX = 10 + halfWidth + margin;
+                  const textWidth = halfWidth - margin * 2;
+
+                  doc.addImage(
+                    imageBuffer,
+                    "JPEG",
+                    imageX,
+                    currentY,
+                    dimensions.width,
+                    dimensions.height
+                  );
+
+                  doc.setFontSize(11);
+                  doc.setFont(defaultFont, "normal");
+                  setColorFromHex("000000");
+                  const textLines = doc.splitTextToSize(text, textWidth);
+                  let textY = currentY;
+                  textLines.forEach((line) => {
+                    doc.text(line, textX, textY);
+                    textY += 6;
+                  });
+
+                  currentY +=
+                    Math.max(dimensions.height, textLines.length * 6) + 10;
+                } else {
+                  const textX = 10;
+                  const imageX = 10 + halfWidth + margin;
+                  const textWidth = halfWidth - margin * 2;
+
+                  doc.setFontSize(11);
+                  doc.setFont(defaultFont, "normal");
+                  setColorFromHex("000000");
+                  const textLines = doc.splitTextToSize(text, textWidth);
+                  let textY = currentY;
+                  textLines.forEach((line) => {
+                    doc.text(line, textX, textY);
+                    textY += 6;
+                  });
+
+                  doc.addImage(
+                    imageBuffer,
+                    "JPEG",
+                    imageX,
+                    currentY,
+                    dimensions.width,
+                    dimensions.height
+                  );
+
+                  currentY +=
+                    Math.max(dimensions.height, textLines.length * 6) + 10;
+                }
+              }
+            } catch (err) {
+              console.error("Error adding cover image-para:", err);
+            }
+          } else if (item.ImageLink1 && item.ImageLink2) {
+            // Handle as double-image on cover
+            try {
+              const [imageBuffer1, imageBuffer2] = await Promise.all([
+                fetchImageAsArrayBuffer(item.ImageLink1),
+                fetchImageAsArrayBuffer(item.ImageLink2),
+              ]);
+
+              if (imageBuffer1 && imageBuffer2) {
+                const dimensions1 = getImageDimensions(
+                  parseInt(item.width1) || 50,
+                  parseInt(item.height1) || 40,
+                  50,
+                  40,
+                  "double"
+                );
+                const dimensions2 = getImageDimensions(
+                  parseInt(item.width2) || 50,
+                  parseInt(item.height2) || 40,
+                  50,
+                  40,
+                  "double"
+                );
+
+                checkPageBreak(
+                  Math.max(dimensions1.height, dimensions2.height) + 20
+                );
+
+                const spacing = 10;
+                const totalWidth =
+                  dimensions1.width + dimensions2.width + spacing;
+                const startX = (pageWidth - totalWidth) / 2;
+
+                doc.addImage(
+                  imageBuffer1,
+                  "JPEG",
+                  startX,
+                  currentY,
+                  dimensions1.width,
+                  dimensions1.height
+                );
+                doc.addImage(
+                  imageBuffer2,
+                  "JPEG",
+                  startX + dimensions1.width + spacing,
+                  currentY,
+                  dimensions2.width,
+                  dimensions2.height
+                );
+
+                currentY +=
+                  Math.max(dimensions1.height, dimensions2.height) + 10;
+              }
+            } catch (err) {
+              console.error("Error adding cover double-image:", err);
+            }
+          } else if (item.content && !validateImageUrl(item.content)) {
+            // Handle as regular image on cover
+            try {
+              const imageBuffer = await fetchImageAsArrayBuffer(item.content);
+              if (imageBuffer) {
+                const dimensions = getImageDimensions(
+                  parseInt(item.width) || 80,
+                  parseInt(item.height) || 60,
+                  80,
+                  60,
+                  "inline"
+                );
+
+                checkPageBreak(dimensions.height + 20);
+
+                const xPosition = (pageWidth - dimensions.width) / 2;
+
+                doc.addImage(
+                  imageBuffer,
+                  "JPEG",
+                  xPosition,
+                  currentY,
+                  dimensions.width,
+                  dimensions.height
+                );
+
+                currentY += dimensions.height + 5;
+
+                if (item.caption) {
+                  checkPageBreak(15);
+                  doc.setFontSize(8);
+                  doc.setFont(defaultFont, "italic");
+                  setColorFromHex("6C757D");
+
+                  const captionWidth = doc.getTextWidth(item.caption);
+                  const captionX = (pageWidth - captionWidth) / 2;
+                  doc.text(item.caption, captionX, currentY);
+                  currentY += 12;
+                  doc.setFont(defaultFont, "normal");
+                }
+              }
+            } catch (err) {
+              console.error("Error adding cover image:", err);
+            }
+          }
+
+          // Create overlays on cover page
           const nextItems = data.slice(index + 1, index + 5);
           let overlayItemIds = new Set();
           const topMargin = 30; // Increased top margin for cover page
@@ -1201,6 +1496,212 @@ const GeneratePDF = async (jsonData, settings) => {
             }
           }
 
+          // Handle image overlays on cover page
+          for (const nextItem of nextItems) {
+            if (nextItem?.type === "image-para" && nextItem.ImageLink) {
+              try {
+                const text =
+                  nextItem.content
+                    ?.map((block) => block?.children?.[0]?.text || "")
+                    .join(" ") || "";
+                const isLeftAligned = nextItem.align === "left";
+
+                // Fetch image
+                const imageBuffer = await fetchImageAsArrayBuffer(
+                  nextItem.ImageLink
+                );
+                if (imageBuffer) {
+                  // Calculate dimensions
+                  const dimensions = getImageDimensions(
+                    parseInt(nextItem.width) || 80,
+                    parseInt(nextItem.height) || 60,
+                    80,
+                    60,
+                    "inline"
+                  );
+
+                  checkPageBreak(dimensions.height + 20);
+
+                  const halfWidth = availableWidth / 2;
+                  const margin = 10;
+
+                  if (isLeftAligned) {
+                    // Image on left, text on right
+                    const imageX = 10;
+                    const textX = 10 + halfWidth + margin;
+                    const textWidth = halfWidth - margin * 2;
+
+                    // Add image
+                    doc.addImage(
+                      imageBuffer,
+                      "JPEG",
+                      imageX,
+                      currentY,
+                      dimensions.width,
+                      dimensions.height
+                    );
+
+                    // Add text
+                    doc.setFontSize(11);
+                    doc.setFont(defaultFont, "normal");
+                    setColorFromHex("000000");
+                    const textLines = doc.splitTextToSize(text, textWidth);
+                    let textY = currentY;
+                    textLines.forEach((line) => {
+                      doc.text(line, textX, textY);
+                      textY += 6;
+                    });
+
+                    currentY +=
+                      Math.max(dimensions.height, textLines.length * 6) + 10;
+                  } else {
+                    // Text on left, image on right
+                    const textX = 10;
+                    const imageX = 10 + halfWidth + margin;
+                    const textWidth = halfWidth - margin * 2;
+
+                    // Add text
+                    doc.setFontSize(11);
+                    doc.setFont(defaultFont, "normal");
+                    setColorFromHex("000000");
+                    const textLines = doc.splitTextToSize(text, textWidth);
+                    let textY = currentY;
+                    textLines.forEach((line) => {
+                      doc.text(line, textX, textY);
+                      textY += 6;
+                    });
+
+                    // Add image
+                    doc.addImage(
+                      imageBuffer,
+                      "JPEG",
+                      imageX,
+                      currentY,
+                      dimensions.width,
+                      dimensions.height
+                    );
+
+                    currentY +=
+                      Math.max(dimensions.height, textLines.length * 6) + 10;
+                  }
+                }
+                overlayItemIds.add(nextItem.id);
+              } catch (err) {
+                console.error("Error adding image-para to cover:", err);
+              }
+            } else if (
+              nextItem?.type === "double-image" &&
+              nextItem.ImageLink1 &&
+              nextItem.ImageLink2
+            ) {
+              try {
+                // Fetch both images
+                const [imageBuffer1, imageBuffer2] = await Promise.all([
+                  fetchImageAsArrayBuffer(nextItem.ImageLink1),
+                  fetchImageAsArrayBuffer(nextItem.ImageLink2),
+                ]);
+
+                if (imageBuffer1 && imageBuffer2) {
+                  const dimensions1 = getImageDimensions(
+                    parseInt(nextItem.width1) || 50,
+                    parseInt(nextItem.height1) || 40,
+                    50,
+                    40,
+                    "double"
+                  );
+                  const dimensions2 = getImageDimensions(
+                    parseInt(nextItem.width2) || 50,
+                    parseInt(nextItem.height2) || 40,
+                    50,
+                    40,
+                    "double"
+                  );
+
+                  checkPageBreak(
+                    Math.max(dimensions1.height, dimensions2.height) + 20
+                  );
+
+                  const spacing = 10;
+                  const totalWidth =
+                    dimensions1.width + dimensions2.width + spacing;
+                  const startX = (pageWidth - totalWidth) / 2;
+
+                  // Add first image
+                  doc.addImage(
+                    imageBuffer1,
+                    "JPEG",
+                    startX,
+                    currentY,
+                    dimensions1.width,
+                    dimensions1.height
+                  );
+
+                  // Add second image
+                  doc.addImage(
+                    imageBuffer2,
+                    "JPEG",
+                    startX + dimensions1.width + spacing,
+                    currentY,
+                    dimensions2.width,
+                    dimensions2.height
+                  );
+
+                  currentY +=
+                    Math.max(dimensions1.height, dimensions2.height) + 10;
+                }
+                overlayItemIds.add(nextItem.id);
+              } catch (err) {
+                console.error("Error adding double-image to cover:", err);
+              }
+            } else if (nextItem?.type === "image" && nextItem.content) {
+              try {
+                const imageBuffer = await fetchImageAsArrayBuffer(
+                  nextItem.content
+                );
+                if (imageBuffer) {
+                  const dimensions = getImageDimensions(
+                    parseInt(nextItem.width) || 80,
+                    parseInt(nextItem.height) || 60,
+                    80,
+                    60,
+                    "inline"
+                  );
+
+                  checkPageBreak(dimensions.height + 20);
+
+                  const xPosition = (pageWidth - dimensions.width) / 2;
+
+                  doc.addImage(
+                    imageBuffer,
+                    "JPEG",
+                    xPosition,
+                    currentY,
+                    dimensions.width,
+                    dimensions.height
+                  );
+
+                  currentY += dimensions.height + 5;
+
+                  if (nextItem.caption) {
+                    checkPageBreak(15);
+                    doc.setFontSize(8);
+                    doc.setFont(defaultFont, "italic");
+                    setColorFromHex("6C757D");
+
+                    const captionWidth = doc.getTextWidth(nextItem.caption);
+                    const captionX = (pageWidth - captionWidth) / 2;
+                    doc.text(nextItem.caption, captionX, currentY);
+                    currentY += 12;
+                    doc.setFont(defaultFont, "normal");
+                  }
+                }
+                overlayItemIds.add(nextItem.id);
+              } catch (err) {
+                console.error("Error adding image to cover:", err);
+              }
+            }
+          }
+
           if (overlayItemIds.size === 0) {
             checkPageBreak(30);
             doc.setFontSize(22);
@@ -1214,6 +1715,9 @@ const GeneratePDF = async (jsonData, settings) => {
           }
 
           overlayItemIds.forEach((id) => skipNextItems.add(id));
+          // Start new page after cover
+          doc.addPage();
+          currentY = 20;
           break;
 
         case "heading":

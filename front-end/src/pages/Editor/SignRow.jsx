@@ -10,10 +10,14 @@ const SignRow = ({
   selected,
   preview,
   view,
+  textColor,
+  settings,
 }) => {
   const { setSignEdit, setSign } = useContext(StateManageContext);
   const [showSignModal, setShowSignModal] = useState(false);
   const [clientName, setClientName] = useState("");
+
+  const fontFamily = settings.body;
 
   const handleSignClient = () => {
     if (clientName.trim()) {
@@ -47,7 +51,9 @@ const SignRow = ({
       {/* Left Column */}
       {view !== false && (
         <div>
-          <h3 className="text-lg  text-active_text text-left px-3">
+          <h3
+            className={`text-lg text-active_text font-${fontFamily} text-left px-3`}
+          >
             Signatures
           </h3>
         </div>
@@ -56,7 +62,9 @@ const SignRow = ({
       {/* Mobile: Title at top */}
       {view === false && (
         <div className="mb-2">
-          <h3 className="text-sm font-semibold text-active_text text-left px-3">
+          <h3
+            className={`text-sm text-active_text font-semibold font-${fontFamily} text-left px-3`}
+          >
             Signatures
           </h3>
         </div>
@@ -81,9 +89,9 @@ const SignRow = ({
             <p
               className={`${
                 view === false ? "text-sm" : "text-lg"
-              } text-active_text ${
+              } font-${fontFamily} ${
                 view === false ? "h-auto py-2" : "h-20 pb-4"
-              } flex items-end justify-center`}
+              } flex items-end justify-center text-active_text`}
             >
               {content[0]?.proposedName}
             </p>
@@ -111,9 +119,9 @@ const SignRow = ({
         </div>
         <div className="border-t border-border_clr w-full  "></div>
         <h3
-          className={`text-non_active_text ${
+          className={`font-${fontFamily} ${
             view === false ? "h-8 text-xs" : "h-12"
-          } flex items-center justify-center`}
+          } flex items-center justify-center text-active_text`}
         >
           {content[0]?.proposedName}
         </h3>
@@ -137,9 +145,9 @@ const SignRow = ({
               <p
                 className={`${
                   view === false ? "text-sm" : "text-lg"
-                } text-active_text ${
+                } font-${fontFamily} ${
                   view === false ? "h-auto py-2" : "h-20 pb-4"
-                } flex items-end justify-center`}
+                } flex items-end justify-center text-active_text`}
               >
                 {content[1]?.acceptedName}
               </p>
@@ -187,9 +195,9 @@ const SignRow = ({
         </div>
         <div className="border-t border-border_clr w-full  "></div>
         <h3
-          className={`text-non_active_text ${
+          className={`font-${fontFamily} ${
             view === false ? "h-8 text-xs" : "h-12"
-          } flex items-center justify-center`}
+          } flex items-center justify-center text-active_text`}
         >
           {content[1]?.acceptedName ||
             (preview ? "Client Name" : content[1]?.acceptedName)}

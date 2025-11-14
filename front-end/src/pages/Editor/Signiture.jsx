@@ -19,6 +19,7 @@ const Signature = ({ addSign, rows, setRows, preview, user }) => {
           },
         ]
   );
+  const [saving, setSaving] = useState(false);
 
   const handleInputChange = (index, key, value) => {
     const updatedTemp = [...temp];
@@ -105,6 +106,8 @@ const Signature = ({ addSign, rows, setRows, preview, user }) => {
           </button>
           <button
             onClick={() => {
+              if (saving) return;
+              setSaving(true);
               if (signEdit !== null) {
                 const updated = [...rows];
                 const tempToSave = [...temp];
@@ -118,10 +121,12 @@ const Signature = ({ addSign, rows, setRows, preview, user }) => {
                 addSign(temp);
               }
               setSign(false);
+              setSaving(false);
             }}
-            className="px-4 py-2 bg-graidient_bottom text-white rounded-md hover:bg-gradient_darker text-sm"
+            disabled={saving}
+            className="px-4 py-2 bg-graidient_bottom text-white rounded-md hover:bg-gradient_darker text-sm disabled:opacity-50"
           >
-            Save
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>

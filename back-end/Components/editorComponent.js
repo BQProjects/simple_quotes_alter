@@ -248,8 +248,8 @@ const updateProposal = async (req, res) => {
     try {
       await proposal.save();
 
-      // Send email if a signature was actually signed
-      if (signedSignatures) {
+      // Send email if a signature was actually signed and signedUserId is provided
+      if (signedUserId && signedSignatures) {
         console.log(
           "Sending email for signed document:",
           proposal.proposalName
@@ -269,7 +269,7 @@ const updateProposal = async (req, res) => {
           );
         }
       } else {
-        console.log("No signed signatures");
+        console.log("No signed signatures or no signedUserId");
       }
 
       return res.status(201).json(proposal);

@@ -10,6 +10,10 @@ import {
   AlignmentType,
   HeadingLevel,
   ImageRun,
+  HorizontalPositionRelativeFrom,
+  HorizontalPositionAlign,
+  VerticalPositionRelativeFrom,
+  TextWrappingType,
   WidthType,
   BorderStyle,
   ShadingType,
@@ -1399,20 +1403,587 @@ const JsonToWord = async (jsonData, settings) => {
       switch (item.type) {
         // In the cover section processing, around line 600-700, replace the cover text processing with this:
         case "cover":
-          if (item.coverType === "full") {
-            // Ensure no image background for full-page covers
-            allContent.push(
-              createParagraph("", {
-                size: 22,
-                alignment: AlignmentType.CENTER,
-                spacing: { before: 60, after: 60 },
-              })
-            );
-          } else if (item.coverType === "half") {
-            // Always create a text-only cover page, but match web UI formatting
-            const nextItems = data.slice(index + 1, index + 5);
+          if (item.content && validateImageUrl(item.content)) {
+            try {
+              // IMPROVED IMAGE FETCHING
+              const response = await fetch(item.content);
+              if (!response.ok) {
+                throw new Error(
+                  `Failed to fetch image: ${response.statusText}`
+                );
+              }
+
+              const imageBlob = await response.blob();
+              const imageBuffer = await imageBlob.arrayBuffer();
+
+              if (!imageBuffer || imageBuffer.byteLength === 0) {
+                throw new Error("Empty image buffer");
+              }
+
+              // Create image to get dimensions
+              const image = new Image();
+              image.crossOrigin = "anonymous";
+              const imageUrl = URL.createObjectURL(imageBlob);
+              image.src = imageUrl;
+
+              await new Promise((resolve, reject) => {
+                image.onload = resolve;
+                image.onerror = reject;
+              });
+
+              const originalWidth = image.naturalWidth;
+              const originalHeight = image.naturalHeight;
+              URL.revokeObjectURL(imageUrl); // Clean up
+
+              console.log(
+                `Image loaded: ${originalWidth}x${originalHeight}, buffer size: ${imageBuffer.byteLength}`
+              );
+
+              // Determine if this is a full or half cover
+              const isFull = item.coverType !== "half";
+
+              const pageWidthTwips = Math.round(11.7 * 130);
+              const pageHeightTwips = isFull
+                ? Math.round(8.26 * 130)
+                : Math.round(4.13 * 130);
+
+              // Calculate aspect ratio
+              const imageAspect = originalWidth / originalHeight;
+              const pageAspect = pageWidthTwips / pageHeightTwips;
+
+              let imageWidthTwips, imageHeightTwips;
+
+              // Fit the entire image within page bounds (similar to CSS background-size: contain)
+              if (imageAspect > pageAspect) {
+                // Image is wider - fit to width
+                imageWidthTwips = pageWidthTwips;
+                imageHeightTwips = Math.round(imageWidthTwips / imageAspect);
+              } else {
+                // Image is taller - fit to height
+                imageHeightTwips = pageHeightTwips;
+                imageWidthTwips = Math.round(imageHeightTwips * imageAspect);
+              }
+
+              console.log(
+                `Image dimensions in twips: ${imageWidthTwips}x${imageHeightTwips} (aspect: ${imageAspect.toFixed(
+                  2
+                )}, page aspect: ${pageAspect.toFixed(2)})`
+              );
+
+              // Create background image paragraph with absolute positioning
+              const backgroundImage = new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: new Uint8Array(imageBuffer), // Ensure it's Uint8Array
+                    transformation: {
+                      width: imageWidthTwips,
+                      height: imageHeightTwips,
+                    },
+                    floating: {
+                      horizontalPosition: {
+                        relative: HorizontalPositionRelativeFrom.PAGE,
+                        align: HorizontalPositionAlign.CENTER,
+                      },
+                      verticalPosition: {
+                        relative: VerticalPositionRelativeFrom.PAGE,
+                        offset: 0,
+                      },
+                      wrap: {
+                        type: TextWrappingType.NONE,
+                      },
+                      zIndex: -1, // Behind text
+                      allowOverlap: true,
+                      behindDocument: true, // IMPORTANT: Place behind document
+                    },
+                  }),
+                ],
+                spacing: { before: 0, after: 0 },
+              });
+
+              allContent.push(backgroundImage);
+
+              // Now add text overlay content
+              const nextItems = data.slice(index + 1, index + 7);
+              let overlayItemIds = new Set();
+              let coverParagraphs = [];
+
+              // Add spacing at top
+              if (isFull) {
+                coverParagraphs.push(
+                  createParagraph("", {
+                    spacing: { before: 240, after: 0 },
+                  })
+                );
+              } else {
+                coverParagraphs.push(
+                  createParagraph("", {
+                    spacing: { before: 120, after: 0 },
+                  })
+                );
+              }
+
+              for (const nextItem of nextItems) {
+                // Handle text content (heading/input)
+                if (
+                  (nextItem?.type === "heading" ||
+                    nextItem?.type === "input") &&
+                  nextItem?.content &&
+                  Array.isArray(nextItem.content)
+                ) {
+                  nextItem.content.forEach((block) => {
+                    const children = block?.children;
+                    if (!Array.isArray(children) || children.length === 0)
+                      return;
+
+                    let blockText = "";
+                    children.forEach((child) => {
+                      if (child && child.text) {
+                        blockText += child.text;
+                      }
+                      if (
+                        child &&
+                        child.children &&
+                        Array.isArray(child.children)
+                      ) {
+                        child.children.forEach((nestedChild) => {
+                          if (nestedChild && nestedChild.text) {
+                            blockText += nestedChild.text;
+                          }
+                        });
+                      }
+                    });
+
+                    if (!blockText.trim()) return;
+
+                    let size = 44;
+                    let heading = null;
+                    let font = headingFont;
+
+                    // Color logic - white for full cover with image
+                    let color = isFull ? "FFFFFF" : "212529";
+
+                    if (
+                      documentSettings.theme !== 0 &&
+                      documentSettings.color &&
+                      (nextItem.size === "heading-one" ||
+                        nextItem.size === "heading-two" ||
+                        nextItem.size === "heading-three")
+                    ) {
+                      color = convertToHex(documentSettings.color);
+                    } else if (nextItem.textColor) {
+                      color = convertTailwindTextColor(nextItem.textColor);
+                    } else if (documentSettings.color && !isFull) {
+                      color = convertToHex(documentSettings.color);
+                    } else if (children && children[0] && children[0].color) {
+                      color = convertToHex(children[0].color);
+                    }
+
+                    if (nextItem.textColor === "text-white") {
+                      color = "FFFFFF";
+                    } else if (nextItem.textColor === "text-black") {
+                      color = "000000";
+                    }
+
+                    let bold =
+                      children &&
+                      children[0] &&
+                      typeof children[0].bold === "boolean"
+                        ? children[0].bold
+                        : true;
+
+                    let alignment = block?.align
+                      ? block.align.toLowerCase()
+                      : "center";
+                    let spacing = { before: 120, after: 120 };
+
+                    if (block?.type && block.type.includes("heading")) {
+                      const sizeMap = {
+                        "heading-one": 48,
+                        "heading-two": 36,
+                        "heading-three": 30,
+                        "heading-four": 26,
+                        "heading-five": 22,
+                        "heading-six": 20,
+                      };
+                      size = sizeMap[block.type] || 44;
+                      const headingMap = {
+                        "heading-one": HeadingLevel.HEADING_1,
+                        "heading-two": HeadingLevel.HEADING_2,
+                        "heading-three": HeadingLevel.HEADING_3,
+                        "heading-four": HeadingLevel.HEADING_4,
+                        "heading-five": HeadingLevel.HEADING_5,
+                        "heading-six": HeadingLevel.HEADING_6,
+                      };
+                      heading = headingMap[block.type];
+                      font = headingFont;
+                    }
+
+                    coverParagraphs.push(
+                      createParagraph(blockText, {
+                        bold,
+                        size,
+                        heading,
+                        alignment:
+                          alignment === "center"
+                            ? AlignmentType.CENTER
+                            : alignment === "right"
+                            ? AlignmentType.RIGHT
+                            : AlignmentType.LEFT,
+                        color,
+                        font,
+                        spacing,
+                      })
+                    );
+                    overlayItemIds.add(nextItem.id);
+                  });
+                }
+
+                // Handle image-para on cover
+                else if (
+                  nextItem?.type === "image-para" &&
+                  nextItem.ImageLink
+                ) {
+                  try {
+                    const text =
+                      nextItem.content
+                        ?.map((block) => block?.children?.[0]?.text || "")
+                        .join(" ") || "";
+                    const isLeftAligned = nextItem.align === "left";
+
+                    const imgBuffer = await fetchImageAsArrayBuffer(
+                      nextItem.ImageLink
+                    );
+                    if (imgBuffer) {
+                      const img = new Image();
+                      img.src = URL.createObjectURL(new Blob([imgBuffer]));
+                      await new Promise((resolve) => {
+                        img.onload = resolve;
+                      });
+
+                      const dims = getImageDimensions(
+                        img.naturalWidth,
+                        img.naturalHeight,
+                        parseInt(nextItem.width) || 300,
+                        parseInt(nextItem.height) || 200,
+                        "inline"
+                      );
+
+                      const imgCell = await createImageParagraph(
+                        nextItem.ImageLink,
+                        {
+                          width: dims.width,
+                          height: dims.height,
+                          context: "inline",
+                          spacing: { before: 0, after: 0 },
+                          alignment: AlignmentType.CENTER,
+                        }
+                      );
+
+                      const txtCell = createParagraph(text, {
+                        size: 22,
+                        color: isFull ? "FFFFFF" : "212529",
+                        spacing: { before: 60, after: 60 },
+                      });
+
+                      const imgParaTable = new Table({
+                        rows: [
+                          new TableRow({
+                            children: isLeftAligned
+                              ? [
+                                  new TableCell({
+                                    children: [imgCell],
+                                    width: {
+                                      size: 40,
+                                      type: WidthType.PERCENTAGE,
+                                    },
+                                    borders: {
+                                      top: { style: BorderStyle.NONE },
+                                      bottom: { style: BorderStyle.NONE },
+                                      left: { style: BorderStyle.NONE },
+                                      right: { style: BorderStyle.NONE },
+                                    },
+                                    margins: {
+                                      top: 0,
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 100,
+                                    },
+                                  }),
+                                  new TableCell({
+                                    children: [txtCell],
+                                    width: {
+                                      size: 60,
+                                      type: WidthType.PERCENTAGE,
+                                    },
+                                    borders: {
+                                      top: { style: BorderStyle.NONE },
+                                      bottom: { style: BorderStyle.NONE },
+                                      left: { style: BorderStyle.NONE },
+                                      right: { style: BorderStyle.NONE },
+                                    },
+                                    margins: {
+                                      top: 0,
+                                      bottom: 0,
+                                      left: 100,
+                                      right: 0,
+                                    },
+                                  }),
+                                ]
+                              : [
+                                  new TableCell({
+                                    children: [txtCell],
+                                    width: {
+                                      size: 60,
+                                      type: WidthType.PERCENTAGE,
+                                    },
+                                    borders: {
+                                      top: { style: BorderStyle.NONE },
+                                      bottom: { style: BorderStyle.NONE },
+                                      left: { style: BorderStyle.NONE },
+                                      right: { style: BorderStyle.NONE },
+                                    },
+                                    margins: {
+                                      top: 0,
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 100,
+                                    },
+                                  }),
+                                  new TableCell({
+                                    children: [imgCell],
+                                    width: {
+                                      size: 40,
+                                      type: WidthType.PERCENTAGE,
+                                    },
+                                    borders: {
+                                      top: { style: BorderStyle.NONE },
+                                      bottom: { style: BorderStyle.NONE },
+                                      left: { style: BorderStyle.NONE },
+                                      right: { style: BorderStyle.NONE },
+                                    },
+                                    margins: {
+                                      top: 0,
+                                      bottom: 0,
+                                      left: 100,
+                                      right: 0,
+                                    },
+                                  }),
+                                ],
+                          }),
+                        ],
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                        layout: TableLayoutType.FIXED,
+                      });
+
+                      coverParagraphs.push(
+                        createParagraph("", {
+                          spacing: { before: 60, after: 20 },
+                        })
+                      );
+                      coverParagraphs.push(imgParaTable);
+                      coverParagraphs.push(
+                        createParagraph("", {
+                          spacing: { before: 20, after: 60 },
+                        })
+                      );
+                    }
+                    overlayItemIds.add(nextItem.id);
+                  } catch (err) {
+                    console.error("Error adding image-para to cover:", err);
+                  }
+                }
+
+                // Handle double-image on cover
+                else if (
+                  nextItem?.type === "double-image" &&
+                  nextItem.ImageLink1 &&
+                  nextItem.ImageLink2
+                ) {
+                  try {
+                    const [img1, img2] = await Promise.all([
+                      createImageParagraph(nextItem.ImageLink1, {
+                        width: parseInt(nextItem.width1) || 250,
+                        height: parseInt(nextItem.height1) || 180,
+                        context: "double",
+                        alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 0 },
+                      }),
+                      createImageParagraph(nextItem.ImageLink2, {
+                        width: parseInt(nextItem.width2) || 250,
+                        height: parseInt(nextItem.height2) || 180,
+                        context: "double",
+                        alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 0 },
+                      }),
+                    ]);
+
+                    const doubleImgTable = new Table({
+                      rows: [
+                        new TableRow({
+                          children: [
+                            new TableCell({
+                              children: [img1],
+                              width: { size: 50, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: { style: BorderStyle.NONE },
+                                bottom: { style: BorderStyle.NONE },
+                                left: { style: BorderStyle.NONE },
+                                right: { style: BorderStyle.NONE },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 0,
+                                right: 50,
+                              },
+                            }),
+                            new TableCell({
+                              children: [img2],
+                              width: { size: 50, type: WidthType.PERCENTAGE },
+                              borders: {
+                                top: { style: BorderStyle.NONE },
+                                bottom: { style: BorderStyle.NONE },
+                                left: { style: BorderStyle.NONE },
+                                right: { style: BorderStyle.NONE },
+                              },
+                              margins: {
+                                top: 0,
+                                bottom: 0,
+                                left: 50,
+                                right: 0,
+                              },
+                            }),
+                          ],
+                        }),
+                      ],
+                      width: { size: 100, type: WidthType.PERCENTAGE },
+                      layout: TableLayoutType.FIXED,
+                    });
+
+                    coverParagraphs.push(
+                      createParagraph("", {
+                        spacing: { before: 60, after: 20 },
+                      })
+                    );
+                    coverParagraphs.push(doubleImgTable);
+                    coverParagraphs.push(
+                      createParagraph("", {
+                        spacing: { before: 20, after: 60 },
+                      })
+                    );
+                    overlayItemIds.add(nextItem.id);
+                  } catch (err) {
+                    console.error("Error adding double-image to cover:", err);
+                  }
+                }
+
+                // Handle regular image on cover
+                else if (
+                  nextItem?.type === "image" &&
+                  nextItem.content &&
+                  validateImageUrl(nextItem.content)
+                ) {
+                  try {
+                    const imgBuffer = await fetchImageAsArrayBuffer(
+                      nextItem.content
+                    );
+                    if (imgBuffer) {
+                      const img = new Image();
+                      img.src = URL.createObjectURL(new Blob([imgBuffer]));
+                      await new Promise((resolve) => {
+                        img.onload = resolve;
+                      });
+
+                      const dims = getImageDimensions(
+                        img.naturalWidth,
+                        img.naturalHeight,
+                        parseInt(nextItem.width) || 400,
+                        parseInt(nextItem.height) || 300,
+                        "inline"
+                      );
+
+                      const imgPara = await createImageParagraph(
+                        nextItem.content,
+                        {
+                          width: dims.singlewidth,
+                          height: dims.singleheight,
+                          context: "inline",
+                          alignment:
+                            nextItem.aliegn === "left"
+                              ? AlignmentType.LEFT
+                              : nextItem.aliegn === "right"
+                              ? AlignmentType.RIGHT
+                              : AlignmentType.CENTER,
+                          spacing: { before: 60, after: 40 },
+                        }
+                      );
+
+                      coverParagraphs.push(imgPara);
+                      if (nextItem.caption) {
+                        coverParagraphs.push(
+                          createParagraph(nextItem.caption, {
+                            italic: true,
+                            size: 16,
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 20, after: 60 },
+                            color: isFull ? "CCCCCC" : "6C757D",
+                          })
+                        );
+                      }
+                    }
+                    overlayItemIds.add(nextItem.id);
+                  } catch (err) {
+                    console.error("Error adding image to cover:", err);
+                  }
+                }
+              }
+
+              if (coverParagraphs.length === 1) {
+                coverParagraphs.push(
+                  createParagraph("COVER PAGE", {
+                    bold: true,
+                    size: 44,
+                    alignment: AlignmentType.CENTER,
+                    color: isFull ? "FFFFFF" : "000000",
+                    spacing: { before: 240, after: 240 },
+                  })
+                );
+              }
+
+              overlayItemIds.forEach((id) => skipNextItems.add(id));
+              allContent.push(...coverParagraphs);
+
+              allContent.push(
+                new Paragraph({
+                  children: [new PageBreak()],
+                })
+              );
+            } catch (error) {
+              console.error("Failed to process cover image:", error);
+              console.error("Error details:", error.message, error.stack);
+
+              // Fallback to text-only cover
+              allContent.push(
+                createParagraph("Cover Image Failed to Load", {
+                  size: 22,
+                  alignment: AlignmentType.CENTER,
+                  color: "FF0000",
+                  spacing: { before: 60, after: 60 },
+                })
+              );
+            }
+          } else {
+            // No image - text only cover
+            const nextItems = data.slice(index + 1, index + 7);
             let overlayItemIds = new Set();
             let coverParagraphs = [];
+
+            coverParagraphs.push(
+              createParagraph("", {
+                spacing: { before: 240, after: 0 },
+              })
+            );
+
             for (const nextItem of nextItems) {
               if (
                 (nextItem?.type === "heading" || nextItem?.type === "input") &&
@@ -1423,13 +1994,11 @@ const JsonToWord = async (jsonData, settings) => {
                   const children = block?.children;
                   if (!Array.isArray(children) || children.length === 0) return;
 
-                  // Extract all text from children (similar to heading processing)
                   let blockText = "";
                   children.forEach((child) => {
                     if (child && child.text) {
                       blockText += child.text;
                     }
-                    // Handle nested children
                     if (
                       child &&
                       child.children &&
@@ -1445,15 +2014,11 @@ const JsonToWord = async (jsonData, settings) => {
 
                   if (!blockText.trim()) return;
 
-                  // Determine style
                   let size = 44;
                   let heading = null;
                   let font = headingFont;
+                  let color = "212529";
 
-                  // ENHANCED COLOR LOGIC:
-                  let color = "212529"; // Start with default dark color
-
-                  // Apply theme-based color logic similar to headings
                   if (
                     documentSettings.theme !== 0 &&
                     documentSettings.color &&
@@ -1461,16 +2026,12 @@ const JsonToWord = async (jsonData, settings) => {
                       nextItem.size === "heading-two" ||
                       nextItem.size === "heading-three")
                   ) {
-                    // For themes other than default and primary heading levels, use user's selected color
                     color = convertToHex(documentSettings.color);
                   } else if (nextItem.textColor) {
-                    // Otherwise use the textColor property with fallback
                     color = convertTailwindTextColor(nextItem.textColor);
                   } else if (documentSettings.color) {
-                    // Use settings color if available
                     color = convertToHex(documentSettings.color);
                   } else if (children && children[0] && children[0].color) {
-                    // Try to get color from block children
                     color = convertToHex(children[0].color);
                   }
 
@@ -1480,10 +2041,11 @@ const JsonToWord = async (jsonData, settings) => {
                     typeof children[0].bold === "boolean"
                       ? children[0].bold
                       : true;
+
                   let alignment = block?.align
                     ? block.align.toLowerCase()
                     : "center";
-                  let spacing = { before: 120, after: 120 }; // Tighter cover spacing
+                  let spacing = { before: 120, after: 120 };
 
                   if (block?.type && block.type.includes("heading")) {
                     const sizeMap = {
@@ -1505,7 +2067,6 @@ const JsonToWord = async (jsonData, settings) => {
                     };
                     heading = headingMap[block.type];
                     font = headingFont;
-                    spacing = { before: 120, after: 120 };
                   }
 
                   coverParagraphs.push(
@@ -1529,13 +2090,13 @@ const JsonToWord = async (jsonData, settings) => {
               }
             }
 
-            if (coverParagraphs.length === 0) {
+            if (coverParagraphs.length === 1) {
               coverParagraphs.push(
                 createParagraph("COVER PAGE", {
                   bold: true,
                   size: 44,
                   alignment: AlignmentType.CENTER,
-                  color: "000000", // EXPLICITLY BLACK
+                  color: "000000",
                   spacing: { before: 240, after: 240 },
                 })
               );
@@ -1543,6 +2104,12 @@ const JsonToWord = async (jsonData, settings) => {
 
             overlayItemIds.forEach((id) => skipNextItems.add(id));
             allContent.push(...coverParagraphs);
+
+            allContent.push(
+              new Paragraph({
+                children: [new PageBreak()],
+              })
+            );
           }
           break;
 

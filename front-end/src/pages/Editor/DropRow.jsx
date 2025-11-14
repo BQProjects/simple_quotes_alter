@@ -873,6 +873,7 @@ const DropRow = ({
               setSign={setSign}
               preview={preview}
               view={view}
+              settings={settings}
             />
           </div>
         ) : row.type === "price" ? (
