@@ -130,6 +130,34 @@ exports.updateTemplateImage = async (req, res) => {
   }
 };
 
+exports.updateTemplate = async (req, res) => {
+  const { id, TemplateName, TemplateImage, data } = req.body;
+
+  try {
+    if (!id) {
+      return res.status(400).json({ message: "Template ID is required" });
+    }
+
+    const template = await TemplateModel.findById(id);
+    if (!template) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+
+    if (TemplateName) template.TemplateName = TemplateName;
+    if (TemplateImage) template.TemplateImage = TemplateImage;
+    if (data) template.data = data;
+
+    await template.save();
+
+    res
+      .status(200)
+      .json({ message: "Template updated successfully", template });
+  } catch (err) {
+    console.error("Error updating template:", err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 exports.GetProposalByLimit = async (req, res) => {
   try {
     const skip = parseInt(req.query.skip);

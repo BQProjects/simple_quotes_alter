@@ -40,6 +40,7 @@ const AllWorkspace = () => {
   const sortButtonRef = useRef();
   const sortRef = useRef();
   const [loading, setLoading] = useState(true);
+  const [creatingWorkspace, setCreatingWorkspace] = useState(false);
 
   const handleFavorate = async (id, favorate, e) => {
     e.stopPropagation();
@@ -81,6 +82,8 @@ const AllWorkspace = () => {
   // };
 
   const handleNewWorkspace = async (workspaceName, users) => {
+    if (creatingWorkspace) return;
+    setCreatingWorkspace(true);
     try {
       const res = await axios.post(`${databaseUrl}/api/workspace/new`, {
         user_id: user.id,
@@ -96,6 +99,7 @@ const AllWorkspace = () => {
     } finally {
       setName("");
       setNewW(false);
+      setCreatingWorkspace(false);
     }
   };
 
@@ -458,15 +462,24 @@ const AllWorkspace = () => {
                         className="py-1  border-b-1 border-black outline-none"
                         placeholder="Workspace Name"
                         value={name}
+                        disabled={creatingWorkspace}
                         onChange={(e) => setName(e.target.value)}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") {
+                          if (e.key === "Enter" && !creatingWorkspace) {
                             handleNewWorkspace(name, "orange", []); // replace this with your actual function
                           }
                         }}
                       />
                       <FaCheck
-                        onClick={() => handleNewWorkspace(name, "orange", [])}
+                        onClick={() =>
+                          !creatingWorkspace &&
+                          handleNewWorkspace(name, "orange", [])
+                        }
+                        className={
+                          creatingWorkspace
+                            ? "opacity-50 cursor-not-allowed"
+                            : "cursor-pointer"
+                        }
                       />
                     </div>
                     <div className="flex flex-row gap-1 items-center justify-end">

@@ -516,21 +516,21 @@ const DashboardFirst = () => {
                             onClick={() => {
                               copyToClipboard(proposal._id);
                             }}
-                            className="w-4 h-4 text-gray-600 "
+                            className="w-4 h-4 text-gray-600 hover:text-graidient_bottom"
                           />
                           <SiSimpleanalytics
                             onClick={() =>
                               navigate(`/analytics/${proposal._id}`)
                             }
-                            className="w-4 h-4 text-gray-600 "
+                            className="w-4 h-4 text-gray-600 hover:text-graidient_bottom"
                           />
                           <IoMdLock
-                            className={`${
+                            className={
                               proposal.locked ||
                               selLocked.includes(proposal._id)
-                                ? "text-graidient_bottom"
-                                : "text-gray-500"
-                            } w-5 h-4 text-gray-600 `}
+                                ? "w-5 h-4 text-graidient_bottom"
+                                : "w-5 h-4 text-gray-500 hover:text-graidient_bottom"
+                            }
                             onClick={() => {
                               handleLocked(!proposal.locked, proposal._id);
                               const temp = [...proposals];
@@ -540,6 +540,7 @@ const DashboardFirst = () => {
                           />
 
                           <FaRegCopy
+                            className="w-4 h-4 text-gray-600 hover:text-graidient_bottom"
                             onClick={() => handleDuplicate(proposal._id)}
                           />
                           <div className="relative" ref={buttonRef}>
@@ -554,7 +555,7 @@ const DashboardFirst = () => {
                               className={`${
                                 threeDots === index
                                   ? "text-graidient_bottom"
-                                  : "text-gray-600"
+                                  : "text-gray-600 hover:text-graidient_bottom"
                               }`}
                             />
                             {threeDots === index && (
